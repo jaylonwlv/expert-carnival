@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
-import { logout } from "./actions";
+import { DeleteClientButton } from "@/components/DeleteClientButton";
+import { deleteClient, logout } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -39,22 +40,25 @@ export default async function AdminPage() {
             {clients.map((client) => {
               const stage = STAGES[client.currentStage];
               return (
-                <Link
+                <div
                   key={client.id}
-                  href={`/admin/clients/${client.id}`}
                   className="flex items-center justify-between px-5 py-4 hover:bg-neutral-50 transition"
                 >
-                  <div>
+                  <Link href={`/admin/clients/${client.id}`} className="flex-1">
                     <p className="font-medium text-neutral-900">{client.name}</p>
                     <p className="text-sm text-neutral-500">{client.email || client.phone || "No contact info"}</p>
-                  </div>
-                  <div className="text-right">
+                  </Link>
+                  <Link href={`/admin/clients/${client.id}`} className="text-right mr-4">
                     <p className="text-sm font-medium text-neutral-900">{stage.title}</p>
                     <p className="text-xs text-neutral-400">
                       Step {client.currentStage + 1} of {STAGES.length}
                     </p>
-                  </div>
-                </Link>
+                  </Link>
+                  <DeleteClientButton
+                    action={deleteClient.bind(null, client.id)}
+                    clientName={client.name}
+                  />
+                </div>
               );
             })}
           </div>
