@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
 import { logout } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage() {
   const clients = await prisma.client.findMany({
     orderBy: { updatedAt: "desc" },
