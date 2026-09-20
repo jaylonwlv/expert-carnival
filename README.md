@@ -20,9 +20,14 @@ the new list.
 
 ## Local development
 
+Requires a Postgres database (this app uses Postgres both locally and in
+production — no SQLite). Point `DATABASE_URL` at any Postgres instance
+(a local install, or a free hosted one like Neon/Supabase).
+
 ```bash
-npm install
-npx prisma migrate dev   # first time only, creates the local SQLite db
+npm install               # also runs `prisma generate` automatically
+cp .env.example .env      # fill in DATABASE_URL and the other vars below
+npx prisma migrate dev    # first time only, creates the tables
 npm run dev
 ```
 
@@ -32,19 +37,16 @@ Open http://localhost:3000 — it redirects to `/admin`.
 
 Copy `.env.example` to `.env` and fill in:
 
-- `DATABASE_URL` — SQLite file for local dev. Swap for a hosted Postgres URL
-  in production (see below).
+- `DATABASE_URL` — Postgres connection string.
 - `ADMIN_PASSWORD` — shared password Paulin/media use to sign into `/admin`.
 - `NEXT_PUBLIC_COMPANY_NAME`, `NEXT_PUBLIC_AGENT_NAME`, `NEXT_PUBLIC_AGENT_PHONE`
   — shown on the client tracker page's contact card (text/call buttons).
 
 ## Deploying
 
-This uses SQLite locally, which doesn't persist on most serverless hosts
-(e.g. Vercel). Before deploying:
-
-1. Swap the Prisma datasource/adapter for a hosted database (e.g. Postgres —
-   `@prisma/adapter-pg` and a `postgresql` provider in `prisma/schema.prisma`).
-2. Set `ADMIN_PASSWORD` and the agent contact env vars in your host's
-   environment settings.
-3. Run `npx prisma migrate deploy` against the production database.
+1. Provision a Postgres database (e.g. via your host's marketplace/storage
+   tab — Vercel's Postgres integrations are Neon-backed) and set
+   `DATABASE_URL` to its connection string in your host's environment settings.
+2. Set `ADMIN_PASSWORD` and the agent contact env vars there too.
+3. Run `npx prisma migrate deploy` against the production database (or let
+   your host run it as part of the build/deploy step).
