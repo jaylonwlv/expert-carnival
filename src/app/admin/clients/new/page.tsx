@@ -23,7 +23,7 @@ export default function NewClientPage() {
               id="name"
               name="name"
               required
-              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900"
             />
           </div>
           <div>
@@ -34,7 +34,7 @@ export default function NewClientPage() {
               id="email"
               name="email"
               type="email"
-              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900"
             />
           </div>
           <div>
@@ -45,7 +45,7 @@ export default function NewClientPage() {
               id="phone"
               name="phone"
               type="tel"
-              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900"
             />
           </div>
           <button

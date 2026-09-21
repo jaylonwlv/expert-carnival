@@ -37,7 +37,7 @@ export default async function LoginPage({
             type="password"
             required
             autoFocus
-            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900"
           />
         </div>
 
