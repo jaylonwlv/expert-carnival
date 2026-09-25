@@ -3,8 +3,17 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
+import { formatFileSize } from "@/lib/format";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
-import { deleteClient, updateNote, updateStage } from "../../actions";
+import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import {
+  deleteClient,
+  deleteDocument,
+  toggleDocumentVisibility,
+  updateNote,
+  updateStage,
+  uploadDocument,
+} from "../../actions";
 
 export default async function ClientDetailPage({
   params,
@@ -12,7 +21,10 @@ export default async function ClientDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const client = await prisma.client.findUnique({ where: { id } });
+  const client = await prisma.client.findUnique({
+    where: { id },
+    include: { documents: { orderBy: { createdAt: "desc" } } },
+  });
 
   if (!client) {
     notFound();
@@ -26,6 +38,7 @@ export default async function ClientDetailPage({
   const updateStageForClient = updateStage.bind(null, client.id);
   const updateNoteForClient = updateNote.bind(null, client.id);
   const deleteClientForClient = deleteClient.bind(null, client.id);
+  const uploadDocumentForClient = uploadDocument.bind(null, client.id);
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -107,6 +120,73 @@ export default async function ClientDetailPage({
               className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 hover:bg-neutral-800"
             >
               Save update
+            </button>
+          </form>
+        </section>
+
+        <section className="bg-white rounded-xl border border-neutral-200 p-6 space-y-4">
+          <div>
+            <h2 className="text-sm font-semibold text-neutral-900">Documents</h2>
+            <p className="text-sm text-neutral-500">
+              Store contracts, IDs, financial paperwork, and closing documents for this client.
+              &ldquo;Visible to client&rdquo; documents also show up on their tracker page.
+            </p>
+          </div>
+
+          {client.documents.length > 0 && (
+            <ul className="divide-y divide-neutral-100 border border-neutral-200 rounded-lg">
+              {client.documents.map((doc) => (
+                <li key={doc.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <a
+                    href={doc.blobUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium text-neutral-900 hover:underline truncate"
+                  >
+                    {doc.filename}
+                  </a>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-xs text-neutral-400">{formatFileSize(doc.size)}</span>
+                    <form action={toggleDocumentVisibility.bind(null, doc.id)}>
+                      <button
+                        type="submit"
+                        className={`text-xs font-medium rounded-full px-2.5 py-1 ${
+                          doc.visibleToClient
+                            ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                            : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                        }`}
+                      >
+                        {doc.visibleToClient ? "Visible to client" : "Admin only"}
+                      </button>
+                    </form>
+                    <ConfirmSubmitButton
+                      action={deleteDocument.bind(null, doc.id)}
+                      confirmMessage={`Delete ${doc.filename}? This can't be undone.`}
+                      label="Delete"
+                      className="text-sm text-red-600 hover:text-red-700 hover:underline"
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <form action={uploadDocumentForClient} className="space-y-3">
+            <input
+              type="file"
+              name="file"
+              required
+              className="block w-full text-sm text-neutral-900 file:mr-3 file:rounded-md file:border-0 file:bg-neutral-900 file:text-white file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-neutral-800"
+            />
+            <label className="flex items-center gap-2 text-sm text-neutral-700">
+              <input type="checkbox" name="visibleToClient" className="rounded" />
+              Visible to client on their tracker page
+            </label>
+            <button
+              type="submit"
+              className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 hover:bg-neutral-800"
+            >
+              Upload document
             </button>
           </form>
         </section>

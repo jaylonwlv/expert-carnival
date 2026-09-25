@@ -13,7 +13,10 @@ export default async function TrackPage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
-  const client = await prisma.client.findUnique({ where: { token } });
+  const client = await prisma.client.findUnique({
+    where: { token },
+    include: { documents: { where: { visibleToClient: true }, orderBy: { createdAt: "desc" } } },
+  });
 
   if (!client) {
     notFound();
@@ -56,6 +59,28 @@ export default async function TrackPage({
         <section className="bg-white rounded-xl border border-neutral-200 p-5">
           <Stepper stages={STAGES} currentIndex={client.currentStage} />
         </section>
+
+        {client.documents.length > 0 && (
+          <section className="bg-white rounded-xl border border-neutral-200 p-5 space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+              Your documents
+            </p>
+            <ul className="space-y-1">
+              {client.documents.map((doc) => (
+                <li key={doc.id}>
+                  <a
+                    href={doc.blobUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-neutral-900 hover:underline"
+                  >
+                    {doc.filename}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {AGENT_PHONE && (
           <section className="bg-white rounded-xl border border-neutral-200 p-5 flex items-center justify-between gap-4">

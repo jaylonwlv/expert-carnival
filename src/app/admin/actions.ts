@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { nanoid } from "nanoid";
+import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { STAGES } from "@/lib/stages";
@@ -67,4 +68,54 @@ export async function deleteClient(clientId: string) {
   await prisma.client.delete({ where: { id: clientId } });
   revalidatePath("/admin");
   redirect("/admin");
+}
+
+export async function uploadDocument(clientId: string, formData: FormData) {
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    throw new Error("Choose a file to upload");
+  }
+
+  const visibleToClient = formData.get("visibleToClient") === "on";
+
+  const blob = await put(`clients/${clientId}/${file.name}`, file, {
+    access: "public",
+    addRandomSuffix: true,
+  });
+
+  await prisma.document.create({
+    data: {
+      clientId,
+      filename: file.name,
+      blobUrl: blob.url,
+      contentType: file.type || null,
+      size: file.size,
+      visibleToClient,
+    },
+  });
+
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath(`/track`);
+}
+
+export async function deleteDocument(documentId: string) {
+  const document = await prisma.document.findUnique({ where: { id: documentId } });
+  if (!document) return;
+
+  await del(document.blobUrl);
+  await prisma.document.delete({ where: { id: documentId } });
+
+  revalidatePath(`/admin/clients/${document.clientId}`);
+}
+
+export async function toggleDocumentVisibility(documentId: string) {
+  const document = await prisma.document.findUnique({ where: { id: documentId } });
+  if (!document) return;
+
+  await prisma.document.update({
+    where: { id: documentId },
+    data: { visibleToClient: !document.visibleToClient },
+  });
+
+  revalidatePath(`/admin/clients/${document.clientId}`);
 }

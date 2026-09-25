@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
-import { DeleteClientButton } from "@/components/DeleteClientButton";
+import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
 import { deleteClient, logout } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -54,9 +54,10 @@ export default async function AdminPage() {
                       Step {client.currentStage + 1} of {STAGES.length}
                     </p>
                   </Link>
-                  <DeleteClientButton
+                  <ConfirmSubmitButton
                     action={deleteClient.bind(null, client.id)}
-                    clientName={client.name}
+                    confirmMessage={`Remove ${client.name}? This can't be undone.`}
+                    label="Remove"
                   />
                 </div>
               );
