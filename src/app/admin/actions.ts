@@ -50,7 +50,6 @@ export async function updateStage(clientId: string, formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath(`/admin/clients/${clientId}`);
-  redirect(`/admin/clients/${clientId}?saved=stage`);
 }
 
 export async function updateNote(clientId: string, formData: FormData) {
@@ -63,7 +62,6 @@ export async function updateNote(clientId: string, formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath(`/admin/clients/${clientId}`);
-  redirect(`/admin/clients/${clientId}?saved=note`);
 }
 
 export async function deleteClient(clientId: string) {
@@ -108,7 +106,6 @@ export async function uploadDocument(clientId: string, formData: FormData) {
   revalidatePath(`/admin/clients/${clientId}`);
   revalidatePath(`/admin/clients/${clientId}/documents`);
   revalidatePath(`/track`);
-  redirect(`/admin/clients/${clientId}?saved=documents`);
 }
 
 export async function deleteDocument(documentId: string) {

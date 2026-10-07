@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
 import { stageColor, avatarColor, initials } from "@/lib/stageColors";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
-import { SavedBanner } from "@/components/SavedBanner";
+import { ActionForm } from "@/components/ActionForm";
 import {
   deleteClient,
   updateNote,
@@ -15,13 +15,10 @@ import {
 
 export default async function ClientDetailPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ saved?: string }>;
 }) {
   const { id } = await params;
-  const { saved } = await searchParams;
   const client = await prisma.client.findUnique({
     where: { id },
     include: { documents: { orderBy: { createdAt: "desc" } } },
@@ -64,8 +61,6 @@ export default async function ClientDetailPage({
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-        {saved && <SavedBanner saved={saved} />}
-
         <div className="flex items-center gap-4">
           <div
             className={`flex items-center justify-center w-14 h-14 rounded-full ${avatarColor(client.name)} text-white text-lg font-semibold shrink-0`}
@@ -93,7 +88,7 @@ export default async function ClientDetailPage({
 
         <section className="bg-white rounded-xl border border-neutral-200 p-6 space-y-4">
           <h2 className="text-sm font-semibold text-neutral-900">Pipeline</h2>
-          <form action={updateStageForClient}>
+          <ActionForm action={updateStageForClient} toastMessage="Stage updated.">
             <div className="flex flex-wrap gap-1.5">
               {STAGES.map((stage, index) => {
                 const color = stageColor(index);
@@ -117,7 +112,7 @@ export default async function ClientDetailPage({
                 );
               })}
             </div>
-          </form>
+          </ActionForm>
           <p className="text-sm text-neutral-500 pt-2 border-t border-neutral-100">
             {STAGES[client.currentStage].summary}
           </p>
@@ -128,7 +123,7 @@ export default async function ClientDetailPage({
           <p className="text-sm text-neutral-500">
             Overrides the default &ldquo;what&apos;s happening now&rdquo; text on the client&apos;s tracker with something specific.
           </p>
-          <form action={updateNoteForClient} className="space-y-3">
+          <ActionForm action={updateNoteForClient} toastMessage="Update saved." className="space-y-3">
             <textarea
               name="note"
               rows={3}
@@ -142,7 +137,7 @@ export default async function ClientDetailPage({
             >
               Save update
             </button>
-          </form>
+          </ActionForm>
         </section>
 
         <section className="bg-white rounded-xl border border-neutral-200 p-6 space-y-4">
@@ -162,7 +157,11 @@ export default async function ClientDetailPage({
             </Link>
           </div>
 
-          <form action={uploadDocumentForClient} className="space-y-3 pt-3 border-t border-neutral-100">
+          <ActionForm
+            action={uploadDocumentForClient}
+            toastMessage="Document(s) uploaded."
+            className="space-y-3 pt-3 border-t border-neutral-100"
+          >
             <input
               type="file"
               name="file"
@@ -181,7 +180,7 @@ export default async function ClientDetailPage({
             >
               Upload document(s)
             </button>
-          </form>
+          </ActionForm>
         </section>
 
         <section className="bg-white rounded-xl border border-red-200 p-6">

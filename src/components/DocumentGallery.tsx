@@ -69,7 +69,8 @@ export function DocumentGallery({
               <span className="text-xs text-neutral-400 shrink-0">{formatFileSize(doc.size)}</span>
               <VisibilityBadge
                 visible={doc.visibleToClient}
-                onClick={() => toggleAction(doc.id)}
+                filename={doc.filename}
+                onConfirmed={() => toggleAction(doc.id)}
               />
               <ConfirmSubmitButton
                 action={deleteAction.bind(null, doc.id)}
@@ -115,7 +116,11 @@ export function DocumentGallery({
                 </p>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs text-neutral-400">{formatFileSize(doc.size)}</span>
-                  <VisibilityBadge visible={doc.visibleToClient} onClick={() => toggleAction(doc.id)} />
+                  <VisibilityBadge
+                    visible={doc.visibleToClient}
+                    filename={doc.filename}
+                    onConfirmed={() => toggleAction(doc.id)}
+                  />
                 </div>
                 <ConfirmSubmitButton
                   action={deleteAction.bind(null, doc.id)}
@@ -132,11 +137,28 @@ export function DocumentGallery({
   );
 }
 
-function VisibilityBadge({ visible, onClick }: { visible: boolean; onClick: () => void }) {
+function VisibilityBadge({
+  visible,
+  filename,
+  onConfirmed,
+}: {
+  visible: boolean;
+  filename: string;
+  onConfirmed: () => void;
+}) {
+  function handleClick() {
+    const message = visible
+      ? `Hide "${filename}" from the client? It will no longer appear on their tracker page.`
+      : `Make "${filename}" visible to the client? They'll be able to see and download it from their tracker page.`;
+    if (confirm(message)) {
+      onConfirmed();
+    }
+  }
+
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={handleClick}
       className={`text-xs font-medium rounded-full px-2.5 py-1 shrink-0 ${
         visible
           ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"

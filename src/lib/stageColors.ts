@@ -6,15 +6,17 @@ export type StageColor = {
   ring: string;
 };
 
+// A single linear light-green -> dark-green progression, so the client
+// journey reads as "further along" rather than a rainbow of unrelated hues.
 export const STAGE_COLORS: StageColor[] = [
-  { badgeBg: "bg-slate-100", badgeText: "text-slate-700", solidBg: "bg-slate-500", solidText: "text-white", ring: "ring-slate-500" },
-  { badgeBg: "bg-sky-100", badgeText: "text-sky-700", solidBg: "bg-sky-500", solidText: "text-white", ring: "ring-sky-500" },
-  { badgeBg: "bg-blue-100", badgeText: "text-blue-700", solidBg: "bg-blue-500", solidText: "text-white", ring: "ring-blue-500" },
-  { badgeBg: "bg-indigo-100", badgeText: "text-indigo-700", solidBg: "bg-indigo-500", solidText: "text-white", ring: "ring-indigo-500" },
-  { badgeBg: "bg-violet-100", badgeText: "text-violet-700", solidBg: "bg-violet-500", solidText: "text-white", ring: "ring-violet-500" },
-  { badgeBg: "bg-amber-100", badgeText: "text-amber-700", solidBg: "bg-amber-500", solidText: "text-white", ring: "ring-amber-500" },
-  { badgeBg: "bg-orange-100", badgeText: "text-orange-700", solidBg: "bg-orange-500", solidText: "text-white", ring: "ring-orange-500" },
-  { badgeBg: "bg-emerald-100", badgeText: "text-emerald-700", solidBg: "bg-emerald-500", solidText: "text-white", ring: "ring-emerald-500" },
+  { badgeBg: "bg-green-50", badgeText: "text-green-800", solidBg: "bg-green-200", solidText: "text-green-900", ring: "ring-neutral-900" },
+  { badgeBg: "bg-green-100", badgeText: "text-green-800", solidBg: "bg-green-300", solidText: "text-green-900", ring: "ring-neutral-900" },
+  { badgeBg: "bg-green-200", badgeText: "text-green-900", solidBg: "bg-green-400", solidText: "text-green-950", ring: "ring-neutral-900" },
+  { badgeBg: "bg-green-300", badgeText: "text-green-950", solidBg: "bg-green-500", solidText: "text-white", ring: "ring-neutral-900" },
+  { badgeBg: "bg-green-400", badgeText: "text-green-950", solidBg: "bg-green-600", solidText: "text-white", ring: "ring-neutral-900" },
+  { badgeBg: "bg-green-500", badgeText: "text-white", solidBg: "bg-green-700", solidText: "text-white", ring: "ring-neutral-900" },
+  { badgeBg: "bg-green-600", badgeText: "text-white", solidBg: "bg-green-800", solidText: "text-white", ring: "ring-neutral-900" },
+  { badgeBg: "bg-green-700", badgeText: "text-white", solidBg: "bg-green-900", solidText: "text-white", ring: "ring-neutral-900" },
 ];
 
 export function stageColor(index: number): StageColor {
@@ -22,16 +24,16 @@ export function stageColor(index: number): StageColor {
 }
 
 const AVATAR_PALETTE = [
-  "bg-rose-500",
-  "bg-orange-500",
-  "bg-amber-500",
-  "bg-lime-500",
-  "bg-emerald-500",
   "bg-teal-500",
+  "bg-cyan-500",
   "bg-sky-500",
+  "bg-blue-500",
   "bg-indigo-500",
   "bg-violet-500",
+  "bg-purple-500",
   "bg-fuchsia-500",
+  "bg-emerald-500",
+  "bg-lime-600",
 ];
 
 export function avatarColor(seed: string): string {
