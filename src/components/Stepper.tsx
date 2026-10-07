@@ -1,9 +1,11 @@
 import { Stage } from "@/lib/stages";
+import { stageColor } from "@/lib/stageColors";
 
 export function Stepper({ stages, currentIndex }: { stages: Stage[]; currentIndex: number }) {
   return (
     <ol>
       {stages.map((stage, index) => {
+        const color = stageColor(index);
         const isDone = index < currentIndex;
         const isCurrent = index === currentIndex;
         const isLast = index === stages.length - 1;
@@ -14,16 +16,16 @@ export function Stepper({ stages, currentIndex }: { stages: Stage[]; currentInde
               <span
                 aria-hidden
                 className={`absolute left-[15px] top-8 w-0.5 h-full ${
-                  isDone ? "bg-emerald-500" : "bg-neutral-200"
+                  isDone ? color.solidBg : "bg-neutral-200"
                 }`}
               />
             )}
             <span
               className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
                 isDone
-                  ? "bg-emerald-500 text-white"
+                  ? `${color.solidBg} ${color.solidText} shadow-sm`
                   : isCurrent
-                    ? "bg-neutral-900 text-white ring-4 ring-neutral-200"
+                    ? "bg-neutral-900 text-white ring-4 ring-neutral-200 shadow-md"
                     : "bg-neutral-100 text-neutral-400 border border-neutral-200"
               }`}
             >
@@ -37,7 +39,7 @@ export function Stepper({ stages, currentIndex }: { stages: Stage[]; currentInde
               >
                 {stage.title}
                 {isCurrent && (
-                  <span className="ml-2 inline-block rounded-full bg-amber-100 text-amber-700 text-[11px] font-medium px-2 py-0.5 align-middle">
+                  <span className="ml-2 inline-block rounded-full bg-green-100 text-green-800 text-[11px] font-medium px-2 py-0.5 align-middle">
                     In progress
                   </span>
                 )}

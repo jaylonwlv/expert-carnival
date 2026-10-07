@@ -24,7 +24,7 @@ export default function NewClientPage() {
 
       <main className="max-w-2xl mx-auto px-4 py-8">
         <h1 className="text-lg font-semibold text-neutral-900 mb-6">Add a client</h1>
-        <form action={createClient} className="bg-white rounded-xl border border-neutral-200 p-6 space-y-5">
+        <form action={createClient} className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-5">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-neutral-700 mb-1">
               Full name
@@ -60,7 +60,7 @@ export default function NewClientPage() {
           </div>
           <button
             type="submit"
-            className="w-full rounded-md bg-neutral-900 text-white text-sm font-medium py-2.5 hover:bg-neutral-800 transition"
+            className="w-full rounded-md bg-neutral-900 text-white text-sm font-medium py-2.5 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
           >
             Create client & tracker link
           </button>

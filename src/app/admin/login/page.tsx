@@ -12,9 +12,12 @@ export default async function LoginPage({
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
       <form
         action={login}
-        className="w-full max-w-sm bg-white rounded-xl shadow-sm border border-neutral-200 p-8 space-y-5"
+        className="w-full max-w-sm bg-white rounded-xl shadow-lg border border-neutral-200 p-8 space-y-5"
       >
         <div>
+          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-neutral-900 text-white font-bold text-sm mb-4">
+            RE
+          </div>
           <h1 className="text-xl font-semibold text-neutral-900">Relocation Engine</h1>
           <p className="text-sm text-neutral-500 mt-1">Admin sign in</p>
         </div>
@@ -43,7 +46,7 @@ export default async function LoginPage({
 
         <button
           type="submit"
-          className="w-full rounded-md bg-neutral-900 text-white text-sm font-medium py-2.5 hover:bg-neutral-800 transition"
+          className="w-full rounded-md bg-neutral-900 text-white text-sm font-medium py-2.5 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
         >
           Sign in
         </button>

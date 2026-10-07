@@ -6,6 +6,7 @@ import { STAGES } from "@/lib/stages";
 import { stageColor, avatarColor, initials } from "@/lib/stageColors";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { ActionForm } from "@/components/ActionForm";
+import { FileDropzone } from "@/components/FileDropzone";
 import {
   deleteClient,
   updateNote,
@@ -63,7 +64,7 @@ export default async function ClientDetailPage({
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         <div className="flex items-center gap-4">
           <div
-            className={`flex items-center justify-center w-14 h-14 rounded-full ${avatarColor(client.name)} text-white text-lg font-semibold shrink-0`}
+            className={`flex items-center justify-center w-14 h-14 rounded-full ${avatarColor(client.name)} text-white text-lg font-semibold shrink-0 shadow-sm`}
           >
             {initials(client.name)}
           </div>
@@ -78,7 +79,7 @@ export default async function ClientDetailPage({
           </span>
         </div>
 
-        <section className="bg-white rounded-xl border border-neutral-200 p-6 space-y-3">
+        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
           <h2 className="text-sm font-semibold text-neutral-900">Client tracker link</h2>
           <p className="text-sm text-neutral-500">
             Send this link via your SMS/email automation so {client.name.split(" ")[0]} can check their progress anytime.
@@ -86,7 +87,7 @@ export default async function ClientDetailPage({
           <CopyLinkButton url={trackerUrl} />
         </section>
 
-        <section className="bg-white rounded-xl border border-neutral-200 p-6 space-y-4">
+        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-4">
           <h2 className="text-sm font-semibold text-neutral-900">Pipeline</h2>
           <ActionForm action={updateStageForClient} toastMessage="Stage updated.">
             <div className="flex flex-wrap gap-1.5">
@@ -103,9 +104,9 @@ export default async function ClientDetailPage({
                     title={stage.summary}
                     className={`text-xs font-medium px-3 py-2 rounded-lg transition ${
                       isDone || isCurrent
-                        ? `${color.solidBg} ${color.solidText}`
+                        ? `${color.solidBg} ${color.solidText} shadow-sm`
                         : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
-                    } ${isCurrent ? `ring-2 ring-offset-2 ${color.ring}` : ""}`}
+                    } ${isCurrent ? `ring-2 ring-offset-2 ${color.ring} shadow-md` : ""}`}
                   >
                     {index + 1}. {stage.title}
                   </button>
@@ -118,7 +119,7 @@ export default async function ClientDetailPage({
           </p>
         </section>
 
-        <section className="bg-white rounded-xl border border-neutral-200 p-6 space-y-3">
+        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
           <h2 className="text-sm font-semibold text-neutral-900">Custom update (optional)</h2>
           <p className="text-sm text-neutral-500">
             Overrides the default &ldquo;what&apos;s happening now&rdquo; text on the client&apos;s tracker with something specific.
@@ -133,14 +134,14 @@ export default async function ClientDetailPage({
             />
             <button
               type="submit"
-              className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 hover:bg-neutral-800"
+              className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
             >
               Save update
             </button>
           </ActionForm>
         </section>
 
-        <section className="bg-white rounded-xl border border-neutral-200 p-6 space-y-4">
+        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-sm font-semibold text-neutral-900">Documents</h2>
@@ -151,7 +152,7 @@ export default async function ClientDetailPage({
             </div>
             <Link
               href={`/admin/clients/${client.id}/documents`}
-              className="shrink-0 text-sm font-medium bg-neutral-900 text-white rounded-md px-3 py-2 hover:bg-neutral-800"
+              className="shrink-0 text-sm font-medium bg-neutral-900 text-white rounded-md px-3 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
             >
               View client documents
             </Link>
@@ -162,28 +163,21 @@ export default async function ClientDetailPage({
             toastMessage="Document(s) uploaded."
             className="space-y-3 pt-3 border-t border-neutral-100"
           >
-            <input
-              type="file"
-              name="file"
-              required
-              multiple
-              className="block w-full text-sm text-neutral-900 file:mr-3 file:rounded-md file:border-0 file:bg-neutral-900 file:text-white file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-neutral-800"
-            />
-            <p className="text-xs text-neutral-400">Up to 5 files at once.</p>
+            <FileDropzone name="file" maxFiles={5} />
             <label className="flex items-center gap-2 text-sm text-neutral-700">
               <input type="checkbox" name="visibleToClient" className="rounded" />
               Visible to client on their tracker page
             </label>
             <button
               type="submit"
-              className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 hover:bg-neutral-800"
+              className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
             >
               Upload document(s)
             </button>
           </ActionForm>
         </section>
 
-        <section className="bg-white rounded-xl border border-red-200 p-6">
+        <section className="bg-white rounded-xl border border-red-200 shadow-sm p-6">
           <h2 className="text-sm font-semibold text-red-700 mb-2">Remove client</h2>
           <p className="text-sm text-neutral-500 mb-3">
             Deletes this client and their tracker link permanently.
@@ -191,7 +185,7 @@ export default async function ClientDetailPage({
           <form action={deleteClientForClient}>
             <button
               type="submit"
-              className="rounded-md border border-red-300 text-red-700 text-sm font-medium px-4 py-2 hover:bg-red-50"
+              className="rounded-md border border-red-300 text-red-700 text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-red-50 transition"
             >
               Delete client
             </button>

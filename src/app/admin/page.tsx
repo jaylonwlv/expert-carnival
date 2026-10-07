@@ -29,7 +29,7 @@ export default async function AdminPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/admin/clients/new"
-              className="text-sm font-medium bg-white text-neutral-900 rounded-md px-3.5 py-2 hover:bg-neutral-100 transition shadow-sm"
+              className="text-sm font-medium bg-white text-neutral-900 rounded-md px-3.5 py-2 hover:bg-neutral-100 transition shadow-sm hover:shadow-md"
             >
               + Add client
             </Link>
