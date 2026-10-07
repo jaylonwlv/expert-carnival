@@ -50,10 +50,9 @@ Copy `.env.example` to `.env` and fill in:
 Each client can have documents uploaded from their admin detail page. Every
 document defaults to admin-only; toggling "Visible to client" also shows it
 on that client's `/track/[token]` page for them to download. Files are
-stored in Vercel Blob at a public-but-unguessable URL (same security model
-as the tracker links themselves) — anyone who can view/manage documents in
-the admin panel is trusted the same way they're trusted with everything else
-there.
+stored in Vercel Blob with **private** access — there's no public URL for
+them. Every download link is a short-lived signed URL generated fresh on
+each page load (valid ~1 hour), via `src/lib/documents.ts`.
 
 ## Deploying
 

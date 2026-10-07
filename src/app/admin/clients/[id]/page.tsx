@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
 import { formatFileSize } from "@/lib/format";
+import { getSignedDownloadUrl } from "@/lib/documents";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
 import {
@@ -39,6 +40,13 @@ export default async function ClientDetailPage({
   const updateNoteForClient = updateNote.bind(null, client.id);
   const deleteClientForClient = deleteClient.bind(null, client.id);
   const uploadDocumentForClient = uploadDocument.bind(null, client.id);
+
+  const documents = await Promise.all(
+    client.documents.map(async (doc) => ({
+      ...doc,
+      downloadUrl: await getSignedDownloadUrl(doc.pathname),
+    }))
+  );
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -133,12 +141,12 @@ export default async function ClientDetailPage({
             </p>
           </div>
 
-          {client.documents.length > 0 && (
+          {documents.length > 0 && (
             <ul className="divide-y divide-neutral-100 border border-neutral-200 rounded-lg">
-              {client.documents.map((doc) => (
+              {documents.map((doc) => (
                 <li key={doc.id} className="flex items-center justify-between gap-3 px-4 py-3">
                   <a
-                    href={doc.blobUrl}
+                    href={doc.downloadUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm font-medium text-neutral-900 hover:underline truncate"

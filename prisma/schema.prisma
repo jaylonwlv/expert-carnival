@@ -30,6 +30,7 @@ model Document {
   client          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   filename        String
   blobUrl         String
+  pathname        String
   contentType     String?
   size            Int
   visibleToClient Boolean  @default(false)

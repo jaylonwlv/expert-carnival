@@ -79,7 +79,7 @@ export async function uploadDocument(clientId: string, formData: FormData) {
   const visibleToClient = formData.get("visibleToClient") === "on";
 
   const blob = await put(`clients/${clientId}/${file.name}`, file, {
-    access: "public",
+    access: "private",
     addRandomSuffix: true,
   });
 
@@ -88,6 +88,7 @@ export async function uploadDocument(clientId: string, formData: FormData) {
       clientId,
       filename: file.name,
       blobUrl: blob.url,
+      pathname: blob.pathname,
       contentType: file.type || null,
       size: file.size,
       visibleToClient,

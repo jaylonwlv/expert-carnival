@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
 import { Stepper } from "@/components/Stepper";
+import { getSignedDownloadUrl } from "@/lib/documents";
 
 const COMPANY_NAME = process.env.NEXT_PUBLIC_COMPANY_NAME ?? "Relocation Engine";
 const AGENT_NAME = process.env.NEXT_PUBLIC_AGENT_NAME ?? "your agent";
@@ -24,6 +25,13 @@ export default async function TrackPage({
 
   const stage = STAGES[client.currentStage];
   const firstName = client.name.split(" ")[0];
+
+  const documents = await Promise.all(
+    client.documents.map(async (doc) => ({
+      ...doc,
+      downloadUrl: await getSignedDownloadUrl(doc.pathname),
+    }))
+  );
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -60,16 +68,16 @@ export default async function TrackPage({
           <Stepper stages={STAGES} currentIndex={client.currentStage} />
         </section>
 
-        {client.documents.length > 0 && (
+        {documents.length > 0 && (
           <section className="bg-white rounded-xl border border-neutral-200 p-5 space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
               Your documents
             </p>
             <ul className="space-y-1">
-              {client.documents.map((doc) => (
+              {documents.map((doc) => (
                 <li key={doc.id}>
                   <a
-                    href={doc.blobUrl}
+                    href={doc.downloadUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-neutral-900 hover:underline"
