@@ -50,6 +50,7 @@ export async function updateStage(clientId: string, formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath(`/admin/clients/${clientId}`);
+  redirect(`/admin/clients/${clientId}?saved=stage`);
 }
 
 export async function updateNote(clientId: string, formData: FormData) {
@@ -62,6 +63,7 @@ export async function updateNote(clientId: string, formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath(`/admin/clients/${clientId}`);
+  redirect(`/admin/clients/${clientId}?saved=note`);
 }
 
 export async function deleteClient(clientId: string) {
@@ -70,33 +72,43 @@ export async function deleteClient(clientId: string) {
   redirect("/admin");
 }
 
+const MAX_FILES_PER_UPLOAD = 5;
+
 export async function uploadDocument(clientId: string, formData: FormData) {
-  const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) {
-    throw new Error("Choose a file to upload");
+  const files = formData.getAll("file").filter((f): f is File => f instanceof File && f.size > 0);
+
+  if (files.length === 0) {
+    throw new Error("Choose at least one file to upload");
+  }
+  if (files.length > MAX_FILES_PER_UPLOAD) {
+    throw new Error(`Choose at most ${MAX_FILES_PER_UPLOAD} files at once`);
   }
 
   const visibleToClient = formData.get("visibleToClient") === "on";
 
-  const blob = await put(`clients/${clientId}/${file.name}`, file, {
-    access: "private",
-    addRandomSuffix: true,
-  });
+  for (const file of files) {
+    const blob = await put(`clients/${clientId}/${file.name}`, file, {
+      access: "private",
+      addRandomSuffix: true,
+    });
 
-  await prisma.document.create({
-    data: {
-      clientId,
-      filename: file.name,
-      blobUrl: blob.url,
-      pathname: blob.pathname,
-      contentType: file.type || null,
-      size: file.size,
-      visibleToClient,
-    },
-  });
+    await prisma.document.create({
+      data: {
+        clientId,
+        filename: file.name,
+        blobUrl: blob.url,
+        pathname: blob.pathname,
+        contentType: file.type || null,
+        size: file.size,
+        visibleToClient,
+      },
+    });
+  }
 
   revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath(`/admin/clients/${clientId}/documents`);
   revalidatePath(`/track`);
+  redirect(`/admin/clients/${clientId}?saved=documents`);
 }
 
 export async function deleteDocument(documentId: string) {
@@ -107,6 +119,8 @@ export async function deleteDocument(documentId: string) {
   await prisma.document.delete({ where: { id: documentId } });
 
   revalidatePath(`/admin/clients/${document.clientId}`);
+  revalidatePath(`/admin/clients/${document.clientId}/documents`);
+  revalidatePath(`/track`);
 }
 
 export async function toggleDocumentVisibility(documentId: string) {
@@ -119,4 +133,6 @@ export async function toggleDocumentVisibility(documentId: string) {
   });
 
   revalidatePath(`/admin/clients/${document.clientId}`);
+  revalidatePath(`/admin/clients/${document.clientId}/documents`);
+  revalidatePath(`/track`);
 }

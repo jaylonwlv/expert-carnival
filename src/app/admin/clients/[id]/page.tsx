@@ -3,14 +3,11 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
-import { formatFileSize } from "@/lib/format";
-import { getSignedDownloadUrl } from "@/lib/documents";
+import { stageColor, avatarColor, initials } from "@/lib/stageColors";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
-import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import { SavedBanner } from "@/components/SavedBanner";
 import {
   deleteClient,
-  deleteDocument,
-  toggleDocumentVisibility,
   updateNote,
   updateStage,
   uploadDocument,
@@ -18,10 +15,13 @@ import {
 
 export default async function ClientDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ saved?: string }>;
 }) {
   const { id } = await params;
+  const { saved } = await searchParams;
   const client = await prisma.client.findUnique({
     where: { id },
     include: { documents: { orderBy: { createdAt: "desc" } } },
@@ -41,27 +41,46 @@ export default async function ClientDetailPage({
   const deleteClientForClient = deleteClient.bind(null, client.id);
   const uploadDocumentForClient = uploadDocument.bind(null, client.id);
 
-  const documents = await Promise.all(
-    client.documents.map(async (doc) => ({
-      ...doc,
-      downloadUrl: await getSignedDownloadUrl(doc.pathname),
-    }))
-  );
+  const currentStageColor = stageColor(client.currentStage);
 
   return (
     <div className="min-h-screen bg-neutral-50">
       <header className="border-b border-neutral-200 bg-white">
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          <Link href="/admin" className="text-sm text-neutral-500 hover:text-neutral-800">
-            ← Back to clients
+        <div className="max-w-2xl mx-auto px-4 py-3">
+          <Link
+            href="/admin"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-neutral-900 rounded-md px-2.5 py-2 -ml-2.5 hover:bg-neutral-100 transition"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fillRule="evenodd"
+                d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Back to clients
           </Link>
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-        <div>
-          <h1 className="text-lg font-semibold text-neutral-900">{client.name}</h1>
-          <p className="text-sm text-neutral-500">{client.email || "No email"} · {client.phone || "No phone"}</p>
+        {saved && <SavedBanner saved={saved} />}
+
+        <div className="flex items-center gap-4">
+          <div
+            className={`flex items-center justify-center w-14 h-14 rounded-full ${avatarColor(client.name)} text-white text-lg font-semibold shrink-0`}
+          >
+            {initials(client.name)}
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-neutral-900">{client.name}</h1>
+            <p className="text-sm text-neutral-500">{client.email || "No email"} · {client.phone || "No phone"}</p>
+          </div>
+          <span
+            className={`ml-auto text-xs font-semibold rounded-full px-3 py-1.5 ${currentStageColor.badgeBg} ${currentStageColor.badgeText}`}
+          >
+            {STAGES[client.currentStage].title}
+          </span>
         </div>
 
         <section className="bg-white rounded-xl border border-neutral-200 p-6 space-y-3">
@@ -73,41 +92,35 @@ export default async function ClientDetailPage({
         </section>
 
         <section className="bg-white rounded-xl border border-neutral-200 p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-neutral-900">Current stage</h2>
-          <form action={updateStageForClient} className="space-y-3">
-            <div className="grid gap-2">
-              {STAGES.map((stage, index) => (
-                <label
-                  key={stage.title}
-                  className={`flex items-start gap-3 rounded-lg border px-3 py-2.5 cursor-pointer transition ${
-                    index === client.currentStage
-                      ? "border-neutral-900 bg-neutral-50"
-                      : "border-neutral-200 hover:border-neutral-300"
-                  }`}
-                >
-                  <input
-                    type="radio"
+          <h2 className="text-sm font-semibold text-neutral-900">Pipeline</h2>
+          <form action={updateStageForClient}>
+            <div className="flex flex-wrap gap-1.5">
+              {STAGES.map((stage, index) => {
+                const color = stageColor(index);
+                const isDone = index < client.currentStage;
+                const isCurrent = index === client.currentStage;
+                return (
+                  <button
+                    key={stage.title}
+                    type="submit"
                     name="currentStage"
                     value={index}
-                    defaultChecked={index === client.currentStage}
-                    className="mt-1"
-                  />
-                  <span>
-                    <span className="block text-sm font-medium text-neutral-900">
-                      {index + 1}. {stage.title}
-                    </span>
-                    <span className="block text-xs text-neutral-500">{stage.summary}</span>
-                  </span>
-                </label>
-              ))}
+                    title={stage.summary}
+                    className={`text-xs font-medium px-3 py-2 rounded-lg transition ${
+                      isDone || isCurrent
+                        ? `${color.solidBg} ${color.solidText}`
+                        : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                    } ${isCurrent ? `ring-2 ring-offset-2 ${color.ring}` : ""}`}
+                  >
+                    {index + 1}. {stage.title}
+                  </button>
+                );
+              })}
             </div>
-            <button
-              type="submit"
-              className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 hover:bg-neutral-800"
-            >
-              Save stage
-            </button>
           </form>
+          <p className="text-sm text-neutral-500 pt-2 border-t border-neutral-100">
+            {STAGES[client.currentStage].summary}
+          </p>
         </section>
 
         <section className="bg-white rounded-xl border border-neutral-200 p-6 space-y-3">
@@ -133,59 +146,31 @@ export default async function ClientDetailPage({
         </section>
 
         <section className="bg-white rounded-xl border border-neutral-200 p-6 space-y-4">
-          <div>
-            <h2 className="text-sm font-semibold text-neutral-900">Documents</h2>
-            <p className="text-sm text-neutral-500">
-              Store contracts, IDs, financial paperwork, and closing documents for this client.
-              &ldquo;Visible to client&rdquo; documents also show up on their tracker page.
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-neutral-900">Documents</h2>
+              <p className="text-sm text-neutral-500">
+                {client.documents.length} {client.documents.length === 1 ? "file" : "files"} · contracts, IDs,
+                financial paperwork, closing documents.
+              </p>
+            </div>
+            <Link
+              href={`/admin/clients/${client.id}/documents`}
+              className="shrink-0 text-sm font-medium bg-neutral-900 text-white rounded-md px-3 py-2 hover:bg-neutral-800"
+            >
+              View client documents
+            </Link>
           </div>
 
-          {documents.length > 0 && (
-            <ul className="divide-y divide-neutral-100 border border-neutral-200 rounded-lg">
-              {documents.map((doc) => (
-                <li key={doc.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                  <a
-                    href={doc.downloadUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-medium text-neutral-900 hover:underline truncate"
-                  >
-                    {doc.filename}
-                  </a>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-xs text-neutral-400">{formatFileSize(doc.size)}</span>
-                    <form action={toggleDocumentVisibility.bind(null, doc.id)}>
-                      <button
-                        type="submit"
-                        className={`text-xs font-medium rounded-full px-2.5 py-1 ${
-                          doc.visibleToClient
-                            ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                            : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
-                        }`}
-                      >
-                        {doc.visibleToClient ? "Visible to client" : "Admin only"}
-                      </button>
-                    </form>
-                    <ConfirmSubmitButton
-                      action={deleteDocument.bind(null, doc.id)}
-                      confirmMessage={`Delete ${doc.filename}? This can't be undone.`}
-                      label="Delete"
-                      className="text-sm text-red-600 hover:text-red-700 hover:underline"
-                    />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <form action={uploadDocumentForClient} className="space-y-3">
+          <form action={uploadDocumentForClient} className="space-y-3 pt-3 border-t border-neutral-100">
             <input
               type="file"
               name="file"
               required
+              multiple
               className="block w-full text-sm text-neutral-900 file:mr-3 file:rounded-md file:border-0 file:bg-neutral-900 file:text-white file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-neutral-800"
             />
+            <p className="text-xs text-neutral-400">Up to 5 files at once.</p>
             <label className="flex items-center gap-2 text-sm text-neutral-700">
               <input type="checkbox" name="visibleToClient" className="rounded" />
               Visible to client on their tracker page
@@ -194,7 +179,7 @@ export default async function ClientDetailPage({
               type="submit"
               className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 hover:bg-neutral-800"
             >
-              Upload document
+              Upload document(s)
             </button>
           </form>
         </section>
