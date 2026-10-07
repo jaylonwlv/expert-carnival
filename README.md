@@ -62,5 +62,6 @@ each page load (valid ~1 hour), via `src/lib/documents.ts`.
 2. Provision a Blob store the same way (Storage tab -> Create Database ->
    Blob) and set `BLOB_READ_WRITE_TOKEN`.
 3. Set `ADMIN_PASSWORD` and the agent contact env vars there too.
-4. Run `npx prisma migrate deploy` against the production database (or let
-   your host run it as part of the build/deploy step).
+4. That's it — the `build` script runs `prisma migrate deploy` automatically
+   before every build, so new migrations apply themselves on each deploy.
+   No manual migration step needed.
