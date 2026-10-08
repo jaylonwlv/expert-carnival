@@ -5,12 +5,17 @@ import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
 import { stageColor, avatarColor, initials } from "@/lib/stageColors";
 import { timeAgo, formatAppointment, toAppointmentInputValue } from "@/lib/format";
+import { ensureChecklistItems, STAGE_CHECKLISTS, type ChecklistStatus } from "@/lib/checklist";
+import { NEIGHBORHOOD_GROUPS } from "@/lib/neighborhoods";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { ActionForm } from "@/components/ActionForm";
 import { FileDropzone } from "@/components/FileDropzone";
+import { ChecklistAccordion, type ChecklistStageData } from "@/components/ChecklistAccordion";
 import {
   deleteClient,
+  setChecklistItemStatus,
   updateAppointment,
+  updateNeighborhoods,
   updateNote,
   updateStage,
   uploadDocument,
@@ -34,6 +39,12 @@ export default async function ClientDetailPage({
     notFound();
   }
 
+  await ensureChecklistItems(client.id);
+  const checklistItems = await prisma.checklistItem.findMany({
+    where: { clientId: client.id },
+    orderBy: [{ stageIndex: "asc" }, { sortOrder: "asc" }],
+  });
+
   const headerList = await headers();
   const host = headerList.get("host");
   const protocol = host?.startsWith("localhost") || host?.startsWith("127.0.0.1") ? "http" : "https";
@@ -44,8 +55,25 @@ export default async function ClientDetailPage({
   const deleteClientForClient = deleteClient.bind(null, client.id);
   const uploadDocumentForClient = uploadDocument.bind(null, client.id);
   const updateAppointmentForClient = updateAppointment.bind(null, client.id);
+  const updateNeighborhoodsForClient = updateNeighborhoods.bind(null, client.id);
 
   const currentStageColor = stageColor(client.currentStage);
+
+  const checklistStages: ChecklistStageData[] = STAGES.map((stage, index) => ({
+    index,
+    title: stage.title,
+    summary: stage.summary,
+    documentHeavy: STAGE_CHECKLISTS[index].documentHeavy,
+    items: checklistItems
+      .filter((item) => item.stageIndex === index)
+      .map((item) => ({
+        id: item.id,
+        label: item.label,
+        status: item.status as ChecklistStatus,
+        statusAt: item.statusAt,
+      })),
+    documentCount: client.documents.filter((doc) => doc.stageIndex === index).length,
+  }));
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -123,6 +151,22 @@ export default async function ClientDetailPage({
           <p className="text-sm text-neutral-500 pt-2 border-t border-neutral-100">
             {STAGES[client.currentStage].summary}
           </p>
+        </section>
+
+        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
+          <h2 className="text-sm font-semibold text-neutral-900 mb-1">Checklist</h2>
+          <p className="text-sm text-neutral-500 mb-2">
+            Steps for each stage. Mark a step &ldquo;not needed&rdquo; if it doesn&apos;t apply to this client.
+          </p>
+          <ChecklistAccordion
+            stages={checklistStages}
+            currentStageIndex={client.currentStage}
+            documentsHref={`/admin/clients/${client.id}/documents`}
+            onSetStatus={setChecklistItemStatus}
+            uploadAction={uploadDocumentForClient}
+            neighborhoods={{ groups: NEIGHBORHOOD_GROUPS, selected: client.preferredNeighborhoods }}
+            updateNeighborhoodsAction={updateNeighborhoodsForClient}
+          />
         </section>
 
         <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">

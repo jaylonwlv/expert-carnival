@@ -11,19 +11,21 @@ datasource db {
 }
 
 model Client {
-  id             String        @id @default(cuid())
-  token          String        @unique
-  name           String
-  email          String?
-  phone          String?
-  currentStage   Int           @default(0)
-  note           String?
-  appointmentAt  DateTime?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  stageUpdatedAt DateTime      @default(now())
-  documents      Document[]
-  activityLog    ActivityLog[]
+  id                     String          @id @default(cuid())
+  token                  String          @unique
+  name                   String
+  email                  String?
+  phone                  String?
+  currentStage           Int             @default(0)
+  note                   String?
+  appointmentAt          DateTime?
+  preferredNeighborhoods String[]        @default([])
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  stageUpdatedAt         DateTime        @default(now())
+  documents              Document[]
+  activityLog            ActivityLog[]
+  checklistItems         ChecklistItem[]
 }
 
 model Document {
@@ -37,6 +39,7 @@ model Document {
   size            Int
   visibleToClient Boolean  @default(false)
   uploadedBy      String   @default("admin")
+  stageIndex      Int?
   createdAt       DateTime @default(now())
 
   @@index([clientId])
@@ -49,5 +52,21 @@ model ActivityLog {
   message   String
   createdAt DateTime @default(now())
 
+  @@index([clientId])
+}
+
+model ChecklistItem {
+  id         String    @id @default(cuid())
+  clientId   String
+  client     Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  stageIndex Int
+  key        String
+  label      String
+  sortOrder  Int
+  status     String    @default("pending")
+  statusAt   DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@unique([clientId, key])
   @@index([clientId])
 }

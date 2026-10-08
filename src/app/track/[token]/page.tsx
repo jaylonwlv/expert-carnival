@@ -95,6 +95,11 @@ export default async function TrackPage({
                 Right now
               </p>
               <p className="text-sm text-neutral-800">{client.note || stage.summary}</p>
+              {client.preferredNeighborhoods.length > 0 && (
+                <p className="text-sm text-neutral-500 mt-1">
+                  Targeting: {client.preferredNeighborhoods.join(", ")}
+                </p>
+              )}
             </div>
             <div className="pt-3 border-t border-neutral-100">
               <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-1">

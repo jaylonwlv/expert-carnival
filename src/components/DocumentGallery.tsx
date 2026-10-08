@@ -4,6 +4,7 @@ import { useState } from "react";
 import { formatFileSize, fileKindLabel, isImageFile } from "@/lib/format";
 import { FileTypeIcon } from "@/components/FileTypeIcon";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import { STAGES } from "@/lib/stages";
 
 type GalleryDocument = {
   id: string;
@@ -13,6 +14,7 @@ type GalleryDocument = {
   contentType: string | null;
   visibleToClient: boolean;
   uploadedBy: string;
+  stageIndex: number | null;
   createdAt: Date;
 };
 
@@ -72,6 +74,11 @@ export function DocumentGallery({
                   From client
                 </span>
               )}
+              {doc.stageIndex !== null && (
+                <span className="text-xs font-medium text-purple-700 bg-purple-50 rounded-full px-2 py-0.5 shrink-0">
+                  {STAGES[doc.stageIndex].title}
+                </span>
+              )}
               <span className="text-xs text-neutral-400 shrink-0">{formatFileSize(doc.size)}</span>
               <VisibilityBadge
                 visible={doc.visibleToClient}
@@ -123,6 +130,11 @@ export function DocumentGallery({
                 {doc.uploadedBy === "client" && (
                   <span className="text-xs font-medium text-blue-700 bg-blue-50 rounded-full px-2 py-0.5 w-fit">
                     From client
+                  </span>
+                )}
+                {doc.stageIndex !== null && (
+                  <span className="text-xs font-medium text-purple-700 bg-purple-50 rounded-full px-2 py-0.5 w-fit">
+                    {STAGES[doc.stageIndex].title}
                   </span>
                 )}
                 <div className="flex items-center justify-between gap-2">

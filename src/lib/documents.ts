@@ -23,11 +23,13 @@ export async function createDocumentsForClient({
   files,
   visibleToClient,
   uploadedBy,
+  stageIndex,
 }: {
   clientId: string;
   files: File[];
   visibleToClient: boolean;
   uploadedBy: "admin" | "client";
+  stageIndex?: number | null;
 }): Promise<string[]> {
   const filenames: string[] = [];
 
@@ -47,6 +49,7 @@ export async function createDocumentsForClient({
         size: file.size,
         visibleToClient,
         uploadedBy,
+        stageIndex: stageIndex ?? null,
       },
     });
 

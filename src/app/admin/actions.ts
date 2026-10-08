@@ -11,6 +11,8 @@ import { STAGES } from "@/lib/stages";
 import { createDocumentsForClient, MAX_FILES_PER_UPLOAD } from "@/lib/documents";
 import { logActivity } from "@/lib/activity";
 import { parseAppointmentInput, formatAppointment } from "@/lib/format";
+import type { ChecklistStatus } from "@/lib/checklist";
+import { NEIGHBORHOOD_GROUPS } from "@/lib/neighborhoods";
 
 export async function logout() {
   const cookieStore = await cookies();
@@ -111,12 +113,16 @@ export async function uploadDocument(clientId: string, formData: FormData) {
   }
 
   const visibleToClient = formData.get("visibleToClient") === "on";
+  const rawStageIndex = formData.get("stageIndex");
+  const stageIndex =
+    rawStageIndex !== null && rawStageIndex !== "" ? Number(rawStageIndex) : null;
 
   const filenames = await createDocumentsForClient({
     clientId,
     files,
     visibleToClient,
     uploadedBy: "admin",
+    stageIndex,
   });
 
   await logActivity(clientId, `Uploaded ${filenames.map((f) => `"${f}"`).join(", ")}.`);
@@ -160,5 +166,51 @@ export async function toggleDocumentVisibility(documentId: string) {
 
   revalidatePath(`/admin/clients/${document.clientId}`);
   revalidatePath(`/admin/clients/${document.clientId}/documents`);
+  revalidatePath(`/track`);
+}
+
+const CHECKLIST_STATUSES: ChecklistStatus[] = ["pending", "done", "not_needed"];
+
+export async function setChecklistItemStatus(itemId: string, status: ChecklistStatus) {
+  if (!CHECKLIST_STATUSES.includes(status)) {
+    throw new Error("Invalid checklist status");
+  }
+
+  const item = await prisma.checklistItem.update({
+    where: { id: itemId },
+    data: { status, statusAt: new Date() },
+  });
+
+  const message =
+    status === "done"
+      ? `Checked off "${item.label}".`
+      : status === "not_needed"
+        ? `Marked "${item.label}" as not needed.`
+        : `Reopened "${item.label}".`;
+
+  await logActivity(item.clientId, message);
+
+  revalidatePath(`/admin/clients/${item.clientId}`);
+}
+
+export async function updateNeighborhoods(clientId: string, formData: FormData) {
+  const allOptions = new Set(NEIGHBORHOOD_GROUPS.flatMap((group) => group.options));
+  const selected = formData.getAll("neighborhoods").filter(
+    (value): value is string => typeof value === "string" && allOptions.has(value)
+  );
+
+  await prisma.client.update({
+    where: { id: clientId },
+    data: { preferredNeighborhoods: selected },
+  });
+
+  await logActivity(
+    clientId,
+    selected.length > 0
+      ? `Preferred neighborhoods updated: ${selected.join(", ")}.`
+      : "Preferred neighborhoods cleared."
+  );
+
+  revalidatePath(`/admin/clients/${clientId}`);
   revalidatePath(`/track`);
 }
