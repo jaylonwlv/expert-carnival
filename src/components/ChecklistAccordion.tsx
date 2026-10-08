@@ -37,9 +37,32 @@ export function ChecklistAccordion({
 }) {
   const [expanded, setExpanded] = useState<number | null>(currentStageIndex);
 
+  // Optimistic local copy: a toggle should feel instant, not wait on the
+  // round trip through the server action + full page revalidation. Re-synced
+  // (via the render-time reset below, per React's docs for adjusting state
+  // when a prop changes) whenever fresh server data actually arrives.
+  const [prevStages, setPrevStages] = useState(stages);
+  const [localStages, setLocalStages] = useState(stages);
+  if (stages !== prevStages) {
+    setPrevStages(stages);
+    setLocalStages(stages);
+  }
+
+  function handleSetStatus(itemId: string, status: ChecklistStatus) {
+    setLocalStages((prev) =>
+      prev.map((stage) => ({
+        ...stage,
+        items: stage.items.map((item) =>
+          item.id === itemId ? { ...item, status, statusAt: new Date() } : item
+        ),
+      }))
+    );
+    onSetStatus(itemId, status);
+  }
+
   return (
     <div className="divide-y divide-neutral-100">
-      {stages.map((stage) => {
+      {localStages.map((stage) => {
         const isOpen = expanded === stage.index;
         const doneCount = stage.items.filter((i) => i.status !== "pending").length;
 
@@ -48,11 +71,11 @@ export function ChecklistAccordion({
             <button
               type="button"
               onClick={() => setExpanded(isOpen ? null : stage.index)}
-              className="w-full flex items-center justify-between gap-3 py-3 text-left"
+              className="w-full flex items-center justify-between gap-3 py-4 text-left"
             >
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-3 min-w-0">
                 <span
-                  className={`text-xs font-semibold shrink-0 rounded-full px-2 py-0.5 ${
+                  className={`text-sm font-semibold shrink-0 rounded-full px-2.5 py-1 ${
                     stage.index === currentStageIndex
                       ? "bg-neutral-900 text-white"
                       : "bg-neutral-100 text-neutral-500"
@@ -60,14 +83,14 @@ export function ChecklistAccordion({
                 >
                   {stage.index + 1}
                 </span>
-                <span className="text-sm font-medium text-neutral-900 truncate">{stage.title}</span>
+                <span className="text-base font-medium text-neutral-900 truncate">{stage.title}</span>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs text-neutral-400">
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="text-sm text-neutral-500">
                   {doneCount}/{stage.items.length}
                 </span>
                 <svg
-                  className={`w-4 h-4 text-neutral-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                  className={`w-5 h-5 text-neutral-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -81,10 +104,10 @@ export function ChecklistAccordion({
             </button>
 
             {isOpen && (
-              <div className="pb-4 space-y-3">
-                <ul className="space-y-1.5">
+              <div className="pb-5 space-y-4">
+                <ul className="space-y-3">
                   {stage.items.map((item) => (
-                    <ChecklistRow key={item.id} item={item} onSetStatus={onSetStatus} />
+                    <ChecklistRow key={item.id} item={item} onSetStatus={handleSetStatus} />
                   ))}
                 </ul>
 
@@ -92,18 +115,18 @@ export function ChecklistAccordion({
                   <ActionForm
                     action={updateNeighborhoodsAction}
                     toastMessage="Preferred neighborhoods saved."
-                    className="pt-2 border-t border-neutral-100 space-y-2"
+                    className="pt-3 border-t border-neutral-100 space-y-3"
                   >
-                    <p className="text-xs font-medium text-neutral-500">Preferred neighborhoods</p>
-                    <div className="space-y-2">
+                    <p className="text-sm font-semibold text-neutral-700">Preferred neighborhoods</p>
+                    <div className="space-y-3">
                       {neighborhoods.groups.map((group) => (
                         <div key={group.group}>
-                          <p className="text-xs text-neutral-400 mb-1">{group.group}</p>
-                          <div className="flex flex-wrap gap-1.5">
+                          <p className="text-sm font-semibold text-neutral-700 mb-1.5">{group.group}</p>
+                          <div className="flex flex-wrap gap-2">
                             {group.options.map((option) => (
                               <label
                                 key={option}
-                                className="flex items-center gap-1.5 text-xs bg-neutral-50 border border-neutral-200 rounded-full px-2.5 py-1 cursor-pointer hover:bg-neutral-100"
+                                className="flex items-center gap-2 text-sm bg-neutral-50 border border-neutral-200 rounded-full px-3 py-1.5 cursor-pointer hover:bg-neutral-100"
                               >
                                 <input
                                   type="checkbox"
@@ -121,7 +144,7 @@ export function ChecklistAccordion({
                     </div>
                     <button
                       type="submit"
-                      className="rounded-md bg-neutral-900 text-white text-xs font-medium px-3 py-1.5 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
+                      className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
                     >
                       Save neighborhoods
                     </button>
@@ -132,16 +155,16 @@ export function ChecklistAccordion({
                   <ActionForm
                     action={uploadAction}
                     toastMessage="Document(s) uploaded."
-                    className="pt-2 border-t border-neutral-100 space-y-2"
+                    className="pt-3 border-t border-neutral-100 space-y-3"
                   >
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium text-neutral-500">
+                      <p className="text-sm font-medium text-neutral-600">
                         Documents for this stage{" "}
                         {stage.documentCount > 0 && (
                           <span className="text-neutral-400">({stage.documentCount} uploaded)</span>
                         )}
                       </p>
-                      <Link href={documentsHref} className="text-xs text-neutral-500 hover:underline">
+                      <Link href={documentsHref} className="text-sm text-neutral-500 hover:underline">
                         View all documents
                       </Link>
                     </div>
@@ -149,7 +172,7 @@ export function ChecklistAccordion({
                     <FileDropzone name="file" maxFiles={5} />
                     <button
                       type="submit"
-                      className="rounded-md bg-neutral-900 text-white text-xs font-medium px-3 py-1.5 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
+                      className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
                     >
                       Upload document(s)
                     </button>
@@ -173,15 +196,15 @@ function ChecklistRow({
 }) {
   if (item.status === "not_needed") {
     return (
-      <li className="flex items-center gap-2.5 text-sm">
-        <span className="shrink-0 w-4 h-4 rounded border border-neutral-300 flex items-center justify-center text-neutral-400">
+      <li className="flex items-center gap-3 text-base">
+        <span className="shrink-0 w-5 h-5 rounded border border-neutral-300 flex items-center justify-center text-neutral-400">
           –
         </span>
         <span className="flex-1 text-neutral-400 italic">{item.label} (not needed)</span>
         <button
           type="button"
           onClick={() => onSetStatus(item.id, "pending")}
-          className="text-xs text-neutral-500 hover:underline shrink-0"
+          className="text-sm text-neutral-500 hover:underline shrink-0"
         >
           Undo
         </button>
@@ -191,14 +214,14 @@ function ChecklistRow({
 
   if (item.status === "done") {
     return (
-      <li className="flex items-center gap-2.5 text-sm">
+      <li className="flex items-center gap-3 text-base">
         <button
           type="button"
           onClick={() => onSetStatus(item.id, "pending")}
-          className="shrink-0 w-4 h-4 rounded bg-emerald-600 text-white flex items-center justify-center"
+          className="shrink-0 w-5 h-5 rounded bg-emerald-600 text-white flex items-center justify-center"
           aria-label="Mark as not done"
         >
-          <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
             <path
               fillRule="evenodd"
               d="M16.704 5.29a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06 0l-3.5-3.5a.75.75 0 111.06-1.06l2.97 2.97 6.97-6.97a.75.75 0 011.06 0z"
@@ -207,24 +230,24 @@ function ChecklistRow({
           </svg>
         </button>
         <span className="flex-1 text-neutral-700">{item.label}</span>
-        {item.statusAt && <span className="text-xs text-neutral-400 shrink-0">{timeAgo(item.statusAt)}</span>}
+        {item.statusAt && <span className="text-sm text-neutral-400 shrink-0">{timeAgo(item.statusAt)}</span>}
       </li>
     );
   }
 
   return (
-    <li className="flex items-center gap-2.5 text-sm">
+    <li className="flex items-center gap-3 text-base">
       <button
         type="button"
         onClick={() => onSetStatus(item.id, "done")}
-        className="shrink-0 w-4 h-4 rounded border border-neutral-300 hover:border-neutral-500"
+        className="shrink-0 w-5 h-5 rounded border border-neutral-300 hover:border-neutral-500"
         aria-label="Mark as done"
       />
       <span className="flex-1 text-neutral-700">{item.label}</span>
       <button
         type="button"
         onClick={() => onSetStatus(item.id, "not_needed")}
-        className="text-xs text-neutral-400 hover:underline shrink-0"
+        className="text-sm text-neutral-400 hover:underline shrink-0"
       >
         Not needed
       </button>

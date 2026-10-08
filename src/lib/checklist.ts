@@ -112,7 +112,15 @@ export const STAGE_CHECKLISTS: StageChecklist[] = [
   },
 ];
 
+const TOTAL_CHECKLIST_ITEMS = STAGE_CHECKLISTS.reduce((sum, stage) => sum + stage.items.length, 0);
+
 export async function ensureChecklistItems(clientId: string) {
+  // Cheap short-circuit: once a client's items are seeded (the common case on
+  // every page load after the first), skip the 37-upsert pass entirely instead
+  // of re-upserting unchanged rows every time the page re-renders.
+  const existingCount = await prisma.checklistItem.count({ where: { clientId } });
+  if (existingCount === TOTAL_CHECKLIST_ITEMS) return;
+
   const upserts = STAGE_CHECKLISTS.flatMap(({ items }, stageIndex) =>
     items.map(({ key, label }, sortOrder) =>
       prisma.checklistItem.upsert({

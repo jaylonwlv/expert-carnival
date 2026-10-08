@@ -22,7 +22,10 @@ export function ConfirmSubmitButton({
     >
       <button
         type="submit"
-        className={className ?? "text-sm text-red-600 hover:text-red-700 hover:underline px-2 py-1"}
+        className={
+          className ??
+          "rounded-md border border-red-300 bg-white text-red-700 text-sm font-medium px-3 py-2 shadow-sm hover:shadow-md hover:bg-red-50 transition"
+        }
       >
         {label}
       </button>
