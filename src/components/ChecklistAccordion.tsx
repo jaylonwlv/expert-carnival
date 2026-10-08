@@ -13,6 +13,7 @@ export type ChecklistStageData = {
   title: string;
   summary: string;
   documentHeavy: boolean;
+  showNeighborhoods: boolean;
   items: { id: string; label: string; status: ChecklistStatus; statusAt: Date | null }[];
   documentCount: number;
 };
@@ -87,7 +88,7 @@ export function ChecklistAccordion({
                   ))}
                 </ul>
 
-                {stage.index === 2 && (
+                {stage.showNeighborhoods && (
                   <ActionForm
                     action={updateNeighborhoodsAction}
                     toastMessage="Preferred neighborhoods saved."

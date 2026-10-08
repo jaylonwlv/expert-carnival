@@ -114,8 +114,14 @@ export async function uploadDocument(clientId: string, formData: FormData) {
 
   const visibleToClient = formData.get("visibleToClient") === "on";
   const rawStageIndex = formData.get("stageIndex");
-  const stageIndex =
-    rawStageIndex !== null && rawStageIndex !== "" ? Number(rawStageIndex) : null;
+  let stageIndex: number | null = null;
+  if (rawStageIndex !== null && rawStageIndex !== "") {
+    const parsed = Number(rawStageIndex);
+    if (!Number.isInteger(parsed) || parsed < 0 || parsed >= STAGES.length) {
+      throw new Error("Invalid stage");
+    }
+    stageIndex = parsed;
+  }
 
   const filenames = await createDocumentsForClient({
     clientId,

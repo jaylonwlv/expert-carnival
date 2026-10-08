@@ -20,6 +20,11 @@ type GalleryDocument = {
 
 type ViewMode = "list" | "medium" | "large";
 
+function stageTitle(stageIndex: number | null): string | null {
+  if (stageIndex === null) return null;
+  return STAGES[stageIndex]?.title ?? null;
+}
+
 export function DocumentGallery({
   documents,
   deleteAction,
@@ -74,9 +79,9 @@ export function DocumentGallery({
                   From client
                 </span>
               )}
-              {doc.stageIndex !== null && (
+              {stageTitle(doc.stageIndex) !== null && (
                 <span className="text-xs font-medium text-purple-700 bg-purple-50 rounded-full px-2 py-0.5 shrink-0">
-                  {STAGES[doc.stageIndex].title}
+                  {stageTitle(doc.stageIndex)}
                 </span>
               )}
               <span className="text-xs text-neutral-400 shrink-0">{formatFileSize(doc.size)}</span>
@@ -132,9 +137,9 @@ export function DocumentGallery({
                     From client
                   </span>
                 )}
-                {doc.stageIndex !== null && (
+                {stageTitle(doc.stageIndex) !== null && (
                   <span className="text-xs font-medium text-purple-700 bg-purple-50 rounded-full px-2 py-0.5 w-fit">
-                    {STAGES[doc.stageIndex].title}
+                    {stageTitle(doc.stageIndex)}
                   </span>
                 )}
                 <div className="flex items-center justify-between gap-2">

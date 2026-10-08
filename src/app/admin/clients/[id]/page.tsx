@@ -59,11 +59,14 @@ export default async function ClientDetailPage({
 
   const currentStageColor = stageColor(client.currentStage);
 
+  const NEIGHBORHOODS_STAGE_TITLE = "Home & Area Selection";
+
   const checklistStages: ChecklistStageData[] = STAGES.map((stage, index) => ({
     index,
     title: stage.title,
     summary: stage.summary,
     documentHeavy: STAGE_CHECKLISTS[index].documentHeavy,
+    showNeighborhoods: stage.title === NEIGHBORHOODS_STAGE_TITLE,
     items: checklistItems
       .filter((item) => item.stageIndex === index)
       .map((item) => ({

@@ -113,15 +113,15 @@ export const STAGE_CHECKLISTS: StageChecklist[] = [
 ];
 
 export async function ensureChecklistItems(clientId: string) {
-  for (let stageIndex = 0; stageIndex < STAGE_CHECKLISTS.length; stageIndex++) {
-    const { items } = STAGE_CHECKLISTS[stageIndex];
-    for (let sortOrder = 0; sortOrder < items.length; sortOrder++) {
-      const { key, label } = items[sortOrder];
-      await prisma.checklistItem.upsert({
+  const upserts = STAGE_CHECKLISTS.flatMap(({ items }, stageIndex) =>
+    items.map(({ key, label }, sortOrder) =>
+      prisma.checklistItem.upsert({
         where: { clientId_key: { clientId, key } },
         update: { label, sortOrder, stageIndex },
         create: { clientId, key, label, sortOrder, stageIndex },
-      });
-    }
-  }
+      })
+    )
+  );
+
+  await Promise.all(upserts);
 }
