@@ -4,11 +4,13 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
 import { stageColor, avatarColor, initials } from "@/lib/stageColors";
+import { timeAgo, formatAppointment, toAppointmentInputValue } from "@/lib/format";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { ActionForm } from "@/components/ActionForm";
 import { FileDropzone } from "@/components/FileDropzone";
 import {
   deleteClient,
+  updateAppointment,
   updateNote,
   updateStage,
   uploadDocument,
@@ -22,7 +24,10 @@ export default async function ClientDetailPage({
   const { id } = await params;
   const client = await prisma.client.findUnique({
     where: { id },
-    include: { documents: { orderBy: { createdAt: "desc" } } },
+    include: {
+      documents: { orderBy: { createdAt: "desc" } },
+      activityLog: { orderBy: { createdAt: "desc" } },
+    },
   });
 
   if (!client) {
@@ -38,6 +43,7 @@ export default async function ClientDetailPage({
   const updateNoteForClient = updateNote.bind(null, client.id);
   const deleteClientForClient = deleteClient.bind(null, client.id);
   const uploadDocumentForClient = uploadDocument.bind(null, client.id);
+  const updateAppointmentForClient = updateAppointment.bind(null, client.id);
 
   const currentStageColor = stageColor(client.currentStage);
 
@@ -120,6 +126,49 @@ export default async function ClientDetailPage({
         </section>
 
         <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
+          <h2 className="text-sm font-semibold text-neutral-900">Upcoming appointment</h2>
+          <p className="text-sm text-neutral-500">
+            {client.appointmentAt ? (
+              <>
+                Currently set to{" "}
+                <span className="font-medium text-neutral-800">{formatAppointment(client.appointmentAt)}</span>.
+                Shown on {client.name.split(" ")[0]}&apos;s tracker page.
+              </>
+            ) : (
+              "No appointment scheduled."
+            )}
+          </p>
+          <ActionForm action={updateAppointmentForClient} toastMessage="Appointment updated." className="flex items-end gap-3">
+            <div className="flex-1">
+              <label htmlFor="appointmentAt" className="block text-xs font-medium text-neutral-500 mb-1">
+                Date &amp; time
+              </label>
+              <input
+                id="appointmentAt"
+                type="datetime-local"
+                name="appointmentAt"
+                defaultValue={client.appointmentAt ? toAppointmentInputValue(client.appointmentAt) : ""}
+                className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+              />
+            </div>
+            <button
+              type="submit"
+              className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
+            >
+              Save
+            </button>
+          </ActionForm>
+          {client.appointmentAt && (
+            <form action={updateAppointmentForClient}>
+              <input type="hidden" name="appointmentAt" value="" />
+              <button type="submit" className="text-xs text-red-600 hover:underline">
+                Clear appointment
+              </button>
+            </form>
+          )}
+        </section>
+
+        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
           <h2 className="text-sm font-semibold text-neutral-900">Custom update (optional)</h2>
           <p className="text-sm text-neutral-500">
             Overrides the default &ldquo;what&apos;s happening now&rdquo; text on the client&apos;s tracker with something specific.
@@ -175,6 +224,22 @@ export default async function ClientDetailPage({
               Upload document(s)
             </button>
           </ActionForm>
+        </section>
+
+        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
+          <h2 className="text-sm font-semibold text-neutral-900">Activity</h2>
+          {client.activityLog.length === 0 ? (
+            <p className="text-sm text-neutral-500">No activity yet.</p>
+          ) : (
+            <ul className="space-y-2.5 max-h-80 overflow-y-auto">
+              {client.activityLog.map((entry) => (
+                <li key={entry.id} className="flex items-start gap-3 text-sm">
+                  <span className="text-neutral-400 shrink-0 w-14 text-right">{timeAgo(entry.createdAt)}</span>
+                  <span className="text-neutral-700">{entry.message}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <section className="bg-white rounded-xl border border-red-200 shadow-sm p-6">

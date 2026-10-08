@@ -4,10 +4,13 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { nanoid } from "nanoid";
-import { put, del } from "@vercel/blob";
+import { del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { STAGES } from "@/lib/stages";
+import { createDocumentsForClient, MAX_FILES_PER_UPLOAD } from "@/lib/documents";
+import { logActivity } from "@/lib/activity";
+import { parseAppointmentInput, formatAppointment } from "@/lib/format";
 
 export async function logout() {
   const cookieStore = await cookies();
@@ -33,6 +36,8 @@ export async function createClient(formData: FormData) {
     },
   });
 
+  await logActivity(client.id, "Client added.");
+
   revalidatePath("/admin");
   redirect(`/admin/clients/${client.id}`);
 }
@@ -48,6 +53,8 @@ export async function updateStage(clientId: string, formData: FormData) {
     data: { currentStage: stageIndex, stageUpdatedAt: new Date() },
   });
 
+  await logActivity(clientId, `Stage changed to "${STAGES[stageIndex].title}".`);
+
   revalidatePath("/admin");
   revalidatePath(`/admin/clients/${clientId}`);
 }
@@ -60,8 +67,31 @@ export async function updateNote(clientId: string, formData: FormData) {
     data: { note: note || null },
   });
 
+  await logActivity(clientId, note ? "Custom update note changed." : "Custom update note cleared.");
+
   revalidatePath("/admin");
   revalidatePath(`/admin/clients/${clientId}`);
+}
+
+export async function updateAppointment(clientId: string, formData: FormData) {
+  const raw = String(formData.get("appointmentAt") ?? "").trim();
+  const appointmentAt = raw ? parseAppointmentInput(raw) : null;
+
+  await prisma.client.update({
+    where: { id: clientId },
+    data: { appointmentAt },
+  });
+
+  await logActivity(
+    clientId,
+    appointmentAt
+      ? `Upcoming appointment set to ${formatAppointment(appointmentAt)}.`
+      : "Upcoming appointment cleared."
+  );
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath(`/track`);
 }
 
 export async function deleteClient(clientId: string) {
@@ -69,8 +99,6 @@ export async function deleteClient(clientId: string) {
   revalidatePath("/admin");
   redirect("/admin");
 }
-
-const MAX_FILES_PER_UPLOAD = 5;
 
 export async function uploadDocument(clientId: string, formData: FormData) {
   const files = formData.getAll("file").filter((f): f is File => f instanceof File && f.size > 0);
@@ -84,24 +112,14 @@ export async function uploadDocument(clientId: string, formData: FormData) {
 
   const visibleToClient = formData.get("visibleToClient") === "on";
 
-  for (const file of files) {
-    const blob = await put(`clients/${clientId}/${file.name}`, file, {
-      access: "private",
-      addRandomSuffix: true,
-    });
+  const filenames = await createDocumentsForClient({
+    clientId,
+    files,
+    visibleToClient,
+    uploadedBy: "admin",
+  });
 
-    await prisma.document.create({
-      data: {
-        clientId,
-        filename: file.name,
-        blobUrl: blob.url,
-        pathname: blob.pathname,
-        contentType: file.type || null,
-        size: file.size,
-        visibleToClient,
-      },
-    });
-  }
+  await logActivity(clientId, `Uploaded ${filenames.map((f) => `"${f}"`).join(", ")}.`);
 
   revalidatePath(`/admin/clients/${clientId}`);
   revalidatePath(`/admin/clients/${clientId}/documents`);
@@ -115,6 +133,8 @@ export async function deleteDocument(documentId: string) {
   await del(document.blobUrl);
   await prisma.document.delete({ where: { id: documentId } });
 
+  await logActivity(document.clientId, `Deleted document "${document.filename}".`);
+
   revalidatePath(`/admin/clients/${document.clientId}`);
   revalidatePath(`/admin/clients/${document.clientId}/documents`);
   revalidatePath(`/track`);
@@ -124,10 +144,19 @@ export async function toggleDocumentVisibility(documentId: string) {
   const document = await prisma.document.findUnique({ where: { id: documentId } });
   if (!document) return;
 
+  const nowVisible = !document.visibleToClient;
+
   await prisma.document.update({
     where: { id: documentId },
-    data: { visibleToClient: !document.visibleToClient },
+    data: { visibleToClient: nowVisible },
   });
+
+  await logActivity(
+    document.clientId,
+    nowVisible
+      ? `Made "${document.filename}" visible to client.`
+      : `Made "${document.filename}" admin-only.`
+  );
 
   revalidatePath(`/admin/clients/${document.clientId}`);
   revalidatePath(`/admin/clients/${document.clientId}/documents`);

@@ -11,17 +11,19 @@ datasource db {
 }
 
 model Client {
-  id             String     @id @default(cuid())
-  token          String     @unique
+  id             String        @id @default(cuid())
+  token          String        @unique
   name           String
   email          String?
   phone          String?
-  currentStage   Int        @default(0)
+  currentStage   Int           @default(0)
   note           String?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  stageUpdatedAt DateTime   @default(now())
+  appointmentAt  DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  stageUpdatedAt DateTime      @default(now())
   documents      Document[]
+  activityLog    ActivityLog[]
 }
 
 model Document {
@@ -34,7 +36,18 @@ model Document {
   contentType     String?
   size            Int
   visibleToClient Boolean  @default(false)
+  uploadedBy      String   @default("admin")
   createdAt       DateTime @default(now())
+
+  @@index([clientId])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  message   String
+  createdAt DateTime @default(now())
 
   @@index([clientId])
 }

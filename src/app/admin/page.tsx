@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
-import { stageColor, avatarColor, initials } from "@/lib/stageColors";
-import { timeAgo } from "@/lib/format";
-import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import { ClientList } from "@/components/ClientList";
 import { deleteClient, logout } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -49,58 +47,7 @@ export default async function AdminPage() {
           <StatCard label="Moved in" value={movedIn} accent="text-green-900" />
         </div>
 
-        {clients.length === 0 ? (
-          <div className="bg-white rounded-xl border border-neutral-200 py-16 text-center">
-            <p className="text-sm text-neutral-500">No clients yet. Add your first client to get started.</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl border border-neutral-200 divide-y divide-neutral-100 overflow-hidden shadow-sm">
-            {clients.map((client) => {
-              const stage = STAGES[client.currentStage];
-              const color = stageColor(client.currentStage);
-              const progress = ((client.currentStage + 1) / STAGES.length) * 100;
-              return (
-                <div
-                  key={client.id}
-                  className="flex items-center gap-4 px-5 py-4 hover:bg-neutral-50 transition"
-                >
-                  <div
-                    className={`flex items-center justify-center w-11 h-11 rounded-full ${avatarColor(client.name)} text-white text-sm font-semibold shrink-0`}
-                  >
-                    {initials(client.name)}
-                  </div>
-                  <Link href={`/admin/clients/${client.id}`} className="flex-1 min-w-0">
-                    <p className="font-medium text-neutral-900 truncate">{client.name}</p>
-                    <p className="text-sm text-neutral-500 truncate">
-                      {client.email || client.phone || "No contact info"}
-                    </p>
-                  </Link>
-                  <Link href={`/admin/clients/${client.id}`} className="w-40 shrink-0 hidden sm:block">
-                    <span
-                      className={`inline-block text-xs font-semibold rounded-full px-2.5 py-1 mb-1.5 ${color.badgeBg} ${color.badgeText}`}
-                    >
-                      {stage.title}
-                    </span>
-                    <div className="h-1.5 rounded-full bg-neutral-100 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${color.solidBg}`}
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                  </Link>
-                  <p className="text-xs text-neutral-400 shrink-0 hidden md:block w-16 text-right">
-                    {timeAgo(client.updatedAt)}
-                  </p>
-                  <ConfirmSubmitButton
-                    action={deleteClient.bind(null, client.id)}
-                    confirmMessage={`Remove ${client.name}? This can't be undone.`}
-                    label="Remove"
-                  />
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <ClientList clients={clients} deleteAction={deleteClient} />
       </main>
     </div>
   );

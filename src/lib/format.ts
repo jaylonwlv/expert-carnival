@@ -30,3 +30,26 @@ export function fileKindLabel(contentType: string | null, filename: string): str
   const ext = filename.split(".").pop()?.toUpperCase() ?? "";
   return SHORT_EXT[ext] ?? (ext ? ext.slice(0, 4) : "FILE");
 }
+
+// Appointment date/times are stored and displayed as plain wall-clock values
+// (no timezone math) — whatever Paulin types is exactly what the client sees,
+// on the assumption everyone involved is in the same local time.
+
+export function parseAppointmentInput(value: string): Date {
+  return new Date(`${value}:00.000Z`);
+}
+
+export function toAppointmentInputValue(date: Date): string {
+  return date.toISOString().slice(0, 16);
+}
+
+export function formatAppointment(date: Date): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}

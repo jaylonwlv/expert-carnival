@@ -12,6 +12,7 @@ type GalleryDocument = {
   size: number;
   contentType: string | null;
   visibleToClient: boolean;
+  uploadedBy: string;
   createdAt: Date;
 };
 
@@ -66,6 +67,11 @@ export function DocumentGallery({
               >
                 {doc.filename}
               </a>
+              {doc.uploadedBy === "client" && (
+                <span className="text-xs font-medium text-blue-700 bg-blue-50 rounded-full px-2 py-0.5 shrink-0">
+                  From client
+                </span>
+              )}
               <span className="text-xs text-neutral-400 shrink-0">{formatFileSize(doc.size)}</span>
               <VisibilityBadge
                 visible={doc.visibleToClient}
@@ -114,6 +120,11 @@ export function DocumentGallery({
                 <p className="text-sm font-medium text-neutral-900 truncate" title={doc.filename}>
                   {doc.filename}
                 </p>
+                {doc.uploadedBy === "client" && (
+                  <span className="text-xs font-medium text-blue-700 bg-blue-50 rounded-full px-2 py-0.5 w-fit">
+                    From client
+                  </span>
+                )}
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs text-neutral-400">{formatFileSize(doc.size)}</span>
                   <VisibilityBadge
