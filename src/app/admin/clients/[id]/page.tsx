@@ -11,9 +11,11 @@ import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { ActionForm } from "@/components/ActionForm";
 import { FileDropzone } from "@/components/FileDropzone";
 import { ChecklistAccordion, type ChecklistStageData } from "@/components/ChecklistAccordion";
+import { PCSBadge } from "@/components/PCSBadge";
 import {
   deleteClient,
   setChecklistItemStatus,
+  toggleClientPCS,
   updateAppointment,
   updateNeighborhoods,
   updateNote,
@@ -39,7 +41,7 @@ export default async function ClientDetailPage({
     notFound();
   }
 
-  await ensureChecklistItems(client.id);
+  await ensureChecklistItems(client.id, client.isPCS);
   const checklistItems = await prisma.checklistItem.findMany({
     where: { clientId: client.id },
     orderBy: [{ stageIndex: "asc" }, { sortOrder: "asc" }],
@@ -56,6 +58,7 @@ export default async function ClientDetailPage({
   const uploadDocumentForClient = uploadDocument.bind(null, client.id);
   const updateAppointmentForClient = updateAppointment.bind(null, client.id);
   const updateNeighborhoodsForClient = updateNeighborhoods.bind(null, client.id);
+  const toggleClientPCSForClient = toggleClientPCS.bind(null, client.id);
 
   const currentStageColor = stageColor(client.currentStage);
 
@@ -106,8 +109,16 @@ export default async function ClientDetailPage({
             {initials(client.name)}
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-neutral-900">{client.name}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-semibold text-neutral-900">{client.name}</h1>
+              {client.isPCS && <PCSBadge />}
+            </div>
             <p className="text-sm text-neutral-500">{client.email || "No email"} · {client.phone || "No phone"}</p>
+            <form action={toggleClientPCSForClient}>
+              <button type="submit" className="text-xs text-neutral-400 hover:text-neutral-600 hover:underline">
+                {client.isPCS ? "Remove PCS tag" : "Mark as PCS relocation"}
+              </button>
+            </form>
           </div>
           <span
             className={`ml-auto text-xs font-semibold rounded-full px-3 py-1.5 ${currentStageColor.badgeBg} ${currentStageColor.badgeText}`}

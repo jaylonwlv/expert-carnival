@@ -24,6 +24,7 @@ export async function createClient(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
+  const isPCS = formData.get("isPCS") === "on";
 
   if (!name) {
     throw new Error("Name is required");
@@ -35,10 +36,11 @@ export async function createClient(formData: FormData) {
       email: email || null,
       phone: phone || null,
       token: nanoid(12),
+      isPCS,
     },
   });
 
-  await logActivity(client.id, "Client added.");
+  await logActivity(client.id, isPCS ? "Client added (PCS relocation)." : "Client added.");
 
   revalidatePath("/admin");
   redirect(`/admin/clients/${client.id}`);
@@ -219,4 +221,24 @@ export async function updateNeighborhoods(clientId: string, formData: FormData) 
 
   revalidatePath(`/admin/clients/${clientId}`);
   revalidatePath(`/track`);
+}
+
+export async function toggleClientPCS(clientId: string) {
+  const client = await prisma.client.findUnique({ where: { id: clientId } });
+  if (!client) return;
+
+  const nowPCS = !client.isPCS;
+
+  await prisma.client.update({
+    where: { id: clientId },
+    data: { isPCS: nowPCS },
+  });
+
+  await logActivity(
+    clientId,
+    nowPCS ? "Marked as a PCS/military relocation." : "Unmarked as a PCS/military relocation."
+  );
+
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath("/admin");
 }

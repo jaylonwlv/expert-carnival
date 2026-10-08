@@ -20,6 +20,7 @@ model Client {
   note                   String?
   appointmentAt          DateTime?
   preferredNeighborhoods String[]        @default([])
+  isPCS                  Boolean         @default(false)
   createdAt              DateTime        @default(now())
   updatedAt              DateTime        @updatedAt
   stageUpdatedAt         DateTime        @default(now())

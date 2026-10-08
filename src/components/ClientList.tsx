@@ -6,6 +6,7 @@ import { STAGES } from "@/lib/stages";
 import { stageColor, avatarColor, initials } from "@/lib/stageColors";
 import { timeAgo } from "@/lib/format";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import { PCSBadge } from "@/components/PCSBadge";
 
 type ClientRow = {
   id: string;
@@ -13,6 +14,7 @@ type ClientRow = {
   email: string | null;
   phone: string | null;
   currentStage: number;
+  isPCS: boolean;
   updatedAt: Date;
 };
 
@@ -99,7 +101,10 @@ export function ClientList({
                   {initials(client.name)}
                 </div>
                 <Link href={`/admin/clients/${client.id}`} className="flex-1 min-w-0">
-                  <p className="font-medium text-neutral-900 truncate">{client.name}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-neutral-900 truncate">{client.name}</p>
+                    {client.isPCS && <PCSBadge />}
+                  </div>
                   <p className="text-sm text-neutral-500 truncate">
                     {client.email || client.phone || "No contact info"}
                   </p>

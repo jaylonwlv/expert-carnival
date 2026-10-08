@@ -58,6 +58,10 @@ export default function NewClientPage() {
               className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900"
             />
           </div>
+          <label className="flex items-center gap-2 text-sm text-neutral-700">
+            <input type="checkbox" name="isPCS" className="rounded" />
+            PCS / military relocation (VA loan checklist)
+          </label>
           <button
             type="submit"
             className="w-full rounded-md bg-neutral-900 text-white text-sm font-medium py-2.5 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
