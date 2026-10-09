@@ -12,6 +12,7 @@ import { ActionForm } from "@/components/ActionForm";
 import { FileDropzone } from "@/components/FileDropzone";
 import { ChecklistAccordion, type ChecklistStageData } from "@/components/ChecklistAccordion";
 import { PCSBadge } from "@/components/PCSBadge";
+import { StageSwitcher } from "@/components/StageSwitcher";
 import {
   deleteClient,
   setChecklistItemStatus,
@@ -134,36 +135,9 @@ export default async function ClientDetailPage({
           <CopyLinkButton url={trackerUrl} />
         </section>
 
-        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-neutral-900">Pipeline</h2>
-          <ActionForm action={updateStageForClient} toastMessage="Stage updated.">
-            <div className="flex flex-wrap gap-1.5">
-              {STAGES.map((stage, index) => {
-                const color = stageColor(index);
-                const isDone = index < client.currentStage;
-                const isCurrent = index === client.currentStage;
-                return (
-                  <button
-                    key={stage.title}
-                    type="submit"
-                    name="currentStage"
-                    value={index}
-                    title={stage.summary}
-                    className={`text-xs font-medium px-3 py-2 rounded-lg transition ${
-                      isDone || isCurrent
-                        ? `${color.solidBg} ${color.solidText} shadow-sm`
-                        : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
-                    } ${isCurrent ? `ring-2 ring-offset-2 ${color.ring} shadow-md` : ""}`}
-                  >
-                    {index + 1}. {stage.title}
-                  </button>
-                );
-              })}
-            </div>
-          </ActionForm>
-          <p className="text-sm text-neutral-500 pt-2 border-t border-neutral-100">
-            {STAGES[client.currentStage].summary}
-          </p>
+        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
+          <h2 className="text-sm font-semibold text-neutral-900 mb-4">Pipeline</h2>
+          <StageSwitcher stages={STAGES} currentStage={client.currentStage} updateStageAction={updateStageForClient} />
         </section>
 
         <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
