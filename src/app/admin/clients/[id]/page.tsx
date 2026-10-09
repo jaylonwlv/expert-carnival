@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
@@ -7,6 +6,7 @@ import { stageColor, avatarColor, initials } from "@/lib/stageColors";
 import { timeAgo, formatAppointment, toAppointmentInputValue } from "@/lib/format";
 import { ensureChecklistItems, STAGE_CHECKLISTS, type ChecklistStatus } from "@/lib/checklist";
 import { NEIGHBORHOOD_GROUPS } from "@/lib/neighborhoods";
+import { buildTrackerUrl } from "@/lib/trackerUrl";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { ActionForm } from "@/components/ActionForm";
 import { FileDropzone } from "@/components/FileDropzone";
@@ -47,10 +47,7 @@ export default async function ClientDetailPage({
     orderBy: [{ stageIndex: "asc" }, { sortOrder: "asc" }],
   });
 
-  const headerList = await headers();
-  const host = headerList.get("host");
-  const protocol = host?.startsWith("localhost") || host?.startsWith("127.0.0.1") ? "http" : "https";
-  const trackerUrl = `${protocol}://${host}/track/${client.token}`;
+  const trackerUrl = await buildTrackerUrl(client.token);
 
   const updateStageForClient = updateStage.bind(null, client.id);
   const updateNoteForClient = updateNote.bind(null, client.id);

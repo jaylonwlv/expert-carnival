@@ -23,17 +23,24 @@ export async function sendEmail({
     return;
   }
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ from, to, subject, html }),
-  });
+  // A failed send should never take down the mutation it's a side effect of
+  // (the stage/checklist change already committed by the time this runs) --
+  // swallow both network-level failures and non-OK responses here.
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ from, to, subject, html }),
+    });
 
-  if (!res.ok) {
-    const body = await res.text();
-    console.error(`[email] Failed to send "${subject}" to ${to}: ${res.status} ${body}`);
+    if (!res.ok) {
+      const body = await res.text();
+      console.error(`[email] Failed to send "${subject}" to ${to}: ${res.status} ${body}`);
+    }
+  } catch (err) {
+    console.error(`[email] Failed to send "${subject}" to ${to}:`, err);
   }
 }

@@ -57,6 +57,8 @@ export async function updateStage(clientId: string, formData: FormData) {
 
   const stageTitle = STAGES[stageIndex].title;
 
+  const previous = await prisma.client.findUnique({ where: { id: clientId } });
+
   const client = await prisma.client.update({
     where: { id: clientId },
     data: { currentStage: stageIndex, stageUpdatedAt: new Date() },
@@ -65,7 +67,7 @@ export async function updateStage(clientId: string, formData: FormData) {
   await logActivity(clientId, `Stage changed to "${stageTitle}".`);
 
   const trigger = STAGE_EMAIL_TRIGGERS[stageTitle];
-  if (trigger && client.email) {
+  if (trigger && client.email && previous?.currentStage !== stageIndex) {
     const trackerUrl = await buildTrackerUrl(client.token);
     await sendEmail({
       to: client.email,
@@ -77,6 +79,7 @@ export async function updateStage(clientId: string, formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath("/track");
 }
 
 export async function updateNote(clientId: string, formData: FormData) {
@@ -200,6 +203,8 @@ export async function setChecklistItemStatus(itemId: string, status: ChecklistSt
     throw new Error("Invalid checklist status");
   }
 
+  const previous = await prisma.checklistItem.findUnique({ where: { id: itemId } });
+
   const item = await prisma.checklistItem.update({
     where: { id: itemId },
     data: { status, statusAt: new Date() },
@@ -215,7 +220,7 @@ export async function setChecklistItemStatus(itemId: string, status: ChecklistSt
 
   await logActivity(item.clientId, message);
 
-  if (status === "done") {
+  if (status === "done" && previous?.status !== "done") {
     const trigger = CHECKLIST_EMAIL_TRIGGERS[item.key];
     if (trigger && item.client.email) {
       const trackerUrl = await buildTrackerUrl(item.client.token);
