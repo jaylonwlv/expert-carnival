@@ -12,7 +12,10 @@ import { createDocumentsForClient, MAX_FILES_PER_UPLOAD } from "@/lib/documents"
 import { logActivity } from "@/lib/activity";
 import { parseAppointmentInput, formatAppointment } from "@/lib/format";
 import type { ChecklistStatus } from "@/lib/checklist";
-import { NEIGHBORHOOD_GROUPS } from "@/lib/neighborhoods";
+import { allNeighborhoodNames } from "@/lib/neighborhoods";
+import { sendEmail } from "@/lib/email";
+import { CHECKLIST_EMAIL_TRIGGERS, STAGE_EMAIL_TRIGGERS } from "@/lib/emailTriggers";
+import { buildTrackerUrl } from "@/lib/trackerUrl";
 
 export async function logout() {
   const cookieStore = await cookies();
@@ -52,12 +55,25 @@ export async function updateStage(clientId: string, formData: FormData) {
     throw new Error("Invalid stage");
   }
 
-  await prisma.client.update({
+  const stageTitle = STAGES[stageIndex].title;
+
+  const client = await prisma.client.update({
     where: { id: clientId },
     data: { currentStage: stageIndex, stageUpdatedAt: new Date() },
   });
 
-  await logActivity(clientId, `Stage changed to "${STAGES[stageIndex].title}".`);
+  await logActivity(clientId, `Stage changed to "${stageTitle}".`);
+
+  const trigger = STAGE_EMAIL_TRIGGERS[stageTitle];
+  if (trigger && client.email) {
+    const trackerUrl = await buildTrackerUrl(client.token);
+    await sendEmail({
+      to: client.email,
+      subject: trigger.subject,
+      html: trigger.body(client.name.split(" ")[0], trackerUrl),
+    });
+    await logActivity(clientId, `Emailed ${client.name}: "${trigger.subject}".`);
+  }
 
   revalidatePath("/admin");
   revalidatePath(`/admin/clients/${clientId}`);
@@ -187,6 +203,7 @@ export async function setChecklistItemStatus(itemId: string, status: ChecklistSt
   const item = await prisma.checklistItem.update({
     where: { id: itemId },
     data: { status, statusAt: new Date() },
+    include: { client: true },
   });
 
   const message =
@@ -198,11 +215,24 @@ export async function setChecklistItemStatus(itemId: string, status: ChecklistSt
 
   await logActivity(item.clientId, message);
 
+  if (status === "done") {
+    const trigger = CHECKLIST_EMAIL_TRIGGERS[item.key];
+    if (trigger && item.client.email) {
+      const trackerUrl = await buildTrackerUrl(item.client.token);
+      await sendEmail({
+        to: item.client.email,
+        subject: trigger.subject,
+        html: trigger.body(item.client.name.split(" ")[0], trackerUrl),
+      });
+      await logActivity(item.clientId, `Emailed ${item.client.name}: "${trigger.subject}".`);
+    }
+  }
+
   revalidatePath(`/admin/clients/${item.clientId}`);
 }
 
 export async function updateNeighborhoods(clientId: string, formData: FormData) {
-  const allOptions = new Set(NEIGHBORHOOD_GROUPS.flatMap((group) => group.options));
+  const allOptions = new Set(allNeighborhoodNames());
   const selected = formData.getAll("neighborhoods").filter(
     (value): value is string => typeof value === "string" && allOptions.has(value)
   );

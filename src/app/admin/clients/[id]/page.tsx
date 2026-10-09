@@ -63,6 +63,7 @@ export default async function ClientDetailPage({
   const currentStageColor = stageColor(client.currentStage);
 
   const NEIGHBORHOODS_STAGE_TITLE = "Home & Area Selection";
+  const TOUR_STAGE_TITLE = "Touring Homes";
 
   const checklistStages: ChecklistStageData[] = STAGES.map((stage, index) => ({
     index,
@@ -70,6 +71,7 @@ export default async function ClientDetailPage({
     summary: stage.summary,
     documentHeavy: STAGE_CHECKLISTS[index].documentHeavy,
     showNeighborhoods: stage.title === NEIGHBORHOODS_STAGE_TITLE,
+    showTourLink: stage.title === TOUR_STAGE_TITLE,
     items: checklistItems
       .filter((item) => item.stageIndex === index)
       .map((item) => ({
@@ -176,6 +178,7 @@ export default async function ClientDetailPage({
             stages={checklistStages}
             currentStageIndex={client.currentStage}
             documentsHref={`/admin/clients/${client.id}/documents`}
+            tourHref={`/admin/clients/${client.id}/tour`}
             onSetStatus={setChecklistItemStatus}
             uploadAction={uploadDocumentForClient}
             neighborhoods={{ groups: NEIGHBORHOOD_GROUPS, selected: client.preferredNeighborhoods }}

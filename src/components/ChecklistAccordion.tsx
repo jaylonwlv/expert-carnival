@@ -2,11 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { timeAgo } from "@/lib/format";
 import { ActionForm } from "@/components/ActionForm";
 import { FileDropzone } from "@/components/FileDropzone";
 import type { ChecklistStatus } from "@/lib/checklist";
 import type { NeighborhoodGroup } from "@/lib/neighborhoods";
+
+// Leaflet touches `window` at import time, which breaks SSR -- load client-only.
+const NeighborhoodMapPicker = dynamic(
+  () => import("@/components/NeighborhoodMapPicker").then((m) => m.NeighborhoodMapPicker),
+  { ssr: false, loading: () => <div className="h-80 rounded-lg bg-neutral-50 animate-pulse" /> }
+);
 
 export type ChecklistStageData = {
   index: number;
@@ -14,6 +21,7 @@ export type ChecklistStageData = {
   summary: string;
   documentHeavy: boolean;
   showNeighborhoods: boolean;
+  showTourLink: boolean;
   items: { id: string; label: string; status: ChecklistStatus; statusAt: Date | null }[];
   documentCount: number;
 };
@@ -22,6 +30,7 @@ export function ChecklistAccordion({
   stages,
   currentStageIndex,
   documentsHref,
+  tourHref,
   onSetStatus,
   uploadAction,
   neighborhoods,
@@ -30,6 +39,7 @@ export function ChecklistAccordion({
   stages: ChecklistStageData[];
   currentStageIndex: number;
   documentsHref: string;
+  tourHref: string;
   onSetStatus: (itemId: string, status: ChecklistStatus) => void;
   uploadAction: (formData: FormData) => Promise<void>;
   neighborhoods: { groups: NeighborhoodGroup[]; selected: string[] };
@@ -111,6 +121,15 @@ export function ChecklistAccordion({
                   ))}
                 </ul>
 
+                {stage.showTourLink && (
+                  <Link
+                    href={tourHref}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-700 hover:text-neutral-900 hover:underline"
+                  >
+                    Plan tour route →
+                  </Link>
+                )}
+
                 {stage.showNeighborhoods && (
                   <ActionForm
                     action={updateNeighborhoodsAction}
@@ -118,30 +137,10 @@ export function ChecklistAccordion({
                     className="pt-3 border-t border-neutral-100 space-y-3"
                   >
                     <p className="text-sm font-semibold text-neutral-700">Preferred neighborhoods</p>
-                    <div className="space-y-3">
-                      {neighborhoods.groups.map((group) => (
-                        <div key={group.group}>
-                          <p className="text-sm font-semibold text-neutral-700 mb-1.5">{group.group}</p>
-                          <div className="flex flex-wrap gap-2">
-                            {group.options.map((option) => (
-                              <label
-                                key={option}
-                                className="flex items-center gap-2 text-sm bg-neutral-50 border border-neutral-200 rounded-full px-3 py-1.5 cursor-pointer hover:bg-neutral-100"
-                              >
-                                <input
-                                  type="checkbox"
-                                  name="neighborhoods"
-                                  value={option}
-                                  defaultChecked={neighborhoods.selected.includes(option)}
-                                  className="rounded"
-                                />
-                                {option}
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <p className="text-sm text-neutral-500">
+                      Click a pin (or a chip below the map) to select. Drag a pin to correct its position.
+                    </p>
+                    <NeighborhoodMapPicker groups={neighborhoods.groups} selected={neighborhoods.selected} />
                     <button
                       type="submit"
                       className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
