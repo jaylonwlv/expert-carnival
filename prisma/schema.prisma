@@ -21,6 +21,8 @@ model Client {
   appointmentAt          DateTime?
   preferredNeighborhoods String[]        @default([])
   isPCS                  Boolean         @default(false)
+  tourStops              Json?
+  tourSavedAt            DateTime?
   createdAt              DateTime        @default(now())
   updatedAt              DateTime        @updatedAt
   stageUpdatedAt         DateTime        @default(now())

@@ -11,6 +11,7 @@ import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { ActionForm } from "@/components/ActionForm";
 import { SubmitButton } from "@/components/SubmitButton";
 import { DocumentUploadForm } from "@/components/DocumentUploadForm";
+import { QuickUploadBar } from "@/components/QuickUploadBar";
 import { ChecklistAccordion, type ChecklistStageData } from "@/components/ChecklistAccordion";
 import { PCSBadge } from "@/components/PCSBadge";
 import { StageSwitcher } from "@/components/StageSwitcher";
@@ -132,6 +133,13 @@ export default async function ClientDetailPage({
             {STAGES[client.currentStage].title}
           </span>
         </div>
+
+        <QuickUploadBar
+          context={{ kind: "admin", clientId: client.id }}
+          documentsHref={`/admin/clients/${client.id}/documents`}
+          stageOptions={STAGES.map((s, index) => ({ index, title: s.title }))}
+          uploadAction={uploadStageDocumentForClient}
+        />
 
         {client.signatureRequests.length > 0 && (
           <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">

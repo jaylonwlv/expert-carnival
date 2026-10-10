@@ -9,13 +9,20 @@ import type { UploadedBlobMeta, UploadAuthContext } from "@/lib/documents";
 export function DocumentUploadForm({
   context,
   onUpload,
+  onUploadWithStage,
+  stageOptions,
   maxFiles = 5,
   showVisibilityToggle = false,
   submitLabel = "Upload document(s)",
   className,
 }: {
   context: UploadAuthContext;
-  onUpload: (blobs: UploadedBlobMeta[], visibleToClient: boolean) => Promise<void>;
+  // Exactly one of these two is used, picked by whether stageOptions is
+  // provided -- kept as two separate props rather than one variable-arity
+  // callback so each call site's existing prop stays untouched.
+  onUpload?: (blobs: UploadedBlobMeta[], visibleToClient: boolean) => Promise<void>;
+  onUploadWithStage?: (stageIndex: number | null, blobs: UploadedBlobMeta[], visibleToClient: boolean) => Promise<void>;
+  stageOptions?: { index: number; title: string }[];
   maxFiles?: number;
   showVisibilityToggle?: boolean;
   submitLabel?: string;
@@ -23,6 +30,7 @@ export function DocumentUploadForm({
 }) {
   const [files, setFiles] = useState<File[]>([]);
   const [visibleToClient, setVisibleToClient] = useState(false);
+  const [stageIndex, setStageIndex] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
   const [toast, setToast] = useState<{ at: number; message: string; variant: "success" | "error" } | null>(null);
 
@@ -52,9 +60,14 @@ export function DocumentUploadForm({
         })
       );
 
-      await onUpload(blobs, visibleToClient);
+      if (stageOptions) {
+        await onUploadWithStage!(stageIndex, blobs, visibleToClient);
+      } else {
+        await onUpload!(blobs, visibleToClient);
+      }
       setFiles([]);
       setVisibleToClient(false);
+      setStageIndex(null);
       setToast({ at: Date.now(), message: "Document(s) uploaded.", variant: "success" });
     } catch (err) {
       setToast({
@@ -70,6 +83,26 @@ export function DocumentUploadForm({
   return (
     <form onSubmit={handleSubmit} className={className}>
       <FileDropzone files={files} onFilesChange={setFiles} maxFiles={maxFiles} />
+      {stageOptions && (
+        <div>
+          <label htmlFor="stageIndex" className="block text-xs font-medium text-stone-500 mb-1">
+            Which stage does this document belong to?
+          </label>
+          <select
+            id="stageIndex"
+            value={stageIndex ?? ""}
+            onChange={(e) => setStageIndex(e.target.value === "" ? null : Number(e.target.value))}
+            className="w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
+          >
+            <option value="">No specific stage</option>
+            {stageOptions.map((stage) => (
+              <option key={stage.index} value={stage.index}>
+                {stage.index + 1}. {stage.title}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       {showVisibilityToggle && (
         <label className="flex items-center gap-2 text-sm text-stone-700">
           <input

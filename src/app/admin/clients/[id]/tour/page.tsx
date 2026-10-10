@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { TourRoutePlannerLoader } from "@/components/TourRoutePlannerLoader";
+import { saveTourRoute, type TourStop } from "../../../actions";
 
 export default async function ClientTourPage({
   params,
@@ -14,6 +15,9 @@ export default async function ClientTourPage({
   if (!client) {
     notFound();
   }
+
+  const saveRouteForClient = saveTourRoute.bind(null, client.id);
+  const initialStops = client.tourStops as TourStop[] | null;
 
   return (
     <div className="min-h-screen bg-stone-50">
@@ -44,7 +48,11 @@ export default async function ClientTourPage({
         </div>
 
         <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
-          <TourRoutePlannerLoader />
+          <TourRoutePlannerLoader
+            initialStops={initialStops ?? undefined}
+            savedAt={client.tourSavedAt}
+            saveRouteAction={saveRouteForClient}
+          />
         </div>
       </main>
     </div>

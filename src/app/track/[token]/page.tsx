@@ -8,8 +8,10 @@ import { formatFileSize, fileKindLabel, formatAppointment } from "@/lib/format";
 import { Stepper } from "@/components/Stepper";
 import { FileTypeIcon } from "@/components/FileTypeIcon";
 import { DocumentUploadForm } from "@/components/DocumentUploadForm";
+import { TourRouteMapLoader } from "@/components/TourRouteMapLoader";
 import { getSignedDownloadUrl } from "@/lib/documents";
 import { createClientDocumentRecords } from "../actions";
+import type { TourStop } from "../../admin/actions";
 
 const COMPANY_NAME = process.env.NEXT_PUBLIC_COMPANY_NAME ?? "Relocation Engine";
 const AGENT_NAME = process.env.NEXT_PUBLIC_AGENT_NAME ?? "your agent";
@@ -41,6 +43,7 @@ export default async function TrackPage({
   const color = stageColor(client.currentStage);
   const firstName = client.name.split(" ")[0];
   const uploadForClient = createClientDocumentRecords.bind(null, token);
+  const tourStops = client.tourStops as TourStop[] | null;
 
   const documents = await Promise.all(
     client.documents.map(async (doc) => ({
@@ -136,6 +139,15 @@ export default async function TrackPage({
         <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-5">
           <Stepper stages={STAGES} currentIndex={client.currentStage} />
         </section>
+
+        {tourStops && tourStops.length >= 2 && (
+          <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-5 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-stone-400">
+              Your home tour route
+            </p>
+            <TourRouteMapLoader stops={tourStops} />
+          </section>
+        )}
 
         <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-5 space-y-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-stone-400">

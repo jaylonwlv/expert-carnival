@@ -117,6 +117,25 @@ export async function updateAppointment(clientId: string, formData: FormData) {
   revalidatePath(`/track`);
 }
 
+export type TourStop = { address: string; lat: number; lng: number };
+
+export async function saveTourRoute(clientId: string, stops: TourStop[]) {
+  if (stops.length < 2) {
+    throw new Error("Need at least 2 stops to save a route");
+  }
+
+  const client = await prisma.client.update({
+    where: { id: clientId },
+    data: { tourStops: stops, tourSavedAt: new Date() },
+  });
+
+  await logActivity(clientId, `Shared a ${stops.length}-stop tour route with the client.`);
+
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath(`/admin/clients/${clientId}/tour`);
+  revalidatePath(`/track/${client.token}`);
+}
+
 export async function deleteClient(clientId: string) {
   await prisma.client.delete({ where: { id: clientId } });
   revalidatePath("/admin");
