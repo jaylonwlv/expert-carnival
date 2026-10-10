@@ -200,11 +200,20 @@ export async function setDocumentSigner(documentId: string, signerId: string | n
   const document = await prisma.document.findUnique({ where: { id: documentId } });
   if (!document) return;
 
+  let signerName: string | null = null;
   if (signerId !== null) {
-    await assertSignerBelongsToClient(signerId, document.clientId);
+    const signer = await assertSignerBelongsToClient(signerId, document.clientId);
+    signerName = signer.name;
   }
 
   await prisma.document.update({ where: { id: documentId }, data: { signerId } });
+
+  await logActivity(
+    document.clientId,
+    signerName
+      ? `Tagged "${document.filename}" as ${signerName}'s document.`
+      : `Marked "${document.filename}" as shared (no specific signer).`
+  );
 
   revalidatePath(`/admin/clients/${document.clientId}`);
   revalidatePath(`/admin/clients/${document.clientId}/documents`);
@@ -218,6 +227,13 @@ export async function addSigner(clientId: string, formData: FormData) {
   }
   if (name.length > 100) {
     throw new Error("Name is too long");
+  }
+
+  const existing = await prisma.signer.findFirst({
+    where: { clientId, name: { equals: name, mode: "insensitive" } },
+  });
+  if (existing) {
+    throw new Error(`"${name}" is already a signer on this file`);
   }
 
   await prisma.signer.create({ data: { clientId, name } });

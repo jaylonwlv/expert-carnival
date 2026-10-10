@@ -47,6 +47,24 @@ export function DocumentUploadForm({
 }) {
   const stageSelectId = useId();
   const signerSelectId = useId();
+
+  // The stage/signer pickers below render whenever stageOptions/signerOptions
+  // are provided -- if the matching callback that would actually carry the
+  // chosen value wasn't also provided, handleSubmit's priority dispatch
+  // would silently fall through to a callback that drops it. Failing loudly
+  // here, rather than quietly losing the picked value, catches that at the
+  // call site instead of in production.
+  if (stageOptions && !onUploadWithStage && !onUploadWithStageAndSigner) {
+    throw new Error(
+      "DocumentUploadForm: stageOptions was provided, but neither onUploadWithStage nor onUploadWithStageAndSigner was -- the chosen stage would be silently dropped."
+    );
+  }
+  if (signerOptions && signerOptions.length > 0 && !onUploadWithSigner && !onUploadWithStageAndSigner) {
+    throw new Error(
+      "DocumentUploadForm: signerOptions was provided, but neither onUploadWithSigner nor onUploadWithStageAndSigner was -- the chosen signer would be silently dropped."
+    );
+  }
+
   const [files, setFiles] = useState<File[]>([]);
   const [visibleToClient, setVisibleToClient] = useState(false);
   const [stageIndex, setStageIndex] = useState<number | null>(null);

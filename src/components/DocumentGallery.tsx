@@ -5,6 +5,7 @@ import Link from "next/link";
 import { formatFileSize, fileKindLabel, isImageFile } from "@/lib/format";
 import { FileTypeIcon } from "@/components/FileTypeIcon";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import { SaveToast } from "@/components/ActionForm";
 import { STAGES } from "@/lib/stages";
 
 type GalleryDocument = {
@@ -71,23 +72,58 @@ function SignerSelect({
 }: {
   doc: GalleryDocument;
   signerOptions: { id: string; name: string }[];
-  setSignerAction: (documentId: string, signerId: string | null) => void;
+  setSignerAction: (documentId: string, signerId: string | null) => Promise<void>;
 }) {
+  // Optimistic local copy, same pattern as ChecklistAccordion's localStages:
+  // kept in sync with the server-provided doc.signer below, but not
+  // clobbered by that sync while a change from this select is in flight.
+  const [prevSignerId, setPrevSignerId] = useState(doc.signer?.id ?? "");
+  const [value, setValue] = useState(doc.signer?.id ?? "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<{ at: number; message: string } | null>(null);
+  if (!saving && (doc.signer?.id ?? "") !== prevSignerId) {
+    setPrevSignerId(doc.signer?.id ?? "");
+    setValue(doc.signer?.id ?? "");
+  }
+
   if (signerOptions.length === 0) return null;
 
+  async function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const next = e.target.value;
+    const previous = value;
+    setValue(next);
+    setSaving(true);
+    setError(null);
+    try {
+      await setSignerAction(doc.id, next === "" ? null : next);
+    } catch (err) {
+      setValue(previous);
+      setError({
+        at: Date.now(),
+        message: err instanceof Error ? err.message : "Could not update signer. Please try again.",
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
-    <select
-      value={doc.signer?.id ?? ""}
-      onChange={(e) => setSignerAction(doc.id, e.target.value === "" ? null : e.target.value)}
-      className="text-xs font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 rounded-full pl-2 pr-1 py-0.5 shrink-0 border-none focus:outline-none focus:ring-2 focus:ring-amber-600"
-    >
-      <option value="">Shared</option>
-      {signerOptions.map((signer) => (
-        <option key={signer.id} value={signer.id}>
-          {signer.name}
-        </option>
-      ))}
-    </select>
+    <>
+      <select
+        value={value}
+        onChange={handleChange}
+        disabled={saving}
+        className="text-xs font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 rounded-full pl-2 pr-1 py-0.5 shrink-0 border-none focus:outline-none focus:ring-2 focus:ring-amber-600 disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        <option value="">Shared</option>
+        {signerOptions.map((signer) => (
+          <option key={signer.id} value={signer.id}>
+            {signer.name}
+          </option>
+        ))}
+      </select>
+      {error && <SaveToast key={error.at} message={error.message} variant="error" />}
+    </>
   );
 }
 
@@ -104,7 +140,7 @@ export function DocumentGallery({
   signerOptions: { id: string; name: string }[];
   deleteAction: (documentId: string) => void;
   toggleAction: (documentId: string) => void;
-  setSignerAction: (documentId: string, signerId: string | null) => void;
+  setSignerAction: (documentId: string, signerId: string | null) => Promise<void>;
 }) {
   const [view, setView] = useState<ViewMode>("medium");
 

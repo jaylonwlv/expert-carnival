@@ -10,6 +10,7 @@ import { buildTrackerUrl } from "@/lib/trackerUrl";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { ActionForm } from "@/components/ActionForm";
 import { SubmitButton } from "@/components/SubmitButton";
+import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
 import { DocumentUploadForm } from "@/components/DocumentUploadForm";
 import { QuickUploadBar } from "@/components/QuickUploadBar";
 import { ChecklistAccordion, type ChecklistStageData } from "@/components/ChecklistAccordion";
@@ -162,15 +163,13 @@ export default async function ClientDetailPage({
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-800 bg-stone-100 rounded-full pl-3 pr-1.5 py-1"
                 >
                   {signer.name}
-                  <form action={removeSigner.bind(null, signer.id)}>
-                    <button
-                      type="submit"
-                      aria-label={`Remove ${signer.name}`}
-                      className="w-5 h-5 flex items-center justify-center rounded-full text-stone-400 hover:text-red-600 hover:bg-white"
-                    >
-                      ✕
-                    </button>
-                  </form>
+                  <ConfirmSubmitButton
+                    action={removeSigner.bind(null, signer.id)}
+                    confirmMessage={`Remove ${signer.name} as a signer? Documents already tagged to them will show as "Shared" instead.`}
+                    label="✕"
+                    ariaLabel={`Remove ${signer.name}`}
+                    className="w-5 h-5 flex items-center justify-center rounded-full text-stone-400 hover:text-red-600 hover:bg-white"
+                  />
                 </li>
               ))}
             </ul>
