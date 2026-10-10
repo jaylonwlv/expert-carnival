@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 // `ssr: false` requires this to live inside a Client Component.
 const TourRoutePlanner = dynamic(
   () => import("@/components/TourRoutePlanner").then((m) => m.TourRoutePlanner),
-  { ssr: false, loading: () => <div className="h-40 rounded-lg bg-neutral-50 animate-pulse" /> }
+  { ssr: false, loading: () => <div className="h-40 rounded-lg bg-stone-50 animate-pulse" /> }
 );
 
 export function TourRoutePlannerLoader() {

@@ -103,8 +103,8 @@ export function PdfFieldEditor({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 bg-neutral-50 border border-neutral-200 rounded-lg p-3 flex-wrap">
-        <p className="text-sm font-medium text-neutral-700 mr-1">Add field:</p>
+      <div className="flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-lg p-3 flex-wrap">
+        <p className="text-sm font-medium text-stone-700 mr-1">Add field:</p>
         {FIELD_TYPES.map((config) => (
           <button
             key={config.type}
@@ -112,15 +112,15 @@ export function PdfFieldEditor({
             onClick={() => setArmedType(armedType === config.type ? null : config.type)}
             className={`text-sm font-medium px-3 py-1.5 rounded-md border transition ${
               armedType === config.type
-                ? "bg-neutral-900 text-white border-neutral-900"
-                : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+                ? "bg-stone-900 text-white border-stone-900"
+                : "bg-white text-stone-700 border-stone-300 hover:bg-stone-100"
             }`}
           >
             {config.label}
           </button>
         ))}
         {armedType && (
-          <p className="text-sm text-neutral-500">Click anywhere on the document to place it.</p>
+          <p className="text-sm text-stone-500">Click anywhere on the document to place it.</p>
         )}
       </div>
 
@@ -165,13 +165,13 @@ export function PdfFieldEditor({
       />
 
       {error && <p className="text-sm text-red-600">{error}</p>}
-      <div className="flex items-center justify-between pt-3 border-t border-neutral-100">
-        <p className="text-sm text-neutral-500">{fields.length} field{fields.length === 1 ? "" : "s"} placed</p>
+      <div className="flex items-center justify-between pt-3 border-t border-stone-100">
+        <p className="text-sm text-stone-500">{fields.length} field{fields.length === 1 ? "" : "s"} placed</p>
         <button
           type="button"
           onClick={handleSend}
           disabled={fields.length === 0 || sending}
-          className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {sending ? "Sending…" : "Send for signature"}
         </button>

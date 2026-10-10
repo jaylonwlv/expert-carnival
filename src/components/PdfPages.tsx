@@ -92,7 +92,7 @@ export function PdfPages({
   }, []);
 
   if (error) return <p className="text-sm text-red-600">{error}</p>;
-  if (!pdf) return <div className="h-96 rounded-lg bg-neutral-50 animate-pulse" />;
+  if (!pdf) return <div className="h-96 rounded-lg bg-stone-50 animate-pulse" />;
 
   return (
     <div className="space-y-4">
@@ -101,7 +101,7 @@ export function PdfPages({
         return (
           <div
             key={pageIndex}
-            className="relative mx-auto border border-neutral-300 shadow-sm bg-white"
+            className="relative mx-auto border border-stone-300 shadow-sm bg-white"
             style={size ? { width: size.width, height: size.height } : { height: 400 }}
             onClick={(e) => {
               if (!onPageClick || !size) return;

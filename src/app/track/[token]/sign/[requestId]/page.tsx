@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -30,10 +31,11 @@ export default async function SignPage({
   const onSubmit = submitSignature.bind(null, requestId, token);
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <header className="bg-neutral-900">
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          <Link href={`/track/${token}`} className="text-sm font-medium text-white/70 hover:text-white">
+    <div className="min-h-screen bg-[#faf8f4]">
+      <header className="bg-white border-b border-stone-200">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Image src="/logo.png" alt="Relocation Engine LLC" width={680} height={546} className="h-11 w-auto" priority />
+          <Link href={`/track/${token}`} className="text-sm font-medium text-stone-500 hover:text-stone-800 transition">
             ← Back
           </Link>
         </div>
@@ -41,16 +43,16 @@ export default async function SignPage({
 
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-4">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900">{request.document.filename}</h1>
-          <p className="text-sm text-neutral-500">Review the document and fill in every highlighted field.</p>
+          <h1 className="text-lg font-semibold text-stone-900">{request.document.filename}</h1>
+          <p className="text-sm text-stone-500">Review the document and fill in every highlighted field.</p>
         </div>
 
         {request.status === "signed" ? (
-          <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-2">
+          <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-2">
             <p className="text-sm font-medium text-emerald-700">
               You signed this document on {request.signedAt?.toLocaleString()}.
             </p>
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-neutral-700 hover:underline">
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-stone-700 hover:underline">
               View the document
             </a>
           </div>

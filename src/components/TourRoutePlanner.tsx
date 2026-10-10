@@ -106,7 +106,7 @@ export function TourRoutePlanner() {
       <div className="space-y-2">
         {stops.map((stop, i) => (
           <div key={stop.id} className="flex items-start gap-2">
-            <span className="shrink-0 w-6 h-9 flex items-center justify-center text-sm text-neutral-400">
+            <span className="shrink-0 w-6 h-9 flex items-center justify-center text-sm text-stone-400">
               {i + 1}
             </span>
             <div className="flex-1">
@@ -115,15 +115,15 @@ export function TourRoutePlanner() {
                 value={stop.address}
                 onChange={(e) => updateAddress(stop.id, e.target.value)}
                 placeholder="e.g. 123 Desert Vista Dr, Summerlin"
-                className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
               />
               {stop.status === "error" && <p className="text-sm text-red-600 mt-1">{stop.error}</p>}
-              {stop.status === "loading" && <p className="text-sm text-neutral-400 mt-1">Locating…</p>}
+              {stop.status === "loading" && <p className="text-sm text-stone-400 mt-1">Locating…</p>}
             </div>
             <button
               type="button"
               onClick={() => removeStop(stop.id)}
-              className="shrink-0 w-9 h-9 flex items-center justify-center text-neutral-400 hover:text-red-600"
+              className="shrink-0 w-9 h-9 flex items-center justify-center text-stone-400 hover:text-red-600"
               aria-label="Remove stop"
             >
               ✕
@@ -136,7 +136,7 @@ export function TourRoutePlanner() {
         <button
           type="button"
           onClick={addStop}
-          className="text-sm font-medium text-neutral-700 hover:underline"
+          className="text-sm font-medium text-stone-700 hover:underline"
         >
           + Add stop
         </button>
@@ -144,15 +144,15 @@ export function TourRoutePlanner() {
           type="button"
           onClick={planRoute}
           disabled={planning || stops.filter((s) => s.address.trim() !== "").length < 2}
-          className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {planning ? "Planning…" : "Plan route"}
         </button>
       </div>
 
       {orderedStops.length >= 2 && (
-        <div className="space-y-3 pt-3 border-t border-neutral-100">
-          <div className="rounded-lg overflow-hidden border border-neutral-200" style={{ height: 320 }}>
+        <div className="space-y-3 pt-3 border-t border-stone-100">
+          <div className="rounded-lg overflow-hidden border border-stone-200" style={{ height: 320 }}>
             <MapContainer
               bounds={orderedStops.map((s) => [s.point.lat, s.point.lng])}
               boundsOptions={{ padding: [30, 30] }}
@@ -170,13 +170,13 @@ export function TourRoutePlanner() {
             </MapContainer>
           </div>
 
-          <ol className="text-sm text-neutral-700 space-y-1 list-decimal list-inside">
+          <ol className="text-sm text-stone-700 space-y-1 list-decimal list-inside">
             {orderedStops.map((s) => (
               <li key={s.id}>{s.address}</li>
             ))}
           </ol>
 
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-stone-500">
             Stop order is picked by straight-line distance, not real roads or traffic -- it gets you a sensible
             plan, but Google Maps below will handle the actual turn-by-turn driving directions.
           </p>
@@ -185,7 +185,7 @@ export function TourRoutePlanner() {
             href={googleMapsRouteUrl(orderedStops.map((s) => s.address))}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
+            className="inline-flex items-center gap-1.5 rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
           >
             Open optimized route in Google Maps
           </a>

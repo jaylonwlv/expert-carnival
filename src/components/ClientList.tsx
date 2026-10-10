@@ -44,7 +44,7 @@ export function ClientList({
       <div className="flex gap-3">
         <div className="relative flex-1">
           <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400"
             viewBox="0 0 20 20"
             fill="currentColor"
           >

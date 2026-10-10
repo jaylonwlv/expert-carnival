@@ -46,7 +46,7 @@ export function NeighborhoodMapPicker({
 
   return (
     <div className="space-y-2">
-      <div className="rounded-lg overflow-hidden border border-neutral-200" style={{ height: 320 }}>
+      <div className="rounded-lg overflow-hidden border border-stone-200" style={{ height: 320 }}>
         <MapContainer
           center={[36.17, -115.14]}
           zoom={10}
@@ -77,7 +77,7 @@ export function NeighborhoodMapPicker({
                 <Popup>
                   <div className="text-sm">
                     <p className="font-semibold">{n.name}</p>
-                    <p className="text-neutral-500">{n.zips.join(", ")}</p>
+                    <p className="text-stone-500">{n.zips.join(", ")}</p>
                     <button
                       type="button"
                       onClick={() => toggle(n.name)}
@@ -101,8 +101,8 @@ export function NeighborhoodMapPicker({
             onClick={() => toggle(n.name)}
             className={`text-sm rounded-full px-3 py-1.5 border transition ${
               selected.includes(n.name)
-                ? "bg-neutral-900 text-white border-neutral-900"
-                : "bg-neutral-50 text-neutral-700 border-neutral-200 hover:bg-neutral-100"
+                ? "bg-stone-900 text-white border-stone-900"
+                : "bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100"
             }`}
           >
             {n.name} <span className="opacity-60">{n.zips[0]}</span>

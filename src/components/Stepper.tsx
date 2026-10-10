@@ -16,7 +16,7 @@ export function Stepper({ stages, currentIndex }: { stages: Stage[]; currentInde
               <span
                 aria-hidden
                 className={`absolute left-[15px] top-8 w-0.5 h-full ${
-                  isDone ? color.solidBg : "bg-neutral-200"
+                  isDone ? color.solidBg : "bg-stone-200"
                 }`}
               />
             )}
@@ -25,8 +25,8 @@ export function Stepper({ stages, currentIndex }: { stages: Stage[]; currentInde
                 isDone
                   ? `${color.solidBg} ${color.solidText} shadow-sm`
                   : isCurrent
-                    ? "bg-neutral-900 text-white ring-4 ring-neutral-200 shadow-md"
-                    : "bg-neutral-100 text-neutral-400 border border-neutral-200"
+                    ? "bg-stone-900 text-white ring-4 ring-stone-200 shadow-md"
+                    : "bg-stone-100 text-stone-400 border border-stone-200"
               }`}
             >
               {isDone ? "✓" : index + 1}
@@ -34,7 +34,7 @@ export function Stepper({ stages, currentIndex }: { stages: Stage[]; currentInde
             <div className="pt-0.5">
               <p
                 className={`text-sm font-semibold ${
-                  isCurrent ? "text-neutral-900" : isDone ? "text-neutral-700" : "text-neutral-400"
+                  isCurrent ? "text-stone-900" : isDone ? "text-stone-700" : "text-stone-400"
                 }`}
               >
                 {stage.title}
@@ -45,7 +45,7 @@ export function Stepper({ stages, currentIndex }: { stages: Stage[]; currentInde
                 )}
               </p>
               {(isCurrent || isDone) && (
-                <p className="text-sm text-neutral-500 mt-1">{stage.summary}</p>
+                <p className="text-sm text-stone-500 mt-1">{stage.summary}</p>
               )}
             </div>
           </li>

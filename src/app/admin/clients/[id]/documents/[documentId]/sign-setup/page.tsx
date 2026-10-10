@@ -25,12 +25,12 @@ export default async function SignSetupPage({
   const sendAction = createSignatureRequest.bind(null, document.id);
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <header className="border-b border-neutral-200 bg-white">
+    <div className="min-h-screen bg-stone-50">
+      <header className="border-b border-stone-200 bg-white">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <Link
             href={`/admin/clients/${id}/documents`}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-neutral-900 rounded-md px-2 py-1.5 -ml-2 hover:bg-neutral-100 transition"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-600 hover:text-stone-900 rounded-md px-2 py-1.5 -ml-2 hover:bg-stone-100 transition"
           >
             <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
               <path
@@ -46,22 +46,22 @@ export default async function SignSetupPage({
 
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-4">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900">{document.filename}</h1>
-          <p className="text-sm text-neutral-500">
+          <h1 className="text-lg font-semibold text-stone-900">{document.filename}</h1>
+          <p className="text-sm text-stone-500">
             Click a field type, then click on the document to place it. Drag to reposition.
           </p>
         </div>
 
         {document.signatureRequest ? (
-          <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
-            <p className="text-sm text-neutral-700">
+          <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+            <p className="text-sm text-stone-700">
               {document.signatureRequest.status === "signed"
                 ? `Signed by ${document.signatureRequest.signedByName} on ${document.signatureRequest.signedAt?.toLocaleString()}.`
                 : "A signature request has already been sent for this document."}
             </p>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
+          <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
             <PdfFieldEditor fileUrl={fileUrl} onSend={sendAction} />
           </div>
         )}

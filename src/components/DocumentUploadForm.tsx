@@ -71,7 +71,7 @@ export function DocumentUploadForm({
     <form onSubmit={handleSubmit} className={className}>
       <FileDropzone files={files} onFilesChange={setFiles} maxFiles={maxFiles} />
       {showVisibilityToggle && (
-        <label className="flex items-center gap-2 text-sm text-neutral-700">
+        <label className="flex items-center gap-2 text-sm text-stone-700">
           <input
             type="checkbox"
             checked={visibleToClient}
@@ -84,7 +84,7 @@ export function DocumentUploadForm({
       <button
         type="submit"
         disabled={uploading}
-        className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {uploading ? "Uploading…" : submitLabel}
       </button>

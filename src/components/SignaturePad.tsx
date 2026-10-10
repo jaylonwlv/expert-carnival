@@ -111,16 +111,16 @@ export function SignaturePad({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 space-y-4">
-        <h2 className="text-base font-semibold text-neutral-900">{title}</h2>
+        <h2 className="text-base font-semibold text-stone-900">{title}</h2>
 
-        <div className="flex gap-1 bg-neutral-100 rounded-lg p-1 w-fit">
+        <div className="flex gap-1 bg-stone-100 rounded-lg p-1 w-fit">
           {(["type", "draw", "upload"] as Mode[]).map((m) => (
             <button
               key={m}
               type="button"
               onClick={() => setMode(m)}
               className={`text-sm font-medium px-3 py-1.5 rounded-md capitalize transition ${
-                mode === m ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-800"
+                mode === m ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-800"
               }`}
             >
               {m}
@@ -135,7 +135,7 @@ export function SignaturePad({
               value={typedName}
               onChange={(e) => setTypedName(e.target.value)}
               placeholder="Type your name"
-              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
             />
             <div className="flex gap-2">
               {SIGNATURE_FONTS.map((font, i) => (
@@ -144,7 +144,7 @@ export function SignaturePad({
                   type="button"
                   onClick={() => setFontIndex(i)}
                   className={`flex-1 rounded-md border px-2 py-3 text-xl ${
-                    fontIndex === i ? "border-neutral-900 ring-1 ring-neutral-900" : "border-neutral-200"
+                    fontIndex === i ? "border-stone-900 ring-1 ring-stone-900" : "border-stone-200"
                   }`}
                   style={{ fontFamily: font.family }}
                 >
@@ -161,7 +161,7 @@ export function SignaturePad({
               ref={canvasRef}
               width={440}
               height={160}
-              className="w-full border border-neutral-300 rounded-md touch-none bg-white"
+              className="w-full border border-stone-300 rounded-md touch-none bg-white"
               onPointerDown={(e) => {
                 drawing.current = true;
                 const ctx = e.currentTarget.getContext("2d");
@@ -187,7 +187,7 @@ export function SignaturePad({
                 drawing.current = false;
               }}
             />
-            <button type="button" onClick={clearCanvas} className="text-sm text-neutral-500 hover:underline">
+            <button type="button" onClick={clearCanvas} className="text-sm text-stone-500 hover:underline">
               Clear
             </button>
           </div>
@@ -219,7 +219,7 @@ export function SignaturePad({
             {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
             {uploadedDataUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={uploadedDataUrl} alt="Uploaded signature" className="max-h-24 border border-neutral-200 rounded-md" />
+              <img src={uploadedDataUrl} alt="Uploaded signature" className="max-h-24 border border-stone-200 rounded-md" />
             )}
           </div>
         )}
@@ -228,7 +228,7 @@ export function SignaturePad({
           <button
             type="button"
             onClick={onCancel}
-            className="text-sm font-medium text-neutral-600 px-4 py-2 rounded-md hover:bg-neutral-100 transition"
+            className="text-sm font-medium text-stone-600 px-4 py-2 rounded-md hover:bg-stone-100 transition"
           >
             Cancel
           </button>
@@ -236,7 +236,7 @@ export function SignaturePad({
             type="button"
             onClick={handleConfirm}
             disabled={!canConfirm}
-            className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Use this
           </button>

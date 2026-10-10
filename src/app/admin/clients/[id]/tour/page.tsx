@@ -16,12 +16,12 @@ export default async function ClientTourPage({
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <header className="border-b border-neutral-200 bg-white">
+    <div className="min-h-screen bg-stone-50">
+      <header className="border-b border-stone-200 bg-white">
         <div className="max-w-2xl mx-auto px-4 py-4">
           <Link
             href={`/admin/clients/${client.id}`}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-neutral-900 rounded-md px-2 py-1.5 -ml-2 hover:bg-neutral-100 transition"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-600 hover:text-stone-900 rounded-md px-2 py-1.5 -ml-2 hover:bg-stone-100 transition"
           >
             <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
               <path
@@ -37,13 +37,13 @@ export default async function ClientTourPage({
 
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-4">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900">Plan {client.name.split(" ")[0]}&apos;s tour route</h1>
-          <p className="text-sm text-neutral-500">
+          <h1 className="text-lg font-semibold text-stone-900">Plan {client.name.split(" ")[0]}&apos;s tour route</h1>
+          <p className="text-sm text-stone-500">
             Enter the addresses you&apos;re touring today and get an efficient visiting order.
           </p>
         </div>
 
-        <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
+        <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
           <TourRoutePlannerLoader />
         </div>
       </main>

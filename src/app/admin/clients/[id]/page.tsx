@@ -87,12 +87,12 @@ export default async function ClientDetailPage({
   }));
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <header className="border-b border-neutral-200 bg-white">
+    <div className="min-h-screen bg-stone-50">
+      <header className="border-b border-stone-200 bg-white">
         <div className="max-w-2xl mx-auto px-4 py-3">
           <Link
             href="/admin"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-neutral-900 rounded-md px-2.5 py-2 -ml-2.5 hover:bg-neutral-100 transition"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-600 hover:text-stone-900 rounded-md px-2.5 py-2 -ml-2.5 hover:bg-stone-100 transition"
           >
             <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
               <path
@@ -115,12 +115,12 @@ export default async function ClientDetailPage({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold text-neutral-900">{client.name}</h1>
+              <h1 className="text-lg font-semibold text-stone-900">{client.name}</h1>
               {client.isPCS && <PCSBadge />}
             </div>
-            <p className="text-sm text-neutral-500">{client.email || "No email"} · {client.phone || "No phone"}</p>
+            <p className="text-sm text-stone-500">{client.email || "No email"} · {client.phone || "No phone"}</p>
             <form action={toggleClientPCSForClient}>
-              <button type="submit" className="text-xs text-neutral-400 hover:text-neutral-600 hover:underline">
+              <button type="submit" className="text-xs text-stone-400 hover:text-stone-600 hover:underline">
                 {client.isPCS ? "Remove PCS tag" : "Mark as PCS relocation"}
               </button>
             </form>
@@ -133,20 +133,20 @@ export default async function ClientDetailPage({
         </div>
 
         {client.signatureRequests.length > 0 && (
-          <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
-            <h2 className="text-sm font-semibold text-neutral-900">Signatures</h2>
+          <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">
+            <h2 className="text-sm font-semibold text-stone-900">Signatures</h2>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 mb-1.5">
                   Awaiting signature ({pendingSignatures.length})
                 </p>
                 {pendingSignatures.length === 0 ? (
-                  <p className="text-sm text-neutral-400">Nothing outstanding.</p>
+                  <p className="text-sm text-stone-400">Nothing outstanding.</p>
                 ) : (
-                  <ul className="divide-y divide-neutral-100 border border-neutral-200 rounded-lg overflow-hidden">
+                  <ul className="divide-y divide-stone-100 border border-stone-200 rounded-lg overflow-hidden">
                     {pendingSignatures.map((request) => (
                       <li key={request.id} className="flex items-center justify-between gap-3 px-3 py-2 bg-white">
-                        <span className="text-sm text-neutral-800 truncate">{request.document.filename}</span>
+                        <span className="text-sm text-stone-800 truncate">{request.document.filename}</span>
                         <span className="text-xs text-amber-700 bg-amber-50 rounded-full px-2 py-0.5 shrink-0">
                           {request.status === "viewed" ? "Viewed" : "Not yet viewed"}
                         </span>
@@ -160,13 +160,13 @@ export default async function ClientDetailPage({
                   Signed ({signedDocuments.length})
                 </p>
                 {signedDocuments.length === 0 ? (
-                  <p className="text-sm text-neutral-400">None yet.</p>
+                  <p className="text-sm text-stone-400">None yet.</p>
                 ) : (
-                  <ul className="divide-y divide-neutral-100 border border-neutral-200 rounded-lg overflow-hidden">
+                  <ul className="divide-y divide-stone-100 border border-stone-200 rounded-lg overflow-hidden">
                     {signedDocuments.map((request) => (
                       <li key={request.id} className="flex items-center justify-between gap-3 px-3 py-2 bg-white">
-                        <span className="text-sm text-neutral-800 truncate">{request.document.filename}</span>
-                        <span className="text-xs text-neutral-400 shrink-0">
+                        <span className="text-sm text-stone-800 truncate">{request.document.filename}</span>
+                        <span className="text-xs text-stone-400 shrink-0">
                           {request.signedAt ? timeAgo(request.signedAt) : ""}
                         </span>
                       </li>
@@ -178,22 +178,22 @@ export default async function ClientDetailPage({
           </section>
         )}
 
-        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
-          <h2 className="text-sm font-semibold text-neutral-900">Client tracker link</h2>
-          <p className="text-sm text-neutral-500">
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">
+          <h2 className="text-sm font-semibold text-stone-900">Client tracker link</h2>
+          <p className="text-sm text-stone-500">
             Send this link via your SMS/email automation so {client.name.split(" ")[0]} can check their progress anytime.
           </p>
           <CopyLinkButton url={trackerUrl} />
         </section>
 
-        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
-          <h2 className="text-sm font-semibold text-neutral-900 mb-4">Pipeline</h2>
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+          <h2 className="text-sm font-semibold text-stone-900 mb-4">Pipeline</h2>
           <StageSwitcher stages={STAGES} currentStage={client.currentStage} updateStageAction={updateStageForClient} />
         </section>
 
-        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
-          <h2 className="text-sm font-semibold text-neutral-900 mb-1">Checklist</h2>
-          <p className="text-sm text-neutral-500 mb-2">
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+          <h2 className="text-sm font-semibold text-stone-900 mb-1">Checklist</h2>
+          <p className="text-sm text-stone-500 mb-2">
             Steps for each stage. Mark a step &ldquo;not needed&rdquo; if it doesn&apos;t apply to this client.
           </p>
           <ChecklistAccordion
@@ -209,13 +209,13 @@ export default async function ClientDetailPage({
           />
         </section>
 
-        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
-          <h2 className="text-sm font-semibold text-neutral-900">Upcoming appointment</h2>
-          <p className="text-sm text-neutral-500">
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">
+          <h2 className="text-sm font-semibold text-stone-900">Upcoming appointment</h2>
+          <p className="text-sm text-stone-500">
             {client.appointmentAt ? (
               <>
                 Currently set to{" "}
-                <span className="font-medium text-neutral-800">{formatAppointment(client.appointmentAt)}</span>.
+                <span className="font-medium text-stone-800">{formatAppointment(client.appointmentAt)}</span>.
                 Shown on {client.name.split(" ")[0]}&apos;s tracker page.
               </>
             ) : (
@@ -224,7 +224,7 @@ export default async function ClientDetailPage({
           </p>
           <ActionForm action={updateAppointmentForClient} toastMessage="Appointment updated." className="flex items-end gap-3">
             <div className="flex-1">
-              <label htmlFor="appointmentAt" className="block text-xs font-medium text-neutral-500 mb-1">
+              <label htmlFor="appointmentAt" className="block text-xs font-medium text-stone-500 mb-1">
                 Date &amp; time
               </label>
               <input
@@ -232,12 +232,12 @@ export default async function ClientDetailPage({
                 type="datetime-local"
                 name="appointmentAt"
                 defaultValue={client.appointmentAt ? toAppointmentInputValue(client.appointmentAt) : ""}
-                className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
               />
             </div>
             <button
               type="submit"
-              className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
+              className="rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
             >
               Save
             </button>
@@ -252,9 +252,9 @@ export default async function ClientDetailPage({
           )}
         </section>
 
-        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
-          <h2 className="text-sm font-semibold text-neutral-900">Custom update (optional)</h2>
-          <p className="text-sm text-neutral-500">
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">
+          <h2 className="text-sm font-semibold text-stone-900">Custom update (optional)</h2>
+          <p className="text-sm text-stone-500">
             Overrides the default &ldquo;what&apos;s happening now&rdquo; text on the client&apos;s tracker with something specific.
           </p>
           <ActionForm action={updateNoteForClient} toastMessage="Update saved." className="space-y-3">
@@ -263,29 +263,29 @@ export default async function ClientDetailPage({
               rows={3}
               defaultValue={client.note ?? ""}
               placeholder="e.g. Inspection is scheduled for Thursday at 10am."
-              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
             />
             <button
               type="submit"
-              className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
+              className="rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
             >
               Save update
             </button>
           </ActionForm>
         </section>
 
-        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-4">
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-semibold text-neutral-900">Documents</h2>
-              <p className="text-sm text-neutral-500">
+              <h2 className="text-sm font-semibold text-stone-900">Documents</h2>
+              <p className="text-sm text-stone-500">
                 {client.documents.length} {client.documents.length === 1 ? "file" : "files"} · contracts, IDs,
                 financial paperwork, closing documents.
               </p>
             </div>
             <Link
               href={`/admin/clients/${client.id}/documents`}
-              className="shrink-0 text-sm font-medium bg-neutral-900 text-white rounded-md px-3 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
+              className="shrink-0 text-sm font-medium bg-amber-600 text-white rounded-md px-3 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
             >
               View client documents
             </Link>
@@ -295,20 +295,20 @@ export default async function ClientDetailPage({
             context={{ kind: "admin", clientId: client.id }}
             onUpload={uploadGeneralDocumentForClient}
             showVisibilityToggle
-            className="space-y-3 pt-3 border-t border-neutral-100"
+            className="space-y-3 pt-3 border-t border-stone-100"
           />
         </section>
 
-        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
-          <h2 className="text-sm font-semibold text-neutral-900">Activity</h2>
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">
+          <h2 className="text-sm font-semibold text-stone-900">Activity</h2>
           {client.activityLog.length === 0 ? (
-            <p className="text-sm text-neutral-500">No activity yet.</p>
+            <p className="text-sm text-stone-500">No activity yet.</p>
           ) : (
             <ul className="space-y-2.5 max-h-80 overflow-y-auto">
               {client.activityLog.map((entry) => (
                 <li key={entry.id} className="flex items-start gap-3 text-sm">
-                  <span className="text-neutral-400 shrink-0 w-14 text-right">{timeAgo(entry.createdAt)}</span>
-                  <span className="text-neutral-700">{entry.message}</span>
+                  <span className="text-stone-400 shrink-0 w-14 text-right">{timeAgo(entry.createdAt)}</span>
+                  <span className="text-stone-700">{entry.message}</span>
                 </li>
               ))}
             </ul>
@@ -317,7 +317,7 @@ export default async function ClientDetailPage({
 
         <section className="bg-white rounded-xl border border-red-200 shadow-sm p-6">
           <h2 className="text-sm font-semibold text-red-700 mb-2">Remove client</h2>
-          <p className="text-sm text-neutral-500 mb-3">
+          <p className="text-sm text-stone-500 mb-3">
             Deletes this client and their tracker link permanently.
           </p>
           <form action={deleteClientForClient}>

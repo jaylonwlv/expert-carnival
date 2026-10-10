@@ -13,7 +13,7 @@ import type { UploadedBlobMeta } from "@/lib/documents";
 // Leaflet touches `window` at import time, which breaks SSR -- load client-only.
 const NeighborhoodMapPicker = dynamic(
   () => import("@/components/NeighborhoodMapPicker").then((m) => m.NeighborhoodMapPicker),
-  { ssr: false, loading: () => <div className="h-80 rounded-lg bg-neutral-50 animate-pulse" /> }
+  { ssr: false, loading: () => <div className="h-80 rounded-lg bg-stone-50 animate-pulse" /> }
 );
 
 export type ChecklistStageData = {
@@ -74,7 +74,7 @@ export function ChecklistAccordion({
   }
 
   return (
-    <div className="divide-y divide-neutral-100">
+    <div className="divide-y divide-stone-100">
       {localStages.map((stage) => {
         const isOpen = expanded === stage.index;
         const doneCount = stage.items.filter((i) => i.status !== "pending").length;
@@ -90,20 +90,20 @@ export function ChecklistAccordion({
                 <span
                   className={`text-sm font-semibold shrink-0 rounded-full px-2.5 py-1 ${
                     stage.index === currentStageIndex
-                      ? "bg-neutral-900 text-white"
-                      : "bg-neutral-100 text-neutral-500"
+                      ? "bg-stone-900 text-white"
+                      : "bg-stone-100 text-stone-500"
                   }`}
                 >
                   {stage.index + 1}
                 </span>
-                <span className="text-base font-medium text-neutral-900 truncate">{stage.title}</span>
+                <span className="text-base font-medium text-stone-900 truncate">{stage.title}</span>
               </div>
               <div className="flex items-center gap-3 shrink-0">
-                <span className="text-sm text-neutral-500">
+                <span className="text-sm text-stone-500">
                   {doneCount}/{stage.items.length}
                 </span>
                 <svg
-                  className={`w-5 h-5 text-neutral-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                  className={`w-5 h-5 text-stone-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -118,7 +118,7 @@ export function ChecklistAccordion({
 
             {isOpen && (
               <div className="pb-5 space-y-4">
-                <ul className="divide-y divide-neutral-100 border border-neutral-200 rounded-lg overflow-hidden">
+                <ul className="divide-y divide-stone-100 border border-stone-200 rounded-lg overflow-hidden">
                   {stage.items.map((item) => (
                     <ChecklistRow key={item.id} item={item} onSetStatus={handleSetStatus} />
                   ))}
@@ -127,7 +127,7 @@ export function ChecklistAccordion({
                 {stage.showTourLink && (
                   <Link
                     href={tourHref}
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-700 hover:text-neutral-900 hover:underline"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-700 hover:text-stone-900 hover:underline"
                   >
                     Plan tour route →
                   </Link>
@@ -137,16 +137,16 @@ export function ChecklistAccordion({
                   <ActionForm
                     action={updateNeighborhoodsAction}
                     toastMessage="Preferred neighborhoods saved."
-                    className="pt-3 border-t border-neutral-100 space-y-3"
+                    className="pt-3 border-t border-stone-100 space-y-3"
                   >
-                    <p className="text-sm font-semibold text-neutral-700">Preferred neighborhoods</p>
-                    <p className="text-sm text-neutral-500">
+                    <p className="text-sm font-semibold text-stone-700">Preferred neighborhoods</p>
+                    <p className="text-sm text-stone-500">
                       Click a pin (or a chip below the map) to select. Drag a pin to correct its position.
                     </p>
                     <NeighborhoodMapPicker groups={neighborhoods.groups} selected={neighborhoods.selected} />
                     <button
                       type="submit"
-                      className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
+                      className="rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
                     >
                       Save neighborhoods
                     </button>
@@ -154,15 +154,15 @@ export function ChecklistAccordion({
                 )}
 
                 {stage.documentHeavy && (
-                  <div className="pt-3 border-t border-neutral-100 space-y-3">
+                  <div className="pt-3 border-t border-stone-100 space-y-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-neutral-600">
+                      <p className="text-sm font-medium text-stone-600">
                         Documents for this stage{" "}
                         {stage.documentCount > 0 && (
-                          <span className="text-neutral-400">({stage.documentCount} uploaded)</span>
+                          <span className="text-stone-400">({stage.documentCount} uploaded)</span>
                         )}
                       </p>
-                      <Link href={documentsHref} className="text-sm text-neutral-500 hover:underline">
+                      <Link href={documentsHref} className="text-sm text-stone-500 hover:underline">
                         View all documents
                       </Link>
                     </div>
@@ -192,14 +192,14 @@ function ChecklistRow({
   if (item.status === "not_needed") {
     return (
       <li className="flex items-center gap-3 text-base px-3 py-2.5 bg-white">
-        <span className="shrink-0 w-5 h-5 rounded border border-neutral-300 flex items-center justify-center text-neutral-400">
+        <span className="shrink-0 w-5 h-5 rounded border border-stone-300 flex items-center justify-center text-stone-400">
           –
         </span>
-        <span className="flex-1 text-neutral-400 italic">{item.label} (not needed)</span>
+        <span className="flex-1 text-stone-400 italic">{item.label} (not needed)</span>
         <button
           type="button"
           onClick={() => onSetStatus(item.id, "pending")}
-          className="text-sm text-neutral-500 hover:underline shrink-0"
+          className="text-sm text-stone-500 hover:underline shrink-0"
         >
           Undo
         </button>
@@ -224,8 +224,8 @@ function ChecklistRow({
             />
           </svg>
         </button>
-        <span className="flex-1 text-neutral-700">{item.label}</span>
-        {item.statusAt && <span className="text-sm text-neutral-400 shrink-0">{timeAgo(item.statusAt)}</span>}
+        <span className="flex-1 text-stone-700">{item.label}</span>
+        {item.statusAt && <span className="text-sm text-stone-400 shrink-0">{timeAgo(item.statusAt)}</span>}
       </li>
     );
   }
@@ -235,14 +235,14 @@ function ChecklistRow({
       <button
         type="button"
         onClick={() => onSetStatus(item.id, "done")}
-        className="shrink-0 w-5 h-5 rounded border border-neutral-300 hover:border-neutral-500"
+        className="shrink-0 w-5 h-5 rounded border border-stone-300 hover:border-stone-500"
         aria-label="Mark as done"
       />
-      <span className="flex-1 text-neutral-700">{item.label}</span>
+      <span className="flex-1 text-stone-700">{item.label}</span>
       <button
         type="button"
         onClick={() => onSetStatus(item.id, "not_needed")}
-        className="text-sm text-neutral-400 hover:underline shrink-0"
+        className="text-sm text-stone-400 hover:underline shrink-0"
       >
         Not needed
       </button>

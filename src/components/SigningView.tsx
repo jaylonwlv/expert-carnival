@@ -134,7 +134,7 @@ export function SigningView({
                   value={value ?? ""}
                   onChange={(e) => setValue(field.id, e.target.value)}
                   placeholder={field.label ?? (field.type === "date" ? "Date" : "Text")}
-                  className="absolute border border-neutral-400 bg-white text-sm text-neutral-900 px-1 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                  className="absolute border border-stone-400 bg-white text-sm text-stone-900 px-1 focus:outline-none focus:ring-2 focus:ring-amber-600"
                   style={style}
                 />
               );
@@ -142,9 +142,9 @@ export function SigningView({
         }
       />
 
-      <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-5 space-y-3">
+      <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-5 space-y-3">
         <div>
-          <label htmlFor="signerName" className="block text-sm font-medium text-neutral-700 mb-1">
+          <label htmlFor="signerName" className="block text-sm font-medium text-stone-700 mb-1">
             Your full name
           </label>
           <input
@@ -152,10 +152,10 @@ export function SigningView({
             type="text"
             value={signerName}
             onChange={(e) => setSignerName(e.target.value)}
-            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+            className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
           />
         </div>
-        <label className="flex items-start gap-2 text-sm text-neutral-700">
+        <label className="flex items-start gap-2 text-sm text-stone-700">
           <input
             type="checkbox"
             checked={consented}
@@ -166,14 +166,14 @@ export function SigningView({
           signature would be.
         </label>
         {requiredUnfilled.length > 0 && (
-          <p className="text-sm text-neutral-500">{requiredUnfilled.length} field(s) still need to be filled in.</p>
+          <p className="text-sm text-stone-500">{requiredUnfilled.length} field(s) still need to be filled in.</p>
         )}
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="button"
           onClick={handleSubmit}
           disabled={!canSubmit}
-          className="w-full rounded-md bg-neutral-900 text-white text-sm font-medium py-2.5 shadow-sm hover:shadow-md hover:bg-neutral-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full rounded-md bg-amber-600 text-white text-sm font-medium py-2.5 shadow-sm hover:shadow-md hover:bg-amber-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting ? "Submitting…" : "Submit signature"}
         </button>

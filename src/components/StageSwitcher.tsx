@@ -49,7 +49,7 @@ export function StageSwitcher({
               className={`text-xs font-medium px-3 py-2 rounded-lg transition ${
                 isDone || isCurrent
                   ? `${color.solidBg} ${color.solidText} shadow-sm`
-                  : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                  : "bg-stone-100 text-stone-500 hover:bg-stone-200"
               } ${isCurrent ? `ring-2 ring-offset-2 ${color.ring} shadow-md` : ""}`}
             >
               {index + 1}. {stage.title}
@@ -57,7 +57,7 @@ export function StageSwitcher({
           );
         })}
       </div>
-      <p className="text-sm text-neutral-500 pt-2 border-t border-neutral-100">{stages[localStage].summary}</p>
+      <p className="text-sm text-stone-500 pt-2 border-t border-stone-100">{stages[localStage].summary}</p>
       {toastAt !== 0 && <SaveToast key={toastAt} message="Stage updated." />}
     </div>
   );
