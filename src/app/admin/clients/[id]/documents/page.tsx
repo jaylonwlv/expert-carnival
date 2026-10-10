@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSignedDownloadUrl } from "@/lib/documents";
 import { DocumentGallery } from "@/components/DocumentGallery";
-import { deleteDocument, toggleDocumentVisibility } from "../../../actions";
+import { deleteDocument, toggleDocumentVisibility, setDocumentSigner } from "../../../actions";
 
 export default async function ClientDocumentsPage({
   params,
@@ -16,8 +16,9 @@ export default async function ClientDocumentsPage({
     include: {
       documents: {
         orderBy: { createdAt: "desc" },
-        include: { signatureRequest: true },
+        include: { signatureRequest: true, signer: true },
       },
+      signers: { orderBy: { createdAt: "asc" } },
     },
   });
 
@@ -63,8 +64,10 @@ export default async function ClientDocumentsPage({
         <DocumentGallery
           documents={documents}
           clientId={client.id}
+          signerOptions={client.signers}
           deleteAction={deleteDocument}
           toggleAction={toggleDocumentVisibility}
+          setSignerAction={setDocumentSigner}
         />
       </main>
     </div>

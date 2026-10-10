@@ -10,32 +10,47 @@ export function DocumentUploadForm({
   context,
   onUpload,
   onUploadWithStage,
+  onUploadWithSigner,
+  onUploadWithStageAndSigner,
   onUploadingChange,
   stageOptions,
+  signerOptions,
   maxFiles = 5,
   showVisibilityToggle = false,
   submitLabel = "Upload document(s)",
   className,
 }: {
   context: UploadAuthContext;
-  // Exactly one of these two is used, picked by whether stageOptions is
-  // provided -- kept as two separate props rather than one variable-arity
-  // callback so each call site's existing prop stays untouched.
+  // Exactly one of these four is used, picked by which of stageOptions /
+  // signerOptions is provided -- kept as separate props (rather than one
+  // variable-arity callback) so each call site's bound server action can be
+  // passed straight through without a wrapping arrow function, which would
+  // break passing it down from a Server Component.
   onUpload?: (blobs: UploadedBlobMeta[], visibleToClient: boolean) => Promise<void>;
   onUploadWithStage?: (stageIndex: number | null, blobs: UploadedBlobMeta[], visibleToClient: boolean) => Promise<void>;
+  onUploadWithSigner?: (signerId: string | null, blobs: UploadedBlobMeta[], visibleToClient: boolean) => Promise<void>;
+  onUploadWithStageAndSigner?: (
+    stageIndex: number | null,
+    signerId: string | null,
+    blobs: UploadedBlobMeta[],
+    visibleToClient: boolean
+  ) => Promise<void>;
   // Lets a parent that can unmount or navigate away from this form (e.g. a
   // collapsible panel) hold off until the upload actually finishes.
   onUploadingChange?: (uploading: boolean) => void;
   stageOptions?: { index: number; title: string }[];
+  signerOptions?: { id: string; name: string }[];
   maxFiles?: number;
   showVisibilityToggle?: boolean;
   submitLabel?: string;
   className?: string;
 }) {
   const stageSelectId = useId();
+  const signerSelectId = useId();
   const [files, setFiles] = useState<File[]>([]);
   const [visibleToClient, setVisibleToClient] = useState(false);
   const [stageIndex, setStageIndex] = useState<number | null>(null);
+  const [signerId, setSignerId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [toast, setToast] = useState<{ at: number; message: string; variant: "success" | "error" } | null>(null);
 
@@ -66,14 +81,24 @@ export function DocumentUploadForm({
         })
       );
 
-      if (stageOptions) {
-        await onUploadWithStage!(stageIndex, blobs, visibleToClient);
+      // Which callback fires is decided by which ones the caller actually
+      // passed in, not by whether signerOptions/stageOptions happens to be
+      // empty right now -- a caller that supports signer tagging still
+      // wires up onUploadWithSigner even before any signers exist yet, so
+      // that still has to be what runs once one gets added later.
+      if (onUploadWithStageAndSigner) {
+        await onUploadWithStageAndSigner(stageIndex, signerId, blobs, visibleToClient);
+      } else if (onUploadWithStage) {
+        await onUploadWithStage(stageIndex, blobs, visibleToClient);
+      } else if (onUploadWithSigner) {
+        await onUploadWithSigner(signerId, blobs, visibleToClient);
       } else {
         await onUpload!(blobs, visibleToClient);
       }
       setFiles([]);
       setVisibleToClient(false);
       setStageIndex(null);
+      setSignerId(null);
       setToast({ at: Date.now(), message: "Document(s) uploaded.", variant: "success" });
     } catch (err) {
       setToast({
@@ -90,6 +115,26 @@ export function DocumentUploadForm({
   return (
     <form onSubmit={handleSubmit} className={className}>
       <FileDropzone files={files} onFilesChange={setFiles} maxFiles={maxFiles} />
+      {signerOptions && signerOptions.length > 0 && (
+        <div>
+          <label htmlFor={signerSelectId} className="block text-xs font-medium text-stone-500 mb-1">
+            Who is this document for?
+          </label>
+          <select
+            id={signerSelectId}
+            value={signerId ?? ""}
+            onChange={(e) => setSignerId(e.target.value === "" ? null : e.target.value)}
+            className="w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
+          >
+            <option value="">Shared / not specific to one person</option>
+            {signerOptions.map((signer) => (
+              <option key={signer.id} value={signer.id}>
+                {signer.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       {stageOptions && (
         <div>
           <label htmlFor={stageSelectId} className="block text-xs font-medium text-stone-500 mb-1">

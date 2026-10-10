@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { STAGES } from "@/lib/stages";
 import { createDocumentRecordsForClient, MAX_FILES_PER_UPLOAD, type UploadedBlobMeta } from "@/lib/documents";
+import { assertSignerBelongsToClient } from "@/lib/signers";
 import { logActivity } from "@/lib/activity";
 import { parseAppointmentInput, formatAppointment } from "@/lib/format";
 import type { ChecklistStatus } from "@/lib/checklist";
@@ -162,6 +163,7 @@ export async function deleteClient(clientId: string) {
 export async function createDocumentRecords(
   clientId: string,
   stageIndex: number | null,
+  signerId: string | null,
   blobs: UploadedBlobMeta[],
   visibleToClient: boolean
 ) {
@@ -174,6 +176,9 @@ export async function createDocumentRecords(
   if (stageIndex !== null && (!Number.isInteger(stageIndex) || stageIndex < 0 || stageIndex >= STAGES.length)) {
     throw new Error("Invalid stage");
   }
+  if (signerId !== null) {
+    await assertSignerBelongsToClient(signerId, clientId);
+  }
 
   const filenames = await createDocumentRecordsForClient({
     clientId,
@@ -181,12 +186,57 @@ export async function createDocumentRecords(
     visibleToClient,
     uploadedBy: "admin",
     stageIndex,
+    signerId,
   });
 
   await logActivity(clientId, `Uploaded ${filenames.map((f) => `"${f}"`).join(", ")}.`);
 
   revalidatePath(`/admin/clients/${clientId}`);
   revalidatePath(`/admin/clients/${clientId}/documents`);
+  revalidatePath(`/track`);
+}
+
+export async function setDocumentSigner(documentId: string, signerId: string | null) {
+  const document = await prisma.document.findUnique({ where: { id: documentId } });
+  if (!document) return;
+
+  if (signerId !== null) {
+    await assertSignerBelongsToClient(signerId, document.clientId);
+  }
+
+  await prisma.document.update({ where: { id: documentId }, data: { signerId } });
+
+  revalidatePath(`/admin/clients/${document.clientId}`);
+  revalidatePath(`/admin/clients/${document.clientId}/documents`);
+  revalidatePath(`/track`);
+}
+
+export async function addSigner(clientId: string, formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) {
+    throw new Error("Name is required");
+  }
+  if (name.length > 100) {
+    throw new Error("Name is too long");
+  }
+
+  await prisma.signer.create({ data: { clientId, name } });
+
+  await logActivity(clientId, `Added "${name}" as a signer.`);
+
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath(`/admin/clients/${clientId}/documents`);
+  revalidatePath(`/track`);
+}
+
+export async function removeSigner(signerId: string) {
+  const signer = await prisma.signer.delete({ where: { id: signerId } }).catch(() => null);
+  if (!signer) return;
+
+  await logActivity(signer.clientId, `Removed "${signer.name}" as a signer.`);
+
+  revalidatePath(`/admin/clients/${signer.clientId}`);
+  revalidatePath(`/admin/clients/${signer.clientId}/documents`);
   revalidatePath(`/track`);
 }
 

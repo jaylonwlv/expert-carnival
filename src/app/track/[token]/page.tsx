@@ -26,12 +26,17 @@ export default async function TrackPage({
   const client = await prisma.client.findUnique({
     where: { token },
     include: {
-      documents: { where: { visibleToClient: true }, orderBy: { createdAt: "desc" } },
+      documents: {
+        where: { visibleToClient: true },
+        orderBy: { createdAt: "desc" },
+        include: { signer: true },
+      },
       signatureRequests: {
         where: { status: { in: ["pending", "viewed"] } },
         include: { document: true },
         orderBy: { createdAt: "desc" },
       },
+      signers: { orderBy: { createdAt: "asc" } },
     },
   });
 
@@ -44,6 +49,7 @@ export default async function TrackPage({
   const firstName = client.name.split(" ")[0];
   const uploadForClient = createClientDocumentRecords.bind(null, token);
   const tourStops = client.tourStops as TourStop[] | null;
+  const signerOptions = client.signers.map((signer) => ({ id: signer.id, name: signer.name }));
 
   const documents = await Promise.all(
     client.documents.map(async (doc) => ({
@@ -167,6 +173,11 @@ export default async function TrackPage({
                   >
                     {doc.filename}
                   </a>
+                  {doc.signer && (
+                    <span className="text-xs font-medium text-sky-700 bg-sky-50 rounded-full px-2 py-0.5 shrink-0">
+                      {doc.signer.name}
+                    </span>
+                  )}
                   <span className="text-xs text-stone-400 shrink-0">{formatFileSize(doc.size)}</span>
                 </li>
               ))}
@@ -178,7 +189,8 @@ export default async function TrackPage({
           </p>
           <DocumentUploadForm
             context={{ kind: "client", token, clientId: client.id }}
-            onUpload={uploadForClient}
+            onUploadWithSigner={uploadForClient}
+            signerOptions={signerOptions}
             submitLabel="Upload"
             className={`space-y-3 ${documents.length > 0 ? "pt-3 border-t border-stone-100" : ""}`}
           />

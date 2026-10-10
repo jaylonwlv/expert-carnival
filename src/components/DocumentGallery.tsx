@@ -16,6 +16,7 @@ type GalleryDocument = {
   visibleToClient: boolean;
   uploadedBy: string;
   stageIndex: number | null;
+  signer?: { id: string; name: string } | null;
   createdAt: Date;
   signatureRequest?: { status: string } | null;
 };
@@ -63,16 +64,47 @@ function stageTitle(stageIndex: number | null): string | null {
   return STAGES[stageIndex]?.title ?? null;
 }
 
+function SignerSelect({
+  doc,
+  signerOptions,
+  setSignerAction,
+}: {
+  doc: GalleryDocument;
+  signerOptions: { id: string; name: string }[];
+  setSignerAction: (documentId: string, signerId: string | null) => void;
+}) {
+  if (signerOptions.length === 0) return null;
+
+  return (
+    <select
+      value={doc.signer?.id ?? ""}
+      onChange={(e) => setSignerAction(doc.id, e.target.value === "" ? null : e.target.value)}
+      className="text-xs font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 rounded-full pl-2 pr-1 py-0.5 shrink-0 border-none focus:outline-none focus:ring-2 focus:ring-amber-600"
+    >
+      <option value="">Shared</option>
+      {signerOptions.map((signer) => (
+        <option key={signer.id} value={signer.id}>
+          {signer.name}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 export function DocumentGallery({
   documents,
   clientId,
+  signerOptions,
   deleteAction,
   toggleAction,
+  setSignerAction,
 }: {
   documents: GalleryDocument[];
   clientId: string;
+  signerOptions: { id: string; name: string }[];
   deleteAction: (documentId: string) => void;
   toggleAction: (documentId: string) => void;
+  setSignerAction: (documentId: string, signerId: string | null) => void;
 }) {
   const [view, setView] = useState<ViewMode>("medium");
 
@@ -124,6 +156,7 @@ export function DocumentGallery({
                   {stageTitle(doc.stageIndex)}
                 </span>
               )}
+              <SignerSelect doc={doc} signerOptions={signerOptions} setSignerAction={setSignerAction} />
               <SignatureBadge doc={doc} clientId={clientId} />
               <span className="text-xs text-stone-400 shrink-0">{formatFileSize(doc.size)}</span>
               <VisibilityBadge
@@ -183,6 +216,7 @@ export function DocumentGallery({
                     {stageTitle(doc.stageIndex)}
                   </span>
                 )}
+                <SignerSelect doc={doc} signerOptions={signerOptions} setSignerAction={setSignerAction} />
                 <SignatureBadge doc={doc} clientId={clientId} />
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs text-stone-400">{formatFileSize(doc.size)}</span>

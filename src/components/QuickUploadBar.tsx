@@ -9,12 +9,19 @@ export function QuickUploadBar({
   context,
   documentsHref,
   stageOptions,
+  signerOptions,
   uploadAction,
 }: {
   context: UploadAuthContext;
   documentsHref: string;
   stageOptions: { index: number; title: string }[];
-  uploadAction: (stageIndex: number | null, blobs: UploadedBlobMeta[], visibleToClient: boolean) => Promise<void>;
+  signerOptions: { id: string; name: string }[];
+  uploadAction: (
+    stageIndex: number | null,
+    signerId: string | null,
+    blobs: UploadedBlobMeta[],
+    visibleToClient: boolean
+  ) => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -61,12 +68,13 @@ export function QuickUploadBar({
         <div className="p-5 pt-4 border-t border-stone-200">
           <DocumentUploadForm
             context={context}
-            onUploadWithStage={async (stageIndex, blobs, visibleToClient) => {
-              await uploadAction(stageIndex, blobs, visibleToClient);
+            onUploadWithStageAndSigner={async (stageIndex, signerId, blobs, visibleToClient) => {
+              await uploadAction(stageIndex, signerId, blobs, visibleToClient);
               setOpen(false);
             }}
             onUploadingChange={setUploading}
             stageOptions={stageOptions}
+            signerOptions={signerOptions}
             showVisibilityToggle
             className="space-y-3"
           />

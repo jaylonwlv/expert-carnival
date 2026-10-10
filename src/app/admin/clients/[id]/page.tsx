@@ -16,8 +16,10 @@ import { ChecklistAccordion, type ChecklistStageData } from "@/components/Checkl
 import { PCSBadge } from "@/components/PCSBadge";
 import { StageSwitcher } from "@/components/StageSwitcher";
 import {
+  addSigner,
   createDocumentRecords,
   deleteClient,
+  removeSigner,
   setChecklistItemStatus,
   toggleClientPCS,
   updateAppointment,
@@ -38,6 +40,7 @@ export default async function ClientDetailPage({
       documents: { orderBy: { createdAt: "desc" } },
       activityLog: { orderBy: { createdAt: "desc" } },
       signatureRequests: { include: { document: true }, orderBy: { createdAt: "desc" } },
+      signers: { orderBy: { createdAt: "asc" } },
     },
   });
 
@@ -61,6 +64,8 @@ export default async function ClientDetailPage({
   const updateAppointmentForClient = updateAppointment.bind(null, client.id);
   const updateNeighborhoodsForClient = updateNeighborhoods.bind(null, client.id);
   const toggleClientPCSForClient = toggleClientPCS.bind(null, client.id);
+  const addSignerForClient = addSigner.bind(null, client.id);
+  const signerOptions = client.signers.map((signer) => ({ id: signer.id, name: signer.name }));
 
   const pendingSignatures = client.signatureRequests.filter((r) => r.status !== "signed");
   const signedDocuments = client.signatureRequests.filter((r) => r.status === "signed");
@@ -138,8 +143,59 @@ export default async function ClientDetailPage({
           context={{ kind: "admin", clientId: client.id }}
           documentsHref={`/admin/clients/${client.id}/documents`}
           stageOptions={STAGES.map((s, index) => ({ index, title: s.title }))}
+          signerOptions={signerOptions}
           uploadAction={uploadStageDocumentForClient}
         />
+
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">
+          <h2 className="text-sm font-semibold text-stone-900">Signers</h2>
+          <p className="text-sm text-stone-500">
+            Everyone whose own documents need to be told apart -- e.g. both spouses on a joint purchase. Tag
+            uploads with a signer below, or leave a document as &ldquo;Shared&rdquo; when it&apos;s not specific
+            to one person.
+          </p>
+          {client.signers.length > 0 && (
+            <ul className="flex flex-wrap gap-2">
+              {client.signers.map((signer) => (
+                <li
+                  key={signer.id}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-800 bg-stone-100 rounded-full pl-3 pr-1.5 py-1"
+                >
+                  {signer.name}
+                  <form action={removeSigner.bind(null, signer.id)}>
+                    <button
+                      type="submit"
+                      aria-label={`Remove ${signer.name}`}
+                      className="w-5 h-5 flex items-center justify-center rounded-full text-stone-400 hover:text-red-600 hover:bg-white"
+                    >
+                      ✕
+                    </button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          )}
+          <ActionForm action={addSignerForClient} toastMessage="Signer added." className="flex items-end gap-3">
+            <div className="flex-1">
+              <label htmlFor="signerName" className="block text-xs font-medium text-stone-500 mb-1">
+                Add a signer
+              </label>
+              <input
+                id="signerName"
+                type="text"
+                name="name"
+                placeholder="e.g. John Smith"
+                className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
+              />
+            </div>
+            <SubmitButton
+              pendingText="Adding…"
+              className="rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
+            >
+              Add
+            </SubmitButton>
+          </ActionForm>
+        </section>
 
         {client.signatureRequests.length > 0 && (
           <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">
@@ -213,6 +269,7 @@ export default async function ClientDetailPage({
             tourHref={`/admin/clients/${client.id}/tour`}
             onSetStatus={setChecklistItemStatus}
             uploadAction={uploadStageDocumentForClient}
+            signers={signerOptions}
             neighborhoods={{ groups: NEIGHBORHOOD_GROUPS, selected: client.preferredNeighborhoods }}
             updateNeighborhoodsAction={updateNeighborhoodsForClient}
           />
@@ -302,7 +359,8 @@ export default async function ClientDetailPage({
 
           <DocumentUploadForm
             context={{ kind: "admin", clientId: client.id }}
-            onUpload={uploadGeneralDocumentForClient}
+            onUploadWithSigner={uploadGeneralDocumentForClient}
+            signerOptions={signerOptions}
             showVisibilityToggle
             className="space-y-3 pt-3 border-t border-stone-100"
           />

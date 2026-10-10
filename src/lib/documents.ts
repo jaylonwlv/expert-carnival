@@ -90,12 +90,14 @@ export async function createDocumentRecordsForClient({
   visibleToClient,
   uploadedBy,
   stageIndex,
+  signerId,
 }: {
   clientId: string;
   blobs: UploadedBlobMeta[];
   visibleToClient: boolean;
   uploadedBy: "admin" | "client";
   stageIndex?: number | null;
+  signerId?: string | null;
 }): Promise<string[]> {
   const filenames: string[] = [];
 
@@ -145,6 +147,7 @@ export async function createDocumentRecordsForClient({
         visibleToClient,
         uploadedBy,
         stageIndex: stageIndex ?? null,
+        signerId: signerId ?? null,
       },
     });
 

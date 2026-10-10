@@ -36,6 +36,7 @@ export function ChecklistAccordion({
   tourHref,
   onSetStatus,
   uploadAction,
+  signers,
   neighborhoods,
   updateNeighborhoodsAction,
 }: {
@@ -45,7 +46,8 @@ export function ChecklistAccordion({
   documentsHref: string;
   tourHref: string;
   onSetStatus: (itemId: string, status: ChecklistStatus) => void;
-  uploadAction: (stageIndex: number, blobs: UploadedBlobMeta[], visibleToClient: boolean) => Promise<void>;
+  uploadAction: (stageIndex: number, signerId: string | null, blobs: UploadedBlobMeta[], visibleToClient: boolean) => Promise<void>;
+  signers: { id: string; name: string }[];
   neighborhoods: { groups: NeighborhoodGroup[]; selected: string[] };
   updateNeighborhoodsAction: (formData: FormData) => Promise<void>;
 }) {
@@ -169,7 +171,10 @@ export function ChecklistAccordion({
                     </div>
                     <DocumentUploadForm
                       context={{ kind: "admin", clientId }}
-                      onUpload={(blobs, visibleToClient) => uploadAction(stage.index, blobs, visibleToClient)}
+                      onUploadWithSigner={(signerId, blobs, visibleToClient) =>
+                        uploadAction(stage.index, signerId, blobs, visibleToClient)
+                      }
+                      signerOptions={signers}
                       className="space-y-3"
                     />
                   </div>
