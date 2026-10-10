@@ -16,7 +16,7 @@ export default async function LoginPage({
         action={login}
         className="w-full max-w-sm bg-white rounded-2xl shadow-lg border border-stone-200 p-8 space-y-5"
       >
-        <div>
+        <div className="flex flex-col items-center text-center">
           <Image src="/logo.png" alt="Relocation Engine LLC" width={680} height={546} className="h-16 w-auto mb-4" priority />
           <p className="text-sm text-stone-500">Admin sign in</p>
         </div>
