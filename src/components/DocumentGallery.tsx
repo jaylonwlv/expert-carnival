@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { formatFileSize, fileKindLabel, isImageFile } from "@/lib/format";
 import { FileTypeIcon } from "@/components/FileTypeIcon";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
@@ -16,7 +17,44 @@ type GalleryDocument = {
   uploadedBy: string;
   stageIndex: number | null;
   createdAt: Date;
+  signatureRequest?: { status: string } | null;
 };
+
+function isPdf(doc: GalleryDocument): boolean {
+  return doc.contentType === "application/pdf" || doc.filename.toLowerCase().endsWith(".pdf");
+}
+
+function SignatureBadge({ doc, clientId }: { doc: GalleryDocument; clientId: string }) {
+  if (!isPdf(doc)) return null;
+
+  if (!doc.signatureRequest) {
+    return (
+      <Link
+        href={`/admin/clients/${clientId}/documents/${doc.id}/sign-setup`}
+        className="text-xs font-medium text-neutral-600 bg-neutral-100 hover:bg-neutral-200 rounded-full px-2 py-0.5 shrink-0"
+      >
+        Request signature
+      </Link>
+    );
+  }
+
+  if (doc.signatureRequest.status === "signed") {
+    return (
+      <span className="text-xs font-medium text-emerald-700 bg-emerald-50 rounded-full px-2 py-0.5 shrink-0">
+        Signed
+      </span>
+    );
+  }
+
+  return (
+    <Link
+      href={`/admin/clients/${clientId}/documents/${doc.id}/sign-setup`}
+      className="text-xs font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-full px-2 py-0.5 shrink-0"
+    >
+      Awaiting signature
+    </Link>
+  );
+}
 
 type ViewMode = "list" | "medium" | "large";
 
@@ -27,10 +65,12 @@ function stageTitle(stageIndex: number | null): string | null {
 
 export function DocumentGallery({
   documents,
+  clientId,
   deleteAction,
   toggleAction,
 }: {
   documents: GalleryDocument[];
+  clientId: string;
   deleteAction: (documentId: string) => void;
   toggleAction: (documentId: string) => void;
 }) {
@@ -84,6 +124,7 @@ export function DocumentGallery({
                   {stageTitle(doc.stageIndex)}
                 </span>
               )}
+              <SignatureBadge doc={doc} clientId={clientId} />
               <span className="text-xs text-neutral-400 shrink-0">{formatFileSize(doc.size)}</span>
               <VisibilityBadge
                 visible={doc.visibleToClient}
@@ -142,6 +183,7 @@ export function DocumentGallery({
                     {stageTitle(doc.stageIndex)}
                   </span>
                 )}
+                <SignatureBadge doc={doc} clientId={clientId} />
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs text-neutral-400">{formatFileSize(doc.size)}</span>
                   <VisibilityBadge

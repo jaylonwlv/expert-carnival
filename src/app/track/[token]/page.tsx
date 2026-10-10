@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
@@ -22,7 +23,14 @@ export default async function TrackPage({
   const { token } = await params;
   const client = await prisma.client.findUnique({
     where: { token },
-    include: { documents: { where: { visibleToClient: true }, orderBy: { createdAt: "desc" } } },
+    include: {
+      documents: { where: { visibleToClient: true }, orderBy: { createdAt: "desc" } },
+      signatureRequests: {
+        where: { status: { in: ["pending", "viewed"] } },
+        include: { document: true },
+        orderBy: { createdAt: "desc" },
+      },
+    },
   });
 
   if (!client) {
@@ -53,6 +61,24 @@ export default async function TrackPage({
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-5">
+        {client.signatureRequests.length > 0 && (
+          <section className="bg-red-600 rounded-xl shadow-sm p-5 space-y-2">
+            <p className="text-sm font-semibold text-white uppercase tracking-wide">Documents to be signed</p>
+            <ul className="space-y-1.5">
+              {client.signatureRequests.map((request) => (
+                <li key={request.id}>
+                  <Link
+                    href={`/track/${token}/sign/${request.id}`}
+                    className="text-sm font-medium text-white underline hover:text-red-100"
+                  >
+                    {request.document.filename}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <div className="flex items-center justify-between gap-3">
           <div>
             <h1 className="text-xl font-semibold text-neutral-900">

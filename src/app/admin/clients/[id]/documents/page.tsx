@@ -13,7 +13,12 @@ export default async function ClientDocumentsPage({
   const { id } = await params;
   const client = await prisma.client.findUnique({
     where: { id },
-    include: { documents: { orderBy: { createdAt: "desc" } } },
+    include: {
+      documents: {
+        orderBy: { createdAt: "desc" },
+        include: { signatureRequest: true },
+      },
+    },
   });
 
   if (!client) {
@@ -57,6 +62,7 @@ export default async function ClientDocumentsPage({
 
         <DocumentGallery
           documents={documents}
+          clientId={client.id}
           deleteAction={deleteDocument}
           toggleAction={toggleDocumentVisibility}
         />
