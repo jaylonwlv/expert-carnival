@@ -1,10 +1,19 @@
 import { issueSignedToken, presignUrl } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 
+// Vercel Blob's default signed-URL lifetime is 1 hour, which is tight for a
+// real estate workflow: a client might open a signing link, get pulled away
+// mid-review, and come back hours later to find the PDF has stopped loading
+// (pdf.js can still be fetching later pages of a multi-page document well
+// after the page's initial load). 72 hours gives documents days, not
+// minutes, to actually get reviewed and signed before a link goes stale.
+const SIGNED_URL_LIFETIME_MS = 72 * 60 * 60 * 1000;
+
 export async function getSignedDownloadUrl(pathname: string): Promise<string> {
   const signedToken = await issueSignedToken({
     pathname,
     operations: ["get"],
+    validUntil: Date.now() + SIGNED_URL_LIFETIME_MS,
   });
 
   const { presignedUrl } = await presignUrl(signedToken, {
