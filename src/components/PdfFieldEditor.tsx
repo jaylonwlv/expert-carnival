@@ -19,6 +19,7 @@ export function PdfFieldEditor({
   const [armedType, setArmedType] = useState<SignatureFieldType | null>(null);
   const [fields, setFields] = useState<EditorField[]>([]);
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const dragState = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
 
   function handlePageClick(pageIndex: number, xPx: number, yPx: number, size: PageSize) {
@@ -79,6 +80,7 @@ export function PdfFieldEditor({
 
   async function handleSend() {
     setSending(true);
+    setError(null);
     try {
       await onSend(
         fields.map((f) => ({
@@ -93,7 +95,8 @@ export function PdfFieldEditor({
         }))
       );
       router.refresh();
-    } finally {
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong sending this document for signature.");
       setSending(false);
     }
   }
@@ -161,6 +164,7 @@ export function PdfFieldEditor({
         }
       />
 
+      {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="flex items-center justify-between pt-3 border-t border-neutral-100">
         <p className="text-sm text-neutral-500">{fields.length} field{fields.length === 1 ? "" : "s"} placed</p>
         <button

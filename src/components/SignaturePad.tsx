@@ -10,6 +10,30 @@ const SIGNATURE_FONTS = [
 
 type Mode = "type" | "draw" | "upload";
 
+// pdf-lib's embedPng requires actual PNG bytes, but <input accept="image/*">
+// lets a client upload a JPEG/WEBP/etc., whose data URL would still pass a
+// naive "data:image/..." check. Re-encoding through a canvas normalizes any
+// browser-decodable image format to PNG before it's ever stamped into a PDF.
+function reencodeAsPng(dataUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("Could not process this image"));
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => reject(new Error("Could not read this image file"));
+    img.src = dataUrl;
+  });
+}
+
 function textToDataUrl(text: string, fontFamily: string, width = 400, height = 120): string {
   const canvas = document.createElement("canvas");
   canvas.width = width;
@@ -40,6 +64,7 @@ export function SignaturePad({
   const drawing = useRef(false);
   const [hasDrawn, setHasDrawn] = useState(false);
   const [uploadedDataUrl, setUploadedDataUrl] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     const link = document.createElement("link");
@@ -176,12 +201,22 @@ export function SignaturePad({
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
+                setUploadError(null);
+                setUploadedDataUrl(null);
                 const reader = new FileReader();
-                reader.onload = () => setUploadedDataUrl(reader.result as string);
+                reader.onload = async () => {
+                  try {
+                    const png = await reencodeAsPng(reader.result as string);
+                    setUploadedDataUrl(png);
+                  } catch {
+                    setUploadError("Could not use this image. Please try a different file.");
+                  }
+                };
                 reader.readAsDataURL(file);
               }}
               className="text-sm"
             />
+            {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
             {uploadedDataUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={uploadedDataUrl} alt="Uploaded signature" className="max-h-24 border border-neutral-200 rounded-md" />

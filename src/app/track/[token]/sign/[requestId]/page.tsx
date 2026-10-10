@@ -27,7 +27,7 @@ export default async function SignPage({
   }
 
   const fileUrl = await getSignedDownloadUrl(request.document.pathname);
-  const onSubmit = submitSignature.bind(null, requestId);
+  const onSubmit = submitSignature.bind(null, requestId, token);
 
   return (
     <div className="min-h-screen bg-neutral-50">
