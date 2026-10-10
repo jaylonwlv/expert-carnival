@@ -73,11 +73,11 @@ export function TourRoutePlanner({
   saveRouteAction: (stops: TourStop[]) => Promise<void>;
 }) {
   const hasSaved = !!initialStops && initialStops.length >= 2;
-  const [stops, setStops] = useState<Stop[]>(
+  const [stops, setStops] = useState<Stop[]>(() =>
     hasSaved ? stopsFromSaved(initialStops) : [newStop(), newStop()]
   );
   const [planning, setPlanning] = useState(false);
-  const [order, setOrder] = useState<number[] | null>(hasSaved ? initialStops.map((_, i) => i) : null);
+  const [order, setOrder] = useState<number[] | null>(() => (hasSaved ? initialStops.map((_, i) => i) : null));
   const [saving, setSaving] = useState(false);
   const [savedJustNow, setSavedJustNow] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);

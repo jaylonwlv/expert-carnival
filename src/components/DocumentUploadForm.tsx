@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { FileDropzone } from "@/components/FileDropzone";
 import { SaveToast } from "@/components/ActionForm";
@@ -10,6 +10,7 @@ export function DocumentUploadForm({
   context,
   onUpload,
   onUploadWithStage,
+  onUploadingChange,
   stageOptions,
   maxFiles = 5,
   showVisibilityToggle = false,
@@ -22,12 +23,16 @@ export function DocumentUploadForm({
   // callback so each call site's existing prop stays untouched.
   onUpload?: (blobs: UploadedBlobMeta[], visibleToClient: boolean) => Promise<void>;
   onUploadWithStage?: (stageIndex: number | null, blobs: UploadedBlobMeta[], visibleToClient: boolean) => Promise<void>;
+  // Lets a parent that can unmount or navigate away from this form (e.g. a
+  // collapsible panel) hold off until the upload actually finishes.
+  onUploadingChange?: (uploading: boolean) => void;
   stageOptions?: { index: number; title: string }[];
   maxFiles?: number;
   showVisibilityToggle?: boolean;
   submitLabel?: string;
   className?: string;
 }) {
+  const stageSelectId = useId();
   const [files, setFiles] = useState<File[]>([]);
   const [visibleToClient, setVisibleToClient] = useState(false);
   const [stageIndex, setStageIndex] = useState<number | null>(null);
@@ -42,6 +47,7 @@ export function DocumentUploadForm({
     }
 
     setUploading(true);
+    onUploadingChange?.(true);
     try {
       const blobs: UploadedBlobMeta[] = await Promise.all(
         files.map(async (file) => {
@@ -77,6 +83,7 @@ export function DocumentUploadForm({
       });
     } finally {
       setUploading(false);
+      onUploadingChange?.(false);
     }
   }
 
@@ -85,11 +92,11 @@ export function DocumentUploadForm({
       <FileDropzone files={files} onFilesChange={setFiles} maxFiles={maxFiles} />
       {stageOptions && (
         <div>
-          <label htmlFor="stageIndex" className="block text-xs font-medium text-stone-500 mb-1">
+          <label htmlFor={stageSelectId} className="block text-xs font-medium text-stone-500 mb-1">
             Which stage does this document belong to?
           </label>
           <select
-            id="stageIndex"
+            id={stageSelectId}
             value={stageIndex ?? ""}
             onChange={(e) => setStageIndex(e.target.value === "" ? null : Number(e.target.value))}
             className="w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"

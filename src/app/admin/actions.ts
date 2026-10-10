@@ -123,13 +123,30 @@ export async function saveTourRoute(clientId: string, stops: TourStop[]) {
   if (stops.length < 2) {
     throw new Error("Need at least 2 stops to save a route");
   }
+  for (const stop of stops) {
+    if (typeof stop.address !== "string" || stop.address.trim() === "" || stop.address.length > 300) {
+      throw new Error("Invalid stop address");
+    }
+    if (typeof stop.lat !== "number" || !Number.isFinite(stop.lat) || stop.lat < -90 || stop.lat > 90) {
+      throw new Error("Invalid stop latitude");
+    }
+    if (typeof stop.lng !== "number" || !Number.isFinite(stop.lng) || stop.lng < -180 || stop.lng > 180) {
+      throw new Error("Invalid stop longitude");
+    }
+  }
 
-  const client = await prisma.client.update({
-    where: { id: clientId },
-    data: { tourStops: stops, tourSavedAt: new Date() },
-  });
-
-  await logActivity(clientId, `Shared a ${stops.length}-stop tour route with the client.`);
+  // Transacted so a failure logging the activity can't leave the client's
+  // page showing a route that the realtor was told (via a thrown error)
+  // never got shared.
+  const [client] = await prisma.$transaction([
+    prisma.client.update({
+      where: { id: clientId },
+      data: { tourStops: stops, tourSavedAt: new Date() },
+    }),
+    prisma.activityLog.create({
+      data: { clientId, message: `Shared a ${stops.length}-stop tour route with the client.` },
+    }),
+  ]);
 
   revalidatePath(`/admin/clients/${clientId}`);
   revalidatePath(`/admin/clients/${clientId}/tour`);
