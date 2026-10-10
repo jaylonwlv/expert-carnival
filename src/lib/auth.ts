@@ -24,5 +24,9 @@ export function isValidSessionToken(token: string | undefined): boolean {
 }
 
 export function checkPassword(password: string): boolean {
-  return password === getSecret();
+  const secret = getSecret();
+  const a = Buffer.from(password);
+  const b = Buffer.from(secret);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
 }

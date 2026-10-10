@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { prisma } from "@/lib/prisma";
 import { SESSION_COOKIE, isValidSessionToken } from "@/lib/auth";
-import type { UploadAuthContext } from "@/lib/documents";
+import { isSafeDocumentPathname, type UploadAuthContext } from "@/lib/documents";
 
 // Documents can be several MB (scanned contracts, phone photos); uploading
 // them straight from the browser to Blob storage, rather than through a
@@ -45,7 +45,7 @@ export async function POST(request: Request): Promise<NextResponse> {
           authorizedClientId = client.id;
         }
 
-        if (!pathname.startsWith(`clients/${authorizedClientId}/`)) {
+        if (!isSafeDocumentPathname(pathname, authorizedClientId)) {
           throw new Error("Invalid upload path");
         }
 

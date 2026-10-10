@@ -35,6 +35,21 @@ export type UploadAuthContext =
   | { kind: "admin"; clientId: string }
   | { kind: "client"; token: string; clientId: string };
 
+// A pathname's "clients/<id>/" prefix proves which client it belongs to,
+// but the filename after it comes straight from the uploaded File's own
+// .name with no sanitization. Blob storage treats the whole string as an
+// opaque key rather than a resolved filesystem path, so a stray "/" or ".."
+// in a filename isn't known to let one client's upload collide with
+// another's real blob -- but there's no reason to let a filename produce
+// anything other than a single flat segment under that prefix, so this
+// rejects the possibility outright rather than relying on that assumption.
+export function isSafeDocumentPathname(pathname: string, clientId: string): boolean {
+  const prefix = `clients/${clientId}/`;
+  if (!pathname.startsWith(prefix)) return false;
+  const rest = pathname.slice(prefix.length);
+  return rest.length > 0 && !rest.includes("/") && !rest.includes("..");
+}
+
 export async function createDocumentRecordsForClient({
   clientId,
   blobs,
@@ -49,15 +64,14 @@ export async function createDocumentRecordsForClient({
   stageIndex?: number | null;
 }): Promise<string[]> {
   const filenames: string[] = [];
-  const expectedPrefix = `clients/${clientId}/`;
 
   for (const blob of blobs) {
     // The /api/blob-upload route only lets a browser mint an upload token
-    // scoped to this exact prefix, but this function takes plain metadata
-    // as a Server Action argument -- without re-checking it here, nothing
-    // stops a caller from claiming a pathname (and therefore a blob) that
-    // actually belongs to a different client.
-    if (!blob.pathname.startsWith(expectedPrefix)) {
+    // scoped to this client's prefix, but this function takes plain
+    // metadata as a Server Action argument -- without re-checking it here,
+    // nothing stops a caller from claiming a pathname (and therefore a
+    // blob) that actually belongs to a different client.
+    if (!isSafeDocumentPathname(blob.pathname, clientId)) {
       throw new Error("Invalid document reference");
     }
 

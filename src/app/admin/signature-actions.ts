@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activity";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, escapeHtml } from "@/lib/email";
 import { buildTrackerUrl } from "@/lib/trackerUrl";
 import type { PlacedFieldPayload } from "@/lib/signatureFields";
 
@@ -43,7 +43,7 @@ export async function createSignatureRequest(documentId: string, fields: PlacedF
     await sendEmail({
       to: document.client.email,
       subject: "A document is waiting for your signature",
-      html: `<p>Hi ${document.client.name.split(" ")[0]},</p><p>A document ("${document.filename}") is ready for your signature.</p><p><a href="${trackerUrl}">Review and sign</a></p>`,
+      html: `<p>Hi ${escapeHtml(document.client.name.split(" ")[0])},</p><p>A document ("${escapeHtml(document.filename)}") is ready for your signature.</p><p><a href="${trackerUrl}">Review and sign</a></p>`,
     });
   }
 

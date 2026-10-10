@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getSignedDownloadUrl } from "@/lib/documents";
 import { stampSignedPdf, type FieldToStamp } from "@/lib/signature";
 import { logActivity } from "@/lib/activity";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, escapeHtml } from "@/lib/email";
 
 async function clientIp(): Promise<string | null> {
   const headerList = await headers();
@@ -128,7 +128,7 @@ export async function submitSignature(
       await sendEmail({
         to: agentEmail,
         subject: `${request.client.name} signed "${request.document.filename}"`,
-        html: `<p>${request.client.name} just signed "${request.document.filename}". The signed copy is in their document gallery.</p>`,
+        html: `<p>${escapeHtml(request.client.name)} just signed "${escapeHtml(request.document.filename)}". The signed copy is in their document gallery.</p>`,
       });
     }
 

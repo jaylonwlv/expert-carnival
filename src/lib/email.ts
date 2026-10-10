@@ -1,3 +1,16 @@
+// A document's filename (or a client's name) can end up interpolated
+// straight into an HTML email body, and either one can originate from a
+// client-controlled upload or form field -- escape before interpolating
+// into any email HTML built from them.
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // Sends via Resend's REST API directly (no SDK dependency, consistent with
 // how this project avoids extra service wrappers). No-ops with a console log
 // when RESEND_API_KEY isn't set, matching the FAKE_SIGNED_URLS pattern in
