@@ -84,6 +84,7 @@ export function TourRoutePlanner({
 
   function updateAddress(id: string, address: string) {
     setOrder(null);
+    setSavedJustNow(false);
     setStops((prev) => prev.map((s) => (s.id === id ? { ...s, address, status: "idle", point: null, error: null } : s)));
   }
 
@@ -93,11 +94,13 @@ export function TourRoutePlanner({
 
   function removeStop(id: string) {
     setOrder(null);
+    setSavedJustNow(false);
     setStops((prev) => (prev.length > 2 ? prev.filter((s) => s.id !== id) : prev));
   }
 
   async function planRoute() {
     setOrder(null);
+    setSavedJustNow(false);
     setPlanning(true);
 
     const addressable = stops.filter((s) => s.address.trim() !== "");
