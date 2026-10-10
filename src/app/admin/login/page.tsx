@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { SubmitButton } from "@/components/SubmitButton";
 import { login } from "./actions";
 
 export default async function LoginPage({
@@ -47,12 +48,12 @@ export default async function LoginPage({
           />
         </div>
 
-        <button
-          type="submit"
+        <SubmitButton
+          pendingText="Signing in…"
           className="w-full rounded-lg bg-amber-600 text-white text-sm font-medium py-2.5 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
         >
           Sign in
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

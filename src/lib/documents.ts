@@ -9,11 +9,31 @@ import { prisma } from "@/lib/prisma";
 // minutes, to actually get reviewed and signed before a link goes stale.
 const SIGNED_URL_LIFETIME_MS = 72 * 60 * 60 * 1000;
 
+// Every page that lists documents (the gallery, the client tracker, the
+// signing view) calls this once per document on every render, and each call
+// is two sequential round trips to Vercel's Blob control API -- that's real,
+// externally-imposed latency on pages that otherwise only touch our own DB.
+// Since a signed URL is now valid for 72 hours, regenerating one on every
+// single page load was pure waste; this reuses one already in flight within
+// that window instead. The margin below just keeps a URL from expiring in
+// the gap between being handed to the browser and actually being fetched --
+// it doesn't change what's servable, only how often this re-asks Vercel for
+// something it already knows the answer to.
+const CACHE_RENEWAL_MARGIN_MS = 10 * 60 * 1000;
+const MAX_CACHED_URLS = 10_000;
+const signedUrlCache = new Map<string, { url: string; expiresAt: number }>();
+
 export async function getSignedDownloadUrl(pathname: string): Promise<string> {
+  const cached = signedUrlCache.get(pathname);
+  if (cached && Date.now() < cached.expiresAt - CACHE_RENEWAL_MARGIN_MS) {
+    return cached.url;
+  }
+
+  const validUntil = Date.now() + SIGNED_URL_LIFETIME_MS;
   const signedToken = await issueSignedToken({
     pathname,
     operations: ["get"],
-    validUntil: Date.now() + SIGNED_URL_LIFETIME_MS,
+    validUntil,
   });
 
   const { presignedUrl } = await presignUrl(signedToken, {
@@ -21,6 +41,11 @@ export async function getSignedDownloadUrl(pathname: string): Promise<string> {
     pathname,
     access: "private",
   });
+
+  if (signedUrlCache.size > MAX_CACHED_URLS) {
+    signedUrlCache.clear();
+  }
+  signedUrlCache.set(pathname, { url: presignedUrl, expiresAt: validUntil });
 
   return presignedUrl;
 }

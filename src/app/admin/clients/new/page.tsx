@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SubmitButton } from "@/components/SubmitButton";
 import { createClient } from "../../actions";
 
 export default function NewClientPage() {
@@ -62,12 +63,12 @@ export default function NewClientPage() {
             <input type="checkbox" name="isPCS" className="rounded" />
             PCS / military relocation (VA loan checklist)
           </label>
-          <button
-            type="submit"
+          <SubmitButton
+            pendingText="Creating…"
             className="w-full rounded-md bg-amber-600 text-white text-sm font-medium py-2.5 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
           >
             Create client & tracker link
-          </button>
+          </SubmitButton>
         </form>
       </main>
     </div>

@@ -9,6 +9,7 @@ import { NEIGHBORHOOD_GROUPS } from "@/lib/neighborhoods";
 import { buildTrackerUrl } from "@/lib/trackerUrl";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { ActionForm } from "@/components/ActionForm";
+import { SubmitButton } from "@/components/SubmitButton";
 import { DocumentUploadForm } from "@/components/DocumentUploadForm";
 import { ChecklistAccordion, type ChecklistStageData } from "@/components/ChecklistAccordion";
 import { PCSBadge } from "@/components/PCSBadge";
@@ -235,12 +236,12 @@ export default async function ClientDetailPage({
                 className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
               />
             </div>
-            <button
-              type="submit"
+            <SubmitButton
+              pendingText="Saving…"
               className="rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
             >
               Save
-            </button>
+            </SubmitButton>
           </ActionForm>
           {client.appointmentAt && (
             <form action={updateAppointmentForClient}>
@@ -265,12 +266,12 @@ export default async function ClientDetailPage({
               placeholder="e.g. Inspection is scheduled for Thursday at 10am."
               className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
             />
-            <button
-              type="submit"
+            <SubmitButton
+              pendingText="Saving…"
               className="rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
             >
               Save update
-            </button>
+            </SubmitButton>
           </ActionForm>
         </section>
 

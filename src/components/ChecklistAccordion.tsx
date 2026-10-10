@@ -5,6 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { timeAgo } from "@/lib/format";
 import { ActionForm } from "@/components/ActionForm";
+import { SubmitButton } from "@/components/SubmitButton";
 import { DocumentUploadForm } from "@/components/DocumentUploadForm";
 import type { ChecklistStatus } from "@/lib/checklist";
 import type { NeighborhoodGroup } from "@/lib/neighborhoods";
@@ -144,12 +145,12 @@ export function ChecklistAccordion({
                       Click a pin (or a chip below the map) to select. Drag a pin to correct its position.
                     </p>
                     <NeighborhoodMapPicker groups={neighborhoods.groups} selected={neighborhoods.selected} />
-                    <button
-                      type="submit"
+                    <SubmitButton
+                      pendingText="Saving…"
                       className="rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
                     >
                       Save neighborhoods
-                    </button>
+                    </SubmitButton>
                   </ActionForm>
                 )}
 

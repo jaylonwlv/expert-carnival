@@ -1,5 +1,7 @@
 "use client";
 
+import { SubmitButton } from "@/components/SubmitButton";
+
 export function ConfirmSubmitButton({
   action,
   confirmMessage,
@@ -20,15 +22,15 @@ export function ConfirmSubmitButton({
         }
       }}
     >
-      <button
-        type="submit"
+      <SubmitButton
+        pendingText="…"
         className={
           className ??
           "rounded-md border border-red-300 bg-white text-red-700 text-sm font-medium px-3 py-2 shadow-sm hover:shadow-md hover:bg-red-50 transition"
         }
       >
         {label}
-      </button>
+      </SubmitButton>
     </form>
   );
 }
