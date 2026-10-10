@@ -22,7 +22,10 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* layout.tsx loads Geist via next/font and exposes it as this variable --
+     it was going unused in favor of a bare Arial fallback, which is most of
+     why text across the app read flatter/more generic than intended. */
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 @keyframes toast-fade {

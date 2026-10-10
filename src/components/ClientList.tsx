@@ -59,13 +59,13 @@ export function ClientList({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name, email, or phone"
-            className="w-full rounded-md border border-neutral-300 pl-9 pr-3 py-2 text-sm text-neutral-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+            className="w-full rounded-lg border border-stone-300 pl-9 pr-3 py-2.5 text-sm text-stone-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-600"
           />
         </div>
         <select
           value={stageFilter}
           onChange={(e) => setStageFilter(e.target.value)}
-          className="rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+          className="rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-600"
         >
           <option value="all">All stages</option>
           {STAGES.map((stage, index) => (
@@ -77,15 +77,15 @@ export function ClientList({
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-xl border border-neutral-200 py-16 text-center">
-          <p className="text-sm text-neutral-500">
+        <div className="bg-white rounded-2xl border border-stone-200 py-16 text-center">
+          <p className="text-sm text-stone-500">
             {clients.length === 0
               ? "No clients yet. Add your first client to get started."
               : "No clients match your search."}
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-neutral-200 divide-y divide-neutral-100 overflow-hidden shadow-sm">
+        <div className="bg-white rounded-2xl border border-stone-200 divide-y divide-stone-100 overflow-hidden shadow-sm">
           {filtered.map((client) => {
             const stage = STAGES[client.currentStage];
             const color = stageColor(client.currentStage);
@@ -93,7 +93,7 @@ export function ClientList({
             return (
               <div
                 key={client.id}
-                className="flex items-center gap-4 px-5 py-4 hover:bg-neutral-50 transition"
+                className="flex items-center gap-4 px-5 py-5 hover:bg-stone-50 transition"
               >
                 <div
                   className={`flex items-center justify-center w-11 h-11 rounded-full ${avatarColor(client.name)} text-white text-sm font-semibold shrink-0`}
@@ -102,10 +102,10 @@ export function ClientList({
                 </div>
                 <Link href={`/admin/clients/${client.id}`} className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-neutral-900 truncate">{client.name}</p>
+                    <p className="font-medium text-stone-900 truncate">{client.name}</p>
                     {client.isPCS && <PCSBadge />}
                   </div>
-                  <p className="text-sm text-neutral-500 truncate">
+                  <p className="text-sm text-stone-500 truncate">
                     {client.email || client.phone || "No contact info"}
                   </p>
                 </Link>
@@ -115,14 +115,14 @@ export function ClientList({
                   >
                     {stage.title}
                   </span>
-                  <div className="h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+                  <div className="h-1.5 rounded-full bg-stone-100 overflow-hidden">
                     <div
                       className={`h-full rounded-full ${color.solidBg}`}
                       style={{ width: `${progress}%` }}
                     />
                   </div>
                 </Link>
-                <p className="text-xs text-neutral-400 shrink-0 hidden md:block w-16 text-right">
+                <p className="text-xs text-stone-400 shrink-0 hidden md:block w-16 text-right">
                   {timeAgo(client.updatedAt)}
                 </p>
                 <ConfirmSubmitButton
