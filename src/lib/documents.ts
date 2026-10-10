@@ -1,4 +1,4 @@
-import { issueSignedToken, presignUrl, put } from "@vercel/blob";
+import { issueSignedToken, presignUrl } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 
 export async function getSignedDownloadUrl(pathname: string): Promise<string> {
@@ -18,42 +18,64 @@ export async function getSignedDownloadUrl(pathname: string): Promise<string> {
 
 export const MAX_FILES_PER_UPLOAD = 5;
 
-export async function createDocumentsForClient({
+// A file's bytes go straight from the browser to Vercel Blob (see
+// src/app/api/blob-upload/route.ts) -- by the time a Document row is
+// created, all we have left is this metadata, not the file itself.
+export type UploadedBlobMeta = {
+  filename: string;
+  pathname: string;
+  url: string;
+  contentType: string | null;
+  size: number;
+};
+
+// The context a browser passes to /api/blob-upload so it can authorize the
+// upload; shared with that route so the two sides can't drift apart.
+export type UploadAuthContext =
+  | { kind: "admin"; clientId: string }
+  | { kind: "client"; token: string; clientId: string };
+
+export async function createDocumentRecordsForClient({
   clientId,
-  files,
+  blobs,
   visibleToClient,
   uploadedBy,
   stageIndex,
 }: {
   clientId: string;
-  files: File[];
+  blobs: UploadedBlobMeta[];
   visibleToClient: boolean;
   uploadedBy: "admin" | "client";
   stageIndex?: number | null;
 }): Promise<string[]> {
   const filenames: string[] = [];
+  const expectedPrefix = `clients/${clientId}/`;
 
-  for (const file of files) {
-    const blob = await put(`clients/${clientId}/${file.name}`, file, {
-      access: "private",
-      addRandomSuffix: true,
-    });
+  for (const blob of blobs) {
+    // The /api/blob-upload route only lets a browser mint an upload token
+    // scoped to this exact prefix, but this function takes plain metadata
+    // as a Server Action argument -- without re-checking it here, nothing
+    // stops a caller from claiming a pathname (and therefore a blob) that
+    // actually belongs to a different client.
+    if (!blob.pathname.startsWith(expectedPrefix)) {
+      throw new Error("Invalid document reference");
+    }
 
     await prisma.document.create({
       data: {
         clientId,
-        filename: file.name,
+        filename: blob.filename,
         blobUrl: blob.url,
         pathname: blob.pathname,
-        contentType: file.type || null,
-        size: file.size,
+        contentType: blob.contentType,
+        size: blob.size,
         visibleToClient,
         uploadedBy,
         stageIndex: stageIndex ?? null,
       },
     });
 
-    filenames.push(file.name);
+    filenames.push(blob.filename);
   }
 
   return filenames;

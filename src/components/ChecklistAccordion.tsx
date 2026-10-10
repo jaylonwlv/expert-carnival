@@ -5,9 +5,10 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { timeAgo } from "@/lib/format";
 import { ActionForm } from "@/components/ActionForm";
-import { FileDropzone } from "@/components/FileDropzone";
+import { DocumentUploadForm } from "@/components/DocumentUploadForm";
 import type { ChecklistStatus } from "@/lib/checklist";
 import type { NeighborhoodGroup } from "@/lib/neighborhoods";
+import type { UploadedBlobMeta } from "@/lib/documents";
 
 // Leaflet touches `window` at import time, which breaks SSR -- load client-only.
 const NeighborhoodMapPicker = dynamic(
@@ -27,6 +28,7 @@ export type ChecklistStageData = {
 };
 
 export function ChecklistAccordion({
+  clientId,
   stages,
   currentStageIndex,
   documentsHref,
@@ -36,12 +38,13 @@ export function ChecklistAccordion({
   neighborhoods,
   updateNeighborhoodsAction,
 }: {
+  clientId: string;
   stages: ChecklistStageData[];
   currentStageIndex: number;
   documentsHref: string;
   tourHref: string;
   onSetStatus: (itemId: string, status: ChecklistStatus) => void;
-  uploadAction: (formData: FormData) => Promise<void>;
+  uploadAction: (stageIndex: number, blobs: UploadedBlobMeta[], visibleToClient: boolean) => Promise<void>;
   neighborhoods: { groups: NeighborhoodGroup[]; selected: string[] };
   updateNeighborhoodsAction: (formData: FormData) => Promise<void>;
 }) {
@@ -151,11 +154,7 @@ export function ChecklistAccordion({
                 )}
 
                 {stage.documentHeavy && (
-                  <ActionForm
-                    action={uploadAction}
-                    toastMessage="Document(s) uploaded."
-                    className="pt-3 border-t border-neutral-100 space-y-3"
-                  >
+                  <div className="pt-3 border-t border-neutral-100 space-y-3">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-medium text-neutral-600">
                         Documents for this stage{" "}
@@ -167,15 +166,12 @@ export function ChecklistAccordion({
                         View all documents
                       </Link>
                     </div>
-                    <input type="hidden" name="stageIndex" value={stage.index} />
-                    <FileDropzone name="file" maxFiles={5} />
-                    <button
-                      type="submit"
-                      className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
-                    >
-                      Upload document(s)
-                    </button>
-                  </ActionForm>
+                    <DocumentUploadForm
+                      context={{ kind: "admin", clientId }}
+                      onUpload={(blobs, visibleToClient) => uploadAction(stage.index, blobs, visibleToClient)}
+                      className="space-y-3"
+                    />
+                  </div>
                 )}
               </div>
             )}

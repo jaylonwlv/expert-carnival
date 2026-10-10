@@ -3,28 +3,25 @@
 import { useRef, useState } from "react";
 import { formatFileSize } from "@/lib/format";
 
-export function FileDropzone({ name, maxFiles = 5 }: { name: string; maxFiles?: number }) {
+export function FileDropzone({
+  files,
+  onFilesChange,
+  maxFiles = 5,
+}: {
+  files: File[];
+  onFilesChange: (files: File[]) => void;
+  maxFiles?: number;
+}) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [files, setFiles] = useState<File[]>([]);
   const [dragOver, setDragOver] = useState(false);
-
-  function syncInput(nextFiles: File[]) {
-    const dt = new DataTransfer();
-    nextFiles.forEach((file) => dt.items.add(file));
-    if (inputRef.current) {
-      inputRef.current.files = dt.files;
-    }
-    setFiles(nextFiles);
-  }
 
   function addFiles(incoming: FileList | null) {
     if (!incoming || incoming.length === 0) return;
-    const combined = [...files, ...Array.from(incoming)].slice(0, maxFiles);
-    syncInput(combined);
+    onFilesChange([...files, ...Array.from(incoming)].slice(0, maxFiles));
   }
 
   function removeFile(index: number) {
-    syncInput(files.filter((_, i) => i !== index));
+    onFilesChange(files.filter((_, i) => i !== index));
   }
 
   return (
@@ -68,10 +65,14 @@ export function FileDropzone({ name, maxFiles = 5 }: { name: string; maxFiles?: 
       <input
         ref={inputRef}
         type="file"
-        name={name}
         multiple
         className="hidden"
-        onChange={(e) => addFiles(e.target.files)}
+        onChange={(e) => {
+          addFiles(e.target.files);
+          // Without this, picking the same filename again (e.g. re-adding a
+          // file just removed) wouldn't re-fire onChange.
+          e.target.value = "";
+        }}
       />
 
       {files.length > 0 && (

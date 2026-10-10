@@ -8,7 +8,7 @@ import { del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { STAGES } from "@/lib/stages";
-import { createDocumentsForClient, MAX_FILES_PER_UPLOAD } from "@/lib/documents";
+import { createDocumentRecordsForClient, MAX_FILES_PER_UPLOAD, type UploadedBlobMeta } from "@/lib/documents";
 import { logActivity } from "@/lib/activity";
 import { parseAppointmentInput, formatAppointment } from "@/lib/format";
 import type { ChecklistStatus } from "@/lib/checklist";
@@ -123,30 +123,25 @@ export async function deleteClient(clientId: string) {
   redirect("/admin");
 }
 
-export async function uploadDocument(clientId: string, formData: FormData) {
-  const files = formData.getAll("file").filter((f): f is File => f instanceof File && f.size > 0);
-
-  if (files.length === 0) {
+export async function createDocumentRecords(
+  clientId: string,
+  stageIndex: number | null,
+  blobs: UploadedBlobMeta[],
+  visibleToClient: boolean
+) {
+  if (blobs.length === 0) {
     throw new Error("Choose at least one file to upload");
   }
-  if (files.length > MAX_FILES_PER_UPLOAD) {
+  if (blobs.length > MAX_FILES_PER_UPLOAD) {
     throw new Error(`Choose at most ${MAX_FILES_PER_UPLOAD} files at once`);
   }
-
-  const visibleToClient = formData.get("visibleToClient") === "on";
-  const rawStageIndex = formData.get("stageIndex");
-  let stageIndex: number | null = null;
-  if (rawStageIndex !== null && rawStageIndex !== "") {
-    const parsed = Number(rawStageIndex);
-    if (!Number.isInteger(parsed) || parsed < 0 || parsed >= STAGES.length) {
-      throw new Error("Invalid stage");
-    }
-    stageIndex = parsed;
+  if (stageIndex !== null && (!Number.isInteger(stageIndex) || stageIndex < 0 || stageIndex >= STAGES.length)) {
+    throw new Error("Invalid stage");
   }
 
-  const filenames = await createDocumentsForClient({
+  const filenames = await createDocumentRecordsForClient({
     clientId,
-    files,
+    blobs,
     visibleToClient,
     uploadedBy: "admin",
     stageIndex,

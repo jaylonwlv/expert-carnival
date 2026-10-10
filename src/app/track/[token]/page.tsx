@@ -6,10 +6,9 @@ import { stageColor } from "@/lib/stageColors";
 import { formatFileSize, fileKindLabel, formatAppointment } from "@/lib/format";
 import { Stepper } from "@/components/Stepper";
 import { FileTypeIcon } from "@/components/FileTypeIcon";
-import { FileDropzone } from "@/components/FileDropzone";
-import { ActionForm } from "@/components/ActionForm";
+import { DocumentUploadForm } from "@/components/DocumentUploadForm";
 import { getSignedDownloadUrl } from "@/lib/documents";
-import { uploadClientDocument } from "../actions";
+import { createClientDocumentRecords } from "../actions";
 
 const COMPANY_NAME = process.env.NEXT_PUBLIC_COMPANY_NAME ?? "Relocation Engine";
 const AGENT_NAME = process.env.NEXT_PUBLIC_AGENT_NAME ?? "your agent";
@@ -40,7 +39,7 @@ export default async function TrackPage({
   const stage = STAGES[client.currentStage];
   const color = stageColor(client.currentStage);
   const firstName = client.name.split(" ")[0];
-  const uploadForClient = uploadClientDocument.bind(null, token);
+  const uploadForClient = createClientDocumentRecords.bind(null, token);
 
   const documents = await Promise.all(
     client.documents.map(async (doc) => ({
@@ -164,22 +163,15 @@ export default async function TrackPage({
             </ul>
           )}
 
-          <ActionForm
-            action={uploadForClient}
-            toastMessage="Document(s) uploaded."
+          <p className="text-xs text-neutral-500">
+            Need to send something our way (ID, pay stubs, etc.)? Upload it here.
+          </p>
+          <DocumentUploadForm
+            context={{ kind: "client", token, clientId: client.id }}
+            onUpload={uploadForClient}
+            submitLabel="Upload"
             className={`space-y-3 ${documents.length > 0 ? "pt-3 border-t border-neutral-100" : ""}`}
-          >
-            <p className="text-xs text-neutral-500">
-              Need to send something our way (ID, pay stubs, etc.)? Upload it here.
-            </p>
-            <FileDropzone name="file" maxFiles={5} />
-            <button
-              type="submit"
-              className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
-            >
-              Upload
-            </button>
-          </ActionForm>
+          />
         </section>
 
         {AGENT_PHONE && (

@@ -9,11 +9,12 @@ import { NEIGHBORHOOD_GROUPS } from "@/lib/neighborhoods";
 import { buildTrackerUrl } from "@/lib/trackerUrl";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { ActionForm } from "@/components/ActionForm";
-import { FileDropzone } from "@/components/FileDropzone";
+import { DocumentUploadForm } from "@/components/DocumentUploadForm";
 import { ChecklistAccordion, type ChecklistStageData } from "@/components/ChecklistAccordion";
 import { PCSBadge } from "@/components/PCSBadge";
 import { StageSwitcher } from "@/components/StageSwitcher";
 import {
+  createDocumentRecords,
   deleteClient,
   setChecklistItemStatus,
   toggleClientPCS,
@@ -21,7 +22,6 @@ import {
   updateNeighborhoods,
   updateNote,
   updateStage,
-  uploadDocument,
 } from "../../actions";
 
 export default async function ClientDetailPage({
@@ -53,7 +53,8 @@ export default async function ClientDetailPage({
   const updateStageForClient = updateStage.bind(null, client.id);
   const updateNoteForClient = updateNote.bind(null, client.id);
   const deleteClientForClient = deleteClient.bind(null, client.id);
-  const uploadDocumentForClient = uploadDocument.bind(null, client.id);
+  const uploadGeneralDocumentForClient = createDocumentRecords.bind(null, client.id, null);
+  const uploadStageDocumentForClient = createDocumentRecords.bind(null, client.id);
   const updateAppointmentForClient = updateAppointment.bind(null, client.id);
   const updateNeighborhoodsForClient = updateNeighborhoods.bind(null, client.id);
   const toggleClientPCSForClient = toggleClientPCS.bind(null, client.id);
@@ -146,12 +147,13 @@ export default async function ClientDetailPage({
             Steps for each stage. Mark a step &ldquo;not needed&rdquo; if it doesn&apos;t apply to this client.
           </p>
           <ChecklistAccordion
+            clientId={client.id}
             stages={checklistStages}
             currentStageIndex={client.currentStage}
             documentsHref={`/admin/clients/${client.id}/documents`}
             tourHref={`/admin/clients/${client.id}/tour`}
             onSetStatus={setChecklistItemStatus}
-            uploadAction={uploadDocumentForClient}
+            uploadAction={uploadStageDocumentForClient}
             neighborhoods={{ groups: NEIGHBORHOOD_GROUPS, selected: client.preferredNeighborhoods }}
             updateNeighborhoodsAction={updateNeighborhoodsForClient}
           />
@@ -239,23 +241,12 @@ export default async function ClientDetailPage({
             </Link>
           </div>
 
-          <ActionForm
-            action={uploadDocumentForClient}
-            toastMessage="Document(s) uploaded."
+          <DocumentUploadForm
+            context={{ kind: "admin", clientId: client.id }}
+            onUpload={uploadGeneralDocumentForClient}
+            showVisibilityToggle
             className="space-y-3 pt-3 border-t border-neutral-100"
-          >
-            <FileDropzone name="file" maxFiles={5} />
-            <label className="flex items-center gap-2 text-sm text-neutral-700">
-              <input type="checkbox" name="visibleToClient" className="rounded" />
-              Visible to client on their tracker page
-            </label>
-            <button
-              type="submit"
-              className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
-            >
-              Upload document(s)
-            </button>
-          </ActionForm>
+          />
         </section>
 
         <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
