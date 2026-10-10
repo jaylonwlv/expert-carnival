@@ -228,12 +228,30 @@ function itemsForClientType(isPCS: boolean): { key: string; label: string; stage
 
 export async function ensureChecklistItems(clientId: string, isPCS: boolean) {
   const expected = itemsForClientType(isPCS);
+  const expectedKeys = new Set(expected.map((item) => item.key));
 
-  // Cheap short-circuit: once a client's items are seeded (the common case on
-  // every page load after the first), skip the upsert pass entirely instead
-  // of re-upserting unchanged rows every time the page re-renders.
-  const existingCount = await prisma.checklistItem.count({ where: { clientId } });
-  if (existingCount === expected.length) return;
+  const existing = await prisma.checklistItem.findMany({ where: { clientId }, select: { key: true } });
+  const existingKeys = new Set(existing.map((item) => item.key));
+
+  // Cheap short-circuit: once a client's items exactly match their current
+  // PCS/standard set (the common case on every page load after the first),
+  // skip the write pass entirely instead of re-upserting unchanged rows on
+  // every render. A plain count match isn't enough here -- toggling isPCS
+  // swaps in a different set of items, which can coincidentally be the same
+  // size as the old one, so the actual key sets have to match.
+  if (existingKeys.size === expectedKeys.size && [...expectedKeys].every((key) => existingKeys.has(key))) {
+    return;
+  }
+
+  // Items left over from before a PCS toggle (standard-only items on a now-
+  // PCS client, or vice versa) are no longer relevant -- without this,
+  // ensureChecklistItems only ever adds the newly-relevant set and the old
+  // one lingers forever, since upsert never removes a row that isn't in
+  // the set it's given.
+  const staleKeys = [...existingKeys].filter((key) => !expectedKeys.has(key));
+  if (staleKeys.length > 0) {
+    await prisma.checklistItem.deleteMany({ where: { clientId, key: { in: staleKeys } } });
+  }
 
   await Promise.all(
     expected.map(({ key, label, stageIndex, sortOrder }) =>
