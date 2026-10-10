@@ -4,10 +4,19 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { nanoid } from "nanoid";
-import { put, del } from "@vercel/blob";
+import { del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { STAGES } from "@/lib/stages";
+import { createDocumentRecordsForClient, MAX_FILES_PER_UPLOAD, type UploadedBlobMeta } from "@/lib/documents";
+import { assertSignerBelongsToClient } from "@/lib/signers";
+import { logActivity } from "@/lib/activity";
+import { parseAppointmentInput, formatAppointment } from "@/lib/format";
+import type { ChecklistStatus } from "@/lib/checklist";
+import { allNeighborhoodNames } from "@/lib/neighborhoods";
+import { sendEmail } from "@/lib/email";
+import { CHECKLIST_EMAIL_TRIGGERS, STAGE_EMAIL_TRIGGERS } from "@/lib/emailTriggers";
+import { buildTrackerUrl } from "@/lib/trackerUrl";
 
 export async function logout() {
   const cookieStore = await cookies();
@@ -19,6 +28,7 @@ export async function createClient(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
+  const isPCS = formData.get("isPCS") === "on";
 
   if (!name) {
     throw new Error("Name is required");
@@ -30,8 +40,11 @@ export async function createClient(formData: FormData) {
       email: email || null,
       phone: phone || null,
       token: nanoid(12),
+      isPCS,
     },
   });
+
+  await logActivity(client.id, isPCS ? "Client added (PCS relocation)." : "Client added.");
 
   revalidatePath("/admin");
   redirect(`/admin/clients/${client.id}`);
@@ -43,13 +56,31 @@ export async function updateStage(clientId: string, formData: FormData) {
     throw new Error("Invalid stage");
   }
 
-  await prisma.client.update({
+  const stageTitle = STAGES[stageIndex].title;
+
+  const previous = await prisma.client.findUnique({ where: { id: clientId } });
+
+  const client = await prisma.client.update({
     where: { id: clientId },
     data: { currentStage: stageIndex, stageUpdatedAt: new Date() },
   });
 
+  await logActivity(clientId, `Stage changed to "${stageTitle}".`);
+
+  const trigger = STAGE_EMAIL_TRIGGERS[stageTitle];
+  if (trigger && client.email && previous?.currentStage !== stageIndex) {
+    const trackerUrl = await buildTrackerUrl(client.token);
+    await sendEmail({
+      to: client.email,
+      subject: trigger.subject,
+      html: trigger.body(client.name.split(" ")[0], trackerUrl),
+    });
+    await logActivity(clientId, `Emailed ${client.name}: "${trigger.subject}".`);
+  }
+
   revalidatePath("/admin");
   revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath("/track");
 }
 
 export async function updateNote(clientId: string, formData: FormData) {
@@ -60,8 +91,67 @@ export async function updateNote(clientId: string, formData: FormData) {
     data: { note: note || null },
   });
 
+  await logActivity(clientId, note ? "Custom update note changed." : "Custom update note cleared.");
+
   revalidatePath("/admin");
   revalidatePath(`/admin/clients/${clientId}`);
+}
+
+export async function updateAppointment(clientId: string, formData: FormData) {
+  const raw = String(formData.get("appointmentAt") ?? "").trim();
+  const appointmentAt = raw ? parseAppointmentInput(raw) : null;
+
+  await prisma.client.update({
+    where: { id: clientId },
+    data: { appointmentAt },
+  });
+
+  await logActivity(
+    clientId,
+    appointmentAt
+      ? `Upcoming appointment set to ${formatAppointment(appointmentAt)}.`
+      : "Upcoming appointment cleared."
+  );
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath(`/track`);
+}
+
+export type TourStop = { address: string; lat: number; lng: number };
+
+export async function saveTourRoute(clientId: string, stops: TourStop[]) {
+  if (stops.length < 2) {
+    throw new Error("Need at least 2 stops to save a route");
+  }
+  for (const stop of stops) {
+    if (typeof stop.address !== "string" || stop.address.trim() === "" || stop.address.length > 300) {
+      throw new Error("Invalid stop address");
+    }
+    if (typeof stop.lat !== "number" || !Number.isFinite(stop.lat) || stop.lat < -90 || stop.lat > 90) {
+      throw new Error("Invalid stop latitude");
+    }
+    if (typeof stop.lng !== "number" || !Number.isFinite(stop.lng) || stop.lng < -180 || stop.lng > 180) {
+      throw new Error("Invalid stop longitude");
+    }
+  }
+
+  // Transacted so a failure logging the activity can't leave the client's
+  // page showing a route that the realtor was told (via a thrown error)
+  // never got shared.
+  const [client] = await prisma.$transaction([
+    prisma.client.update({
+      where: { id: clientId },
+      data: { tourStops: stops, tourSavedAt: new Date() },
+    }),
+    prisma.activityLog.create({
+      data: { clientId, message: `Shared a ${stops.length}-stop tour route with the client.` },
+    }),
+  ]);
+
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath(`/admin/clients/${clientId}/tour`);
+  revalidatePath(`/track/${client.token}`);
 }
 
 export async function deleteClient(clientId: string) {
@@ -70,41 +160,99 @@ export async function deleteClient(clientId: string) {
   redirect("/admin");
 }
 
-const MAX_FILES_PER_UPLOAD = 5;
-
-export async function uploadDocument(clientId: string, formData: FormData) {
-  const files = formData.getAll("file").filter((f): f is File => f instanceof File && f.size > 0);
-
-  if (files.length === 0) {
+export async function createDocumentRecords(
+  clientId: string,
+  stageIndex: number | null,
+  signerId: string | null,
+  blobs: UploadedBlobMeta[],
+  visibleToClient: boolean
+) {
+  if (blobs.length === 0) {
     throw new Error("Choose at least one file to upload");
   }
-  if (files.length > MAX_FILES_PER_UPLOAD) {
+  if (blobs.length > MAX_FILES_PER_UPLOAD) {
     throw new Error(`Choose at most ${MAX_FILES_PER_UPLOAD} files at once`);
   }
-
-  const visibleToClient = formData.get("visibleToClient") === "on";
-
-  for (const file of files) {
-    const blob = await put(`clients/${clientId}/${file.name}`, file, {
-      access: "private",
-      addRandomSuffix: true,
-    });
-
-    await prisma.document.create({
-      data: {
-        clientId,
-        filename: file.name,
-        blobUrl: blob.url,
-        pathname: blob.pathname,
-        contentType: file.type || null,
-        size: file.size,
-        visibleToClient,
-      },
-    });
+  if (stageIndex !== null && (!Number.isInteger(stageIndex) || stageIndex < 0 || stageIndex >= STAGES.length)) {
+    throw new Error("Invalid stage");
   }
+  if (signerId !== null) {
+    await assertSignerBelongsToClient(signerId, clientId);
+  }
+
+  const filenames = await createDocumentRecordsForClient({
+    clientId,
+    blobs,
+    visibleToClient,
+    uploadedBy: "admin",
+    stageIndex,
+    signerId,
+  });
+
+  await logActivity(clientId, `Uploaded ${filenames.map((f) => `"${f}"`).join(", ")}.`);
 
   revalidatePath(`/admin/clients/${clientId}`);
   revalidatePath(`/admin/clients/${clientId}/documents`);
+  revalidatePath(`/track`);
+}
+
+export async function setDocumentSigner(documentId: string, signerId: string | null) {
+  const document = await prisma.document.findUnique({ where: { id: documentId } });
+  if (!document) return;
+
+  let signerName: string | null = null;
+  if (signerId !== null) {
+    const signer = await assertSignerBelongsToClient(signerId, document.clientId);
+    signerName = signer.name;
+  }
+
+  await prisma.document.update({ where: { id: documentId }, data: { signerId } });
+
+  await logActivity(
+    document.clientId,
+    signerName
+      ? `Tagged "${document.filename}" as ${signerName}'s document.`
+      : `Marked "${document.filename}" as shared (no specific signer).`
+  );
+
+  revalidatePath(`/admin/clients/${document.clientId}`);
+  revalidatePath(`/admin/clients/${document.clientId}/documents`);
+  revalidatePath(`/track`);
+}
+
+export async function addSigner(clientId: string, formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) {
+    throw new Error("Name is required");
+  }
+  if (name.length > 100) {
+    throw new Error("Name is too long");
+  }
+
+  const existing = await prisma.signer.findFirst({
+    where: { clientId, name: { equals: name, mode: "insensitive" } },
+  });
+  if (existing) {
+    throw new Error(`"${name}" is already a signer on this file`);
+  }
+
+  await prisma.signer.create({ data: { clientId, name } });
+
+  await logActivity(clientId, `Added "${name}" as a signer.`);
+
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath(`/admin/clients/${clientId}/documents`);
+  revalidatePath(`/track`);
+}
+
+export async function removeSigner(signerId: string) {
+  const signer = await prisma.signer.delete({ where: { id: signerId } }).catch(() => null);
+  if (!signer) return;
+
+  await logActivity(signer.clientId, `Removed "${signer.name}" as a signer.`);
+
+  revalidatePath(`/admin/clients/${signer.clientId}`);
+  revalidatePath(`/admin/clients/${signer.clientId}/documents`);
   revalidatePath(`/track`);
 }
 
@@ -115,6 +263,8 @@ export async function deleteDocument(documentId: string) {
   await del(document.blobUrl);
   await prisma.document.delete({ where: { id: documentId } });
 
+  await logActivity(document.clientId, `Deleted document "${document.filename}".`);
+
   revalidatePath(`/admin/clients/${document.clientId}`);
   revalidatePath(`/admin/clients/${document.clientId}/documents`);
   revalidatePath(`/track`);
@@ -124,12 +274,103 @@ export async function toggleDocumentVisibility(documentId: string) {
   const document = await prisma.document.findUnique({ where: { id: documentId } });
   if (!document) return;
 
+  const nowVisible = !document.visibleToClient;
+
   await prisma.document.update({
     where: { id: documentId },
-    data: { visibleToClient: !document.visibleToClient },
+    data: { visibleToClient: nowVisible },
   });
+
+  await logActivity(
+    document.clientId,
+    nowVisible
+      ? `Made "${document.filename}" visible to client.`
+      : `Made "${document.filename}" admin-only.`
+  );
 
   revalidatePath(`/admin/clients/${document.clientId}`);
   revalidatePath(`/admin/clients/${document.clientId}/documents`);
   revalidatePath(`/track`);
+}
+
+const CHECKLIST_STATUSES: ChecklistStatus[] = ["pending", "done", "not_needed"];
+
+export async function setChecklistItemStatus(itemId: string, status: ChecklistStatus) {
+  if (!CHECKLIST_STATUSES.includes(status)) {
+    throw new Error("Invalid checklist status");
+  }
+
+  const previous = await prisma.checklistItem.findUnique({ where: { id: itemId } });
+
+  const item = await prisma.checklistItem.update({
+    where: { id: itemId },
+    data: { status, statusAt: new Date() },
+    include: { client: true },
+  });
+
+  const message =
+    status === "done"
+      ? `Checked off "${item.label}".`
+      : status === "not_needed"
+        ? `Marked "${item.label}" as not needed.`
+        : `Reopened "${item.label}".`;
+
+  await logActivity(item.clientId, message);
+
+  if (status === "done" && previous?.status !== "done") {
+    const trigger = CHECKLIST_EMAIL_TRIGGERS[item.key];
+    if (trigger && item.client.email) {
+      const trackerUrl = await buildTrackerUrl(item.client.token);
+      await sendEmail({
+        to: item.client.email,
+        subject: trigger.subject,
+        html: trigger.body(item.client.name.split(" ")[0], trackerUrl),
+      });
+      await logActivity(item.clientId, `Emailed ${item.client.name}: "${trigger.subject}".`);
+    }
+  }
+
+  revalidatePath(`/admin/clients/${item.clientId}`);
+}
+
+export async function updateNeighborhoods(clientId: string, formData: FormData) {
+  const allOptions = new Set(allNeighborhoodNames());
+  const selected = formData.getAll("neighborhoods").filter(
+    (value): value is string => typeof value === "string" && allOptions.has(value)
+  );
+
+  await prisma.client.update({
+    where: { id: clientId },
+    data: { preferredNeighborhoods: selected },
+  });
+
+  await logActivity(
+    clientId,
+    selected.length > 0
+      ? `Preferred neighborhoods updated: ${selected.join(", ")}.`
+      : "Preferred neighborhoods cleared."
+  );
+
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath(`/track`);
+}
+
+export async function toggleClientPCS(clientId: string) {
+  const client = await prisma.client.findUnique({ where: { id: clientId } });
+  if (!client) return;
+
+  const nowPCS = !client.isPCS;
+
+  await prisma.client.update({
+    where: { id: clientId },
+    data: { isPCS: nowPCS },
+  });
+
+  await logActivity(
+    clientId,
+    nowPCS ? "Marked as a PCS/military relocation." : "Unmarked as a PCS/military relocation."
+  );
+
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath("/admin");
 }

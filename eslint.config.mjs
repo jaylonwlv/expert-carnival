@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored build artifact (copied from node_modules/pdfjs-dist), not
+    // project source.
+    "public/pdf.worker.min.mjs",
   ]),
 ]);
 

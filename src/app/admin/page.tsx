@@ -1,9 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
-import { stageColor, avatarColor, initials } from "@/lib/stageColors";
-import { timeAgo } from "@/lib/format";
-import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import { ClientList } from "@/components/ClientList";
 import { deleteClient, logout } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -17,24 +16,19 @@ export default async function AdminPage() {
   const active = clients.length - movedIn;
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <header className="bg-neutral-900">
-        <div className="max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white text-neutral-900 font-bold text-sm">
-              RE
-            </div>
-            <h1 className="text-lg font-semibold text-white">Relocation Engine</h1>
-          </div>
-          <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-[#faf8f4]">
+      <header className="bg-white border-b border-stone-200">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Image src="/logo.png" alt="Relocation Engine LLC" width={680} height={546} className="h-14 w-auto" priority />
+          <div className="flex items-center gap-4">
             <Link
               href="/admin/clients/new"
-              className="text-sm font-medium bg-white text-neutral-900 rounded-md px-3.5 py-2 hover:bg-neutral-100 transition shadow-sm hover:shadow-md"
+              className="text-sm font-medium bg-amber-600 text-white rounded-lg px-4 py-2.5 hover:bg-amber-700 transition shadow-sm hover:shadow-md"
             >
               + Add client
             </Link>
             <form action={logout}>
-              <button type="submit" className="text-sm font-medium text-white/70 hover:text-white">
+              <button type="submit" className="text-sm font-medium text-stone-500 hover:text-stone-800 transition">
                 Sign out
               </button>
             </form>
@@ -42,75 +36,63 @@ export default async function AdminPage() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        <div className="grid grid-cols-3 gap-4">
-          <StatCard label="Total clients" value={clients.length} />
-          <StatCard label="Active" value={active} accent="text-green-700" />
-          <StatCard label="Moved in" value={movedIn} accent="text-green-900" />
+      <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+        <div className="grid grid-cols-3 gap-5">
+          <StatCard label="Total clients" value={clients.length} icon={<PeopleIcon />} chip="bg-amber-50 text-amber-700" />
+          <StatCard label="Active" value={active} icon={<ClockIcon />} chip="bg-sky-50 text-sky-700" />
+          <StatCard label="Moved in" value={movedIn} icon={<HomeIcon />} chip="bg-emerald-50 text-emerald-700" />
         </div>
 
-        {clients.length === 0 ? (
-          <div className="bg-white rounded-xl border border-neutral-200 py-16 text-center">
-            <p className="text-sm text-neutral-500">No clients yet. Add your first client to get started.</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl border border-neutral-200 divide-y divide-neutral-100 overflow-hidden shadow-sm">
-            {clients.map((client) => {
-              const stage = STAGES[client.currentStage];
-              const color = stageColor(client.currentStage);
-              const progress = ((client.currentStage + 1) / STAGES.length) * 100;
-              return (
-                <div
-                  key={client.id}
-                  className="flex items-center gap-4 px-5 py-4 hover:bg-neutral-50 transition"
-                >
-                  <div
-                    className={`flex items-center justify-center w-11 h-11 rounded-full ${avatarColor(client.name)} text-white text-sm font-semibold shrink-0`}
-                  >
-                    {initials(client.name)}
-                  </div>
-                  <Link href={`/admin/clients/${client.id}`} className="flex-1 min-w-0">
-                    <p className="font-medium text-neutral-900 truncate">{client.name}</p>
-                    <p className="text-sm text-neutral-500 truncate">
-                      {client.email || client.phone || "No contact info"}
-                    </p>
-                  </Link>
-                  <Link href={`/admin/clients/${client.id}`} className="w-40 shrink-0 hidden sm:block">
-                    <span
-                      className={`inline-block text-xs font-semibold rounded-full px-2.5 py-1 mb-1.5 ${color.badgeBg} ${color.badgeText}`}
-                    >
-                      {stage.title}
-                    </span>
-                    <div className="h-1.5 rounded-full bg-neutral-100 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${color.solidBg}`}
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                  </Link>
-                  <p className="text-xs text-neutral-400 shrink-0 hidden md:block w-16 text-right">
-                    {timeAgo(client.updatedAt)}
-                  </p>
-                  <ConfirmSubmitButton
-                    action={deleteClient.bind(null, client.id)}
-                    confirmMessage={`Remove ${client.name}? This can't be undone.`}
-                    label="Remove"
-                  />
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <ClientList clients={clients} deleteAction={deleteClient} />
       </main>
     </div>
   );
 }
 
-function StatCard({ label, value, accent }: { label: string; value: number; accent?: string }) {
+function StatCard({
+  label,
+  value,
+  icon,
+  chip,
+}: {
+  label: string;
+  value: number;
+  icon: React.ReactNode;
+  chip: string;
+}) {
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-4 shadow-sm">
-      <p className="text-xs font-medium text-neutral-500">{label}</p>
-      <p className={`text-2xl font-semibold mt-1 ${accent ?? "text-neutral-900"}`}>{value}</p>
+    <div className="bg-white rounded-2xl border border-stone-200 p-5 shadow-sm hover:shadow-md transition">
+      <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl ${chip} mb-3`}>{icon}</div>
+      <p className="text-3xl font-semibold text-stone-900 tabular-nums">{value}</p>
+      <p className="text-xs font-medium text-stone-500 uppercase tracking-wide mt-1">{label}</p>
     </div>
+  );
+}
+
+function PeopleIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+      <circle cx="7" cy="6" r="3" />
+      <path d="M1.5 17c0-3.5 2.5-6 5.5-6s5.5 2.5 5.5 6v.5h-11V17z" />
+      <circle cx="14.5" cy="7.5" r="2.4" opacity="0.55" />
+      <path d="M11.8 17c.3-2.6 1.6-4.6 3.3-5.4 2.1.6 3.7 2.8 3.9 5.4v.5h-7.2V17z" opacity="0.55" />
+    </svg>
+  );
+}
+
+function ClockIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
+      <circle cx="10" cy="10" r="7.25" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6.25V10l2.75 1.75" />
+    </svg>
+  );
+}
+
+function HomeIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+      <path d="M10 2.5l7.5 6.1V17a1 1 0 01-1 1h-4v-6h-5v6h-4a1 1 0 01-1-1V8.6l7.5-6.1z" />
+    </svg>
   );
 }

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSignedDownloadUrl } from "@/lib/documents";
 import { DocumentGallery } from "@/components/DocumentGallery";
-import { deleteDocument, toggleDocumentVisibility } from "../../../actions";
+import { deleteDocument, toggleDocumentVisibility, setDocumentSigner } from "../../../actions";
 
 export default async function ClientDocumentsPage({
   params,
@@ -13,7 +13,13 @@ export default async function ClientDocumentsPage({
   const { id } = await params;
   const client = await prisma.client.findUnique({
     where: { id },
-    include: { documents: { orderBy: { createdAt: "desc" } } },
+    include: {
+      documents: {
+        orderBy: { createdAt: "desc" },
+        include: { signatureRequest: true, signer: true },
+      },
+      signers: { orderBy: { createdAt: "asc" } },
+    },
   });
 
   if (!client) {
@@ -28,12 +34,12 @@ export default async function ClientDocumentsPage({
   );
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <header className="border-b border-neutral-200 bg-white">
+    <div className="min-h-screen bg-stone-50">
+      <header className="border-b border-stone-200 bg-white">
         <div className="max-w-5xl mx-auto px-4 py-4">
           <Link
             href={`/admin/clients/${client.id}`}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-neutral-900 rounded-md px-2 py-1.5 -ml-2 hover:bg-neutral-100 transition"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-600 hover:text-stone-900 rounded-md px-2 py-1.5 -ml-2 hover:bg-stone-100 transition"
           >
             <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
               <path
@@ -49,16 +55,19 @@ export default async function ClientDocumentsPage({
 
       <main className="max-w-5xl mx-auto px-4 py-8 space-y-4">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900">{client.name}&apos;s documents</h1>
-          <p className="text-sm text-neutral-500">
+          <h1 className="text-lg font-semibold text-stone-900">{client.name}&apos;s documents</h1>
+          <p className="text-sm text-stone-500">
             {documents.length} {documents.length === 1 ? "document" : "documents"}
           </p>
         </div>
 
         <DocumentGallery
           documents={documents}
+          clientId={client.id}
+          signerOptions={client.signers}
           deleteAction={deleteDocument}
           toggleAction={toggleDocumentVisibility}
+          setSignerAction={setDocumentSigner}
         />
       </main>
     </div>

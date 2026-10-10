@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Client" ADD COLUMN     "isPCS" BOOLEAN NOT NULL DEFAULT false;

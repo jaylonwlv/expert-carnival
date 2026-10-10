@@ -1,17 +1,32 @@
 import Link from "next/link";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { STAGES } from "@/lib/stages";
 import { stageColor, avatarColor, initials } from "@/lib/stageColors";
+import { timeAgo, formatAppointment, toAppointmentInputValue } from "@/lib/format";
+import { ensureChecklistItems, STAGE_CHECKLISTS, type ChecklistStatus } from "@/lib/checklist";
+import { NEIGHBORHOOD_GROUPS } from "@/lib/neighborhoods";
+import { buildTrackerUrl } from "@/lib/trackerUrl";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { ActionForm } from "@/components/ActionForm";
-import { FileDropzone } from "@/components/FileDropzone";
+import { SubmitButton } from "@/components/SubmitButton";
+import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import { DocumentUploadForm } from "@/components/DocumentUploadForm";
+import { QuickUploadBar } from "@/components/QuickUploadBar";
+import { ChecklistAccordion, type ChecklistStageData } from "@/components/ChecklistAccordion";
+import { PCSBadge } from "@/components/PCSBadge";
+import { StageSwitcher } from "@/components/StageSwitcher";
 import {
+  addSigner,
+  createDocumentRecords,
   deleteClient,
+  removeSigner,
+  setChecklistItemStatus,
+  toggleClientPCS,
+  updateAppointment,
+  updateNeighborhoods,
   updateNote,
   updateStage,
-  uploadDocument,
 } from "../../actions";
 
 export default async function ClientDetailPage({
@@ -22,32 +37,70 @@ export default async function ClientDetailPage({
   const { id } = await params;
   const client = await prisma.client.findUnique({
     where: { id },
-    include: { documents: { orderBy: { createdAt: "desc" } } },
+    include: {
+      documents: { orderBy: { createdAt: "desc" } },
+      activityLog: { orderBy: { createdAt: "desc" } },
+      signatureRequests: { include: { document: true }, orderBy: { createdAt: "desc" } },
+      signers: { orderBy: { createdAt: "asc" } },
+    },
   });
 
   if (!client) {
     notFound();
   }
 
-  const headerList = await headers();
-  const host = headerList.get("host");
-  const protocol = host?.startsWith("localhost") || host?.startsWith("127.0.0.1") ? "http" : "https";
-  const trackerUrl = `${protocol}://${host}/track/${client.token}`;
+  await ensureChecklistItems(client.id, client.isPCS);
+  const checklistItems = await prisma.checklistItem.findMany({
+    where: { clientId: client.id },
+    orderBy: [{ stageIndex: "asc" }, { sortOrder: "asc" }],
+  });
+
+  const trackerUrl = await buildTrackerUrl(client.token);
 
   const updateStageForClient = updateStage.bind(null, client.id);
   const updateNoteForClient = updateNote.bind(null, client.id);
   const deleteClientForClient = deleteClient.bind(null, client.id);
-  const uploadDocumentForClient = uploadDocument.bind(null, client.id);
+  const uploadGeneralDocumentForClient = createDocumentRecords.bind(null, client.id, null);
+  const uploadStageDocumentForClient = createDocumentRecords.bind(null, client.id);
+  const updateAppointmentForClient = updateAppointment.bind(null, client.id);
+  const updateNeighborhoodsForClient = updateNeighborhoods.bind(null, client.id);
+  const toggleClientPCSForClient = toggleClientPCS.bind(null, client.id);
+  const addSignerForClient = addSigner.bind(null, client.id);
+  const signerOptions = client.signers.map((signer) => ({ id: signer.id, name: signer.name }));
+
+  const pendingSignatures = client.signatureRequests.filter((r) => r.status !== "signed");
+  const signedDocuments = client.signatureRequests.filter((r) => r.status === "signed");
 
   const currentStageColor = stageColor(client.currentStage);
 
+  const NEIGHBORHOODS_STAGE_TITLE = "Home & Area Selection";
+  const TOUR_STAGE_TITLE = "Touring Homes";
+
+  const checklistStages: ChecklistStageData[] = STAGES.map((stage, index) => ({
+    index,
+    title: stage.title,
+    summary: stage.summary,
+    documentHeavy: STAGE_CHECKLISTS[index].documentHeavy,
+    showNeighborhoods: stage.title === NEIGHBORHOODS_STAGE_TITLE,
+    showTourLink: stage.title === TOUR_STAGE_TITLE,
+    items: checklistItems
+      .filter((item) => item.stageIndex === index)
+      .map((item) => ({
+        id: item.id,
+        label: item.label,
+        status: item.status as ChecklistStatus,
+        statusAt: item.statusAt,
+      })),
+    documentCount: client.documents.filter((doc) => doc.stageIndex === index).length,
+  }));
+
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <header className="border-b border-neutral-200 bg-white">
+    <div className="min-h-screen bg-stone-50">
+      <header className="border-b border-stone-200 bg-white">
         <div className="max-w-2xl mx-auto px-4 py-3">
           <Link
             href="/admin"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-neutral-900 rounded-md px-2.5 py-2 -ml-2.5 hover:bg-neutral-100 transition"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-600 hover:text-stone-900 rounded-md px-2.5 py-2 -ml-2.5 hover:bg-stone-100 transition"
           >
             <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
               <path
@@ -69,8 +122,16 @@ export default async function ClientDetailPage({
             {initials(client.name)}
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-neutral-900">{client.name}</h1>
-            <p className="text-sm text-neutral-500">{client.email || "No email"} · {client.phone || "No phone"}</p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-semibold text-stone-900">{client.name}</h1>
+              {client.isPCS && <PCSBadge />}
+            </div>
+            <p className="text-sm text-stone-500">{client.email || "No email"} · {client.phone || "No phone"}</p>
+            <form action={toggleClientPCSForClient}>
+              <button type="submit" className="text-xs text-stone-400 hover:text-stone-600 hover:underline">
+                {client.isPCS ? "Remove PCS tag" : "Mark as PCS relocation"}
+              </button>
+            </form>
           </div>
           <span
             className={`ml-auto text-xs font-semibold rounded-full px-3 py-1.5 ${currentStageColor.badgeBg} ${currentStageColor.badgeText}`}
@@ -79,49 +140,186 @@ export default async function ClientDetailPage({
           </span>
         </div>
 
-        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
-          <h2 className="text-sm font-semibold text-neutral-900">Client tracker link</h2>
-          <p className="text-sm text-neutral-500">
+        <QuickUploadBar
+          context={{ kind: "admin", clientId: client.id }}
+          documentsHref={`/admin/clients/${client.id}/documents`}
+          stageOptions={STAGES.map((s, index) => ({ index, title: s.title }))}
+          signerOptions={signerOptions}
+          uploadAction={uploadStageDocumentForClient}
+        />
+
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">
+          <h2 className="text-sm font-semibold text-stone-900">Signers</h2>
+          <p className="text-sm text-stone-500">
+            Everyone whose own documents need to be told apart -- e.g. both spouses on a joint purchase. Tag
+            uploads with a signer below, or leave a document as &ldquo;Shared&rdquo; when it&apos;s not specific
+            to one person.
+          </p>
+          {client.signers.length > 0 && (
+            <ul className="flex flex-wrap gap-2">
+              {client.signers.map((signer) => (
+                <li
+                  key={signer.id}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-800 bg-stone-100 rounded-full pl-3 pr-1.5 py-1"
+                >
+                  {signer.name}
+                  <ConfirmSubmitButton
+                    action={removeSigner.bind(null, signer.id)}
+                    confirmMessage={`Remove ${signer.name} as a signer? Documents already tagged to them will show as "Shared" instead.`}
+                    label="✕"
+                    ariaLabel={`Remove ${signer.name}`}
+                    className="w-5 h-5 flex items-center justify-center rounded-full text-stone-400 hover:text-red-600 hover:bg-white"
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+          <ActionForm action={addSignerForClient} toastMessage="Signer added." className="flex items-end gap-3">
+            <div className="flex-1">
+              <label htmlFor="signerName" className="block text-xs font-medium text-stone-500 mb-1">
+                Add a signer
+              </label>
+              <input
+                id="signerName"
+                type="text"
+                name="name"
+                placeholder="e.g. John Smith"
+                className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
+              />
+            </div>
+            <SubmitButton
+              pendingText="Adding…"
+              className="rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
+            >
+              Add
+            </SubmitButton>
+          </ActionForm>
+        </section>
+
+        {client.signatureRequests.length > 0 && (
+          <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">
+            <h2 className="text-sm font-semibold text-stone-900">Signatures</h2>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 mb-1.5">
+                  Awaiting signature ({pendingSignatures.length})
+                </p>
+                {pendingSignatures.length === 0 ? (
+                  <p className="text-sm text-stone-400">Nothing outstanding.</p>
+                ) : (
+                  <ul className="divide-y divide-stone-100 border border-stone-200 rounded-lg overflow-hidden">
+                    {pendingSignatures.map((request) => (
+                      <li key={request.id} className="flex items-center justify-between gap-3 px-3 py-2 bg-white">
+                        <span className="text-sm text-stone-800 truncate">{request.document.filename}</span>
+                        <span className="text-xs text-amber-700 bg-amber-50 rounded-full px-2 py-0.5 shrink-0">
+                          {request.status === "viewed" ? "Viewed" : "Not yet viewed"}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 mb-1.5">
+                  Signed ({signedDocuments.length})
+                </p>
+                {signedDocuments.length === 0 ? (
+                  <p className="text-sm text-stone-400">None yet.</p>
+                ) : (
+                  <ul className="divide-y divide-stone-100 border border-stone-200 rounded-lg overflow-hidden">
+                    {signedDocuments.map((request) => (
+                      <li key={request.id} className="flex items-center justify-between gap-3 px-3 py-2 bg-white">
+                        <span className="text-sm text-stone-800 truncate">{request.document.filename}</span>
+                        <span className="text-xs text-stone-400 shrink-0">
+                          {request.signedAt ? timeAgo(request.signedAt) : ""}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">
+          <h2 className="text-sm font-semibold text-stone-900">Client tracker link</h2>
+          <p className="text-sm text-stone-500">
             Send this link via your SMS/email automation so {client.name.split(" ")[0]} can check their progress anytime.
           </p>
           <CopyLinkButton url={trackerUrl} />
         </section>
 
-        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-neutral-900">Pipeline</h2>
-          <ActionForm action={updateStageForClient} toastMessage="Stage updated.">
-            <div className="flex flex-wrap gap-1.5">
-              {STAGES.map((stage, index) => {
-                const color = stageColor(index);
-                const isDone = index < client.currentStage;
-                const isCurrent = index === client.currentStage;
-                return (
-                  <button
-                    key={stage.title}
-                    type="submit"
-                    name="currentStage"
-                    value={index}
-                    title={stage.summary}
-                    className={`text-xs font-medium px-3 py-2 rounded-lg transition ${
-                      isDone || isCurrent
-                        ? `${color.solidBg} ${color.solidText} shadow-sm`
-                        : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
-                    } ${isCurrent ? `ring-2 ring-offset-2 ${color.ring} shadow-md` : ""}`}
-                  >
-                    {index + 1}. {stage.title}
-                  </button>
-                );
-              })}
-            </div>
-          </ActionForm>
-          <p className="text-sm text-neutral-500 pt-2 border-t border-neutral-100">
-            {STAGES[client.currentStage].summary}
-          </p>
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+          <h2 className="text-sm font-semibold text-stone-900 mb-4">Pipeline</h2>
+          <StageSwitcher stages={STAGES} currentStage={client.currentStage} updateStageAction={updateStageForClient} />
         </section>
 
-        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
-          <h2 className="text-sm font-semibold text-neutral-900">Custom update (optional)</h2>
-          <p className="text-sm text-neutral-500">
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+          <h2 className="text-sm font-semibold text-stone-900 mb-1">Checklist</h2>
+          <p className="text-sm text-stone-500 mb-2">
+            Steps for each stage. Mark a step &ldquo;not needed&rdquo; if it doesn&apos;t apply to this client.
+          </p>
+          <ChecklistAccordion
+            clientId={client.id}
+            stages={checklistStages}
+            currentStageIndex={client.currentStage}
+            documentsHref={`/admin/clients/${client.id}/documents`}
+            tourHref={`/admin/clients/${client.id}/tour`}
+            onSetStatus={setChecklistItemStatus}
+            uploadAction={uploadStageDocumentForClient}
+            signers={signerOptions}
+            neighborhoods={{ groups: NEIGHBORHOOD_GROUPS, selected: client.preferredNeighborhoods }}
+            updateNeighborhoodsAction={updateNeighborhoodsForClient}
+          />
+        </section>
+
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">
+          <h2 className="text-sm font-semibold text-stone-900">Upcoming appointment</h2>
+          <p className="text-sm text-stone-500">
+            {client.appointmentAt ? (
+              <>
+                Currently set to{" "}
+                <span className="font-medium text-stone-800">{formatAppointment(client.appointmentAt)}</span>.
+                Shown on {client.name.split(" ")[0]}&apos;s tracker page.
+              </>
+            ) : (
+              "No appointment scheduled."
+            )}
+          </p>
+          <ActionForm action={updateAppointmentForClient} toastMessage="Appointment updated." className="flex items-end gap-3">
+            <div className="flex-1">
+              <label htmlFor="appointmentAt" className="block text-xs font-medium text-stone-500 mb-1">
+                Date &amp; time
+              </label>
+              <input
+                id="appointmentAt"
+                type="datetime-local"
+                name="appointmentAt"
+                defaultValue={client.appointmentAt ? toAppointmentInputValue(client.appointmentAt) : ""}
+                className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
+              />
+            </div>
+            <SubmitButton
+              pendingText="Saving…"
+              className="rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
+            >
+              Save
+            </SubmitButton>
+          </ActionForm>
+          {client.appointmentAt && (
+            <form action={updateAppointmentForClient}>
+              <input type="hidden" name="appointmentAt" value="" />
+              <button type="submit" className="text-xs text-red-600 hover:underline">
+                Clear appointment
+              </button>
+            </form>
+          )}
+        </section>
+
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">
+          <h2 className="text-sm font-semibold text-stone-900">Custom update (optional)</h2>
+          <p className="text-sm text-stone-500">
             Overrides the default &ldquo;what&apos;s happening now&rdquo; text on the client&apos;s tracker with something specific.
           </p>
           <ActionForm action={updateNoteForClient} toastMessage="Update saved." className="space-y-3">
@@ -130,56 +328,62 @@ export default async function ClientDetailPage({
               rows={3}
               defaultValue={client.note ?? ""}
               placeholder="e.g. Inspection is scheduled for Thursday at 10am."
-              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
             />
-            <button
-              type="submit"
-              className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
+            <SubmitButton
+              pendingText="Saving…"
+              className="rounded-md bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
             >
               Save update
-            </button>
+            </SubmitButton>
           </ActionForm>
         </section>
 
-        <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-4">
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-semibold text-neutral-900">Documents</h2>
-              <p className="text-sm text-neutral-500">
+              <h2 className="text-sm font-semibold text-stone-900">Documents</h2>
+              <p className="text-sm text-stone-500">
                 {client.documents.length} {client.documents.length === 1 ? "file" : "files"} · contracts, IDs,
                 financial paperwork, closing documents.
               </p>
             </div>
             <Link
               href={`/admin/clients/${client.id}/documents`}
-              className="shrink-0 text-sm font-medium bg-neutral-900 text-white rounded-md px-3 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
+              className="shrink-0 text-sm font-medium bg-amber-600 text-white rounded-md px-3 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
             >
               View client documents
             </Link>
           </div>
 
-          <ActionForm
-            action={uploadDocumentForClient}
-            toastMessage="Document(s) uploaded."
-            className="space-y-3 pt-3 border-t border-neutral-100"
-          >
-            <FileDropzone name="file" maxFiles={5} />
-            <label className="flex items-center gap-2 text-sm text-neutral-700">
-              <input type="checkbox" name="visibleToClient" className="rounded" />
-              Visible to client on their tracker page
-            </label>
-            <button
-              type="submit"
-              className="rounded-md bg-neutral-900 text-white text-sm font-medium px-4 py-2 shadow-sm hover:shadow-md hover:bg-neutral-800 transition"
-            >
-              Upload document(s)
-            </button>
-          </ActionForm>
+          <DocumentUploadForm
+            context={{ kind: "admin", clientId: client.id }}
+            onUploadWithSigner={uploadGeneralDocumentForClient}
+            signerOptions={signerOptions}
+            showVisibilityToggle
+            className="space-y-3 pt-3 border-t border-stone-100"
+          />
+        </section>
+
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">
+          <h2 className="text-sm font-semibold text-stone-900">Activity</h2>
+          {client.activityLog.length === 0 ? (
+            <p className="text-sm text-stone-500">No activity yet.</p>
+          ) : (
+            <ul className="space-y-2.5 max-h-80 overflow-y-auto">
+              {client.activityLog.map((entry) => (
+                <li key={entry.id} className="flex items-start gap-3 text-sm">
+                  <span className="text-stone-400 shrink-0 w-14 text-right">{timeAgo(entry.createdAt)}</span>
+                  <span className="text-stone-700">{entry.message}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <section className="bg-white rounded-xl border border-red-200 shadow-sm p-6">
           <h2 className="text-sm font-semibold text-red-700 mb-2">Remove client</h2>
-          <p className="text-sm text-neutral-500 mb-3">
+          <p className="text-sm text-stone-500 mb-3">
             Deletes this client and their tracker link permanently.
           </p>
           <form action={deleteClientForClient}>
