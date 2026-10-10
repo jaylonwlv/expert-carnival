@@ -1,4 +1,4 @@
-import { issueSignedToken, presignUrl } from "@vercel/blob";
+import { issueSignedToken, presignUrl, head, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 
 // Vercel Blob's default signed-URL lifetime is 1 hour, which is tight for a
@@ -84,14 +84,39 @@ export async function createDocumentRecordsForClient({
       throw new Error("Invalid document reference");
     }
 
+    // blob.url/size/contentType are the browser's own unverified report of
+    // what it uploaded -- deleteDocument later calls del() on whatever
+    // blobUrl is stored here, so trusting a fabricated url outright would
+    // turn a crafted Document row into a "delete any blob in the store"
+    // primitive. head() asks Vercel directly what's actually at this
+    // pathname and is what gets persisted instead.
+    //
+    // It also doubles as the only way to catch a tampered upload that
+    // requested public access: the client (not this server) is the one
+    // that tells Vercel whether a blob is public or private at upload time
+    // (access isn't part of the signed upload token this app issues), so
+    // the real url -- which embeds ".public." or ".private." in its host
+    // -- is the only authoritative signal available after the fact.
+    let realBlob;
+    try {
+      realBlob = await head(blob.pathname);
+    } catch {
+      throw new Error("Could not verify the uploaded file");
+    }
+
+    if (!new URL(realBlob.url).hostname.includes(".private.")) {
+      await del(realBlob.url).catch(() => {});
+      throw new Error("Upload was not stored privately and has been removed");
+    }
+
     await prisma.document.create({
       data: {
         clientId,
         filename: blob.filename,
-        blobUrl: blob.url,
+        blobUrl: realBlob.url,
         pathname: blob.pathname,
-        contentType: blob.contentType,
-        size: blob.size,
+        contentType: realBlob.contentType || null,
+        size: realBlob.size,
         visibleToClient,
         uploadedBy,
         stageIndex: stageIndex ?? null,
