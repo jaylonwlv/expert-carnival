@@ -118,7 +118,7 @@ export function ChecklistAccordion({
 
             {isOpen && (
               <div className="pb-5 space-y-4">
-                <ul className="space-y-3">
+                <ul className="divide-y divide-neutral-100 border border-neutral-200 rounded-lg overflow-hidden">
                   {stage.items.map((item) => (
                     <ChecklistRow key={item.id} item={item} onSetStatus={handleSetStatus} />
                   ))}
@@ -191,7 +191,7 @@ function ChecklistRow({
 }) {
   if (item.status === "not_needed") {
     return (
-      <li className="flex items-center gap-3 text-base">
+      <li className="flex items-center gap-3 text-base px-3 py-2.5 bg-white">
         <span className="shrink-0 w-5 h-5 rounded border border-neutral-300 flex items-center justify-center text-neutral-400">
           –
         </span>
@@ -209,7 +209,7 @@ function ChecklistRow({
 
   if (item.status === "done") {
     return (
-      <li className="flex items-center gap-3 text-base">
+      <li className="flex items-center gap-3 text-base px-3 py-2.5 bg-white">
         <button
           type="button"
           onClick={() => onSetStatus(item.id, "pending")}
@@ -231,7 +231,7 @@ function ChecklistRow({
   }
 
   return (
-    <li className="flex items-center gap-3 text-base">
+    <li className="flex items-center gap-3 text-base px-3 py-2.5 bg-white">
       <button
         type="button"
         onClick={() => onSetStatus(item.id, "done")}

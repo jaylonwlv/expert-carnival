@@ -134,7 +134,7 @@ export function SigningView({
                   value={value ?? ""}
                   onChange={(e) => setValue(field.id, e.target.value)}
                   placeholder={field.label ?? (field.type === "date" ? "Date" : "Text")}
-                  className="absolute border border-neutral-400 bg-white text-sm px-1 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                  className="absolute border border-neutral-400 bg-white text-sm text-neutral-900 px-1 focus:outline-none focus:ring-2 focus:ring-neutral-900"
                   style={style}
                 />
               );

@@ -35,6 +35,7 @@ export default async function ClientDetailPage({
     include: {
       documents: { orderBy: { createdAt: "desc" } },
       activityLog: { orderBy: { createdAt: "desc" } },
+      signatureRequests: { include: { document: true }, orderBy: { createdAt: "desc" } },
     },
   });
 
@@ -58,6 +59,9 @@ export default async function ClientDetailPage({
   const updateAppointmentForClient = updateAppointment.bind(null, client.id);
   const updateNeighborhoodsForClient = updateNeighborhoods.bind(null, client.id);
   const toggleClientPCSForClient = toggleClientPCS.bind(null, client.id);
+
+  const pendingSignatures = client.signatureRequests.filter((r) => r.status !== "signed");
+  const signedDocuments = client.signatureRequests.filter((r) => r.status === "signed");
 
   const currentStageColor = stageColor(client.currentStage);
 
@@ -127,6 +131,52 @@ export default async function ClientDetailPage({
             {STAGES[client.currentStage].title}
           </span>
         </div>
+
+        {client.signatureRequests.length > 0 && (
+          <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
+            <h2 className="text-sm font-semibold text-neutral-900">Signatures</h2>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 mb-1.5">
+                  Awaiting signature ({pendingSignatures.length})
+                </p>
+                {pendingSignatures.length === 0 ? (
+                  <p className="text-sm text-neutral-400">Nothing outstanding.</p>
+                ) : (
+                  <ul className="divide-y divide-neutral-100 border border-neutral-200 rounded-lg overflow-hidden">
+                    {pendingSignatures.map((request) => (
+                      <li key={request.id} className="flex items-center justify-between gap-3 px-3 py-2 bg-white">
+                        <span className="text-sm text-neutral-800 truncate">{request.document.filename}</span>
+                        <span className="text-xs text-amber-700 bg-amber-50 rounded-full px-2 py-0.5 shrink-0">
+                          {request.status === "viewed" ? "Viewed" : "Not yet viewed"}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 mb-1.5">
+                  Signed ({signedDocuments.length})
+                </p>
+                {signedDocuments.length === 0 ? (
+                  <p className="text-sm text-neutral-400">None yet.</p>
+                ) : (
+                  <ul className="divide-y divide-neutral-100 border border-neutral-200 rounded-lg overflow-hidden">
+                    {signedDocuments.map((request) => (
+                      <li key={request.id} className="flex items-center justify-between gap-3 px-3 py-2 bg-white">
+                        <span className="text-sm text-neutral-800 truncate">{request.document.filename}</span>
+                        <span className="text-xs text-neutral-400 shrink-0">
+                          {request.signedAt ? timeAgo(request.signedAt) : ""}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 space-y-3">
           <h2 className="text-sm font-semibold text-neutral-900">Client tracker link</h2>
