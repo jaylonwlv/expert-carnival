@@ -22,7 +22,12 @@ export default async function LoginPage({
           <p className="text-sm text-neutral-500 mt-1">Admin sign in</p>
         </div>
 
-        {params.error && (
+        {params.error === "locked" && (
+          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+            Too many attempts. Try again in a few minutes.
+          </p>
+        )}
+        {params.error === "1" && (
           <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
             Incorrect password. Try again.
           </p>
