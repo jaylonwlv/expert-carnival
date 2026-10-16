@@ -179,7 +179,7 @@ export function PdfFieldEditor({
                 onPointerDown={(e) => handlePointerDownOnField(e, field)}
                 onPointerMove={(e) => handlePointerMoveOnField(e, field)}
                 onPointerUp={handlePointerUpOnField}
-                className="absolute border-2 border-indigo-500 bg-indigo-50/70 rounded cursor-move flex items-center justify-center gap-1 group"
+                className="absolute border-2 border-indigo-500 bg-indigo-50/70 rounded cursor-move touch-none flex items-center justify-center gap-1 group"
                 style={{
                   left: field.xPct * field.pageSize.width,
                   top: field.yPct * field.pageSize.height,
@@ -190,6 +190,9 @@ export function PdfFieldEditor({
                 <span className="text-xs font-medium text-indigo-700 select-none truncate px-1">
                   {fieldTypeConfig(field.type).label}
                 </span>
+                {/* Always visible (not hover-gated) and sized for a thumb, not
+                    just a mouse pointer -- a control only shown on :hover is
+                    simply never reachable on a touch device. */}
                 <button
                   type="button"
                   onPointerDown={(e) => e.stopPropagation()}
@@ -197,7 +200,7 @@ export function PdfFieldEditor({
                     e.stopPropagation();
                     removeField(field.id);
                   }}
-                  className="shrink-0 w-4 h-4 rounded-full bg-white text-red-600 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                  className="absolute -right-2 -top-2 shrink-0 w-6 h-6 rounded-full bg-white text-red-600 text-sm shadow border border-stone-200 flex items-center justify-center"
                   aria-label="Remove field"
                 >
                   ×
@@ -206,9 +209,11 @@ export function PdfFieldEditor({
                   onPointerDown={(e) => handlePointerDownOnResizeHandle(e, field)}
                   onPointerMove={(e) => handlePointerMoveOnResizeHandle(e, field)}
                   onPointerUp={handlePointerUpOnResizeHandle}
-                  className="absolute right-0 bottom-0 w-3 h-3 translate-x-1/2 translate-y-1/2 rounded-full bg-indigo-600 border border-white opacity-0 group-hover:opacity-100 transition cursor-nwse-resize"
+                  className="absolute right-0 bottom-0 w-6 h-6 translate-x-1/2 translate-y-1/2 touch-none cursor-nwse-resize flex items-center justify-center"
                   aria-label="Resize field"
-                />
+                >
+                  <div className="w-3 h-3 rounded-full bg-indigo-600 border border-white shadow" />
+                </div>
               </div>
             ))
         }
