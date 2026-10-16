@@ -12,7 +12,8 @@ export const FIELD_TYPES: FieldTypeConfig[] = [
   { type: "signature", label: "Signature", defaultWidth: 180, defaultHeight: 60 },
   { type: "initials", label: "Initials", defaultWidth: 70, defaultHeight: 50 },
   { type: "date", label: "Date", defaultWidth: 110, defaultHeight: 30 },
-  { type: "text", label: "Text", defaultWidth: 160, defaultHeight: 30 },
+  { type: "time", label: "Time", defaultWidth: 90, defaultHeight: 30 },
+  { type: "text", label: "Full Name", defaultWidth: 160, defaultHeight: 30 },
   { type: "checkbox", label: "Checkbox", defaultWidth: 24, defaultHeight: 24 },
 ];
 

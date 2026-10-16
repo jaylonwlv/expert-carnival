@@ -20,6 +20,10 @@ function todayFormatted(): string {
   return new Date().toLocaleDateString("en-US");
 }
 
+function nowFormatted(): string {
+  return new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
 export function SigningView({
   fileUrl,
   fields,
@@ -35,6 +39,7 @@ export function SigningView({
     const initial: Record<string, string> = {};
     for (const field of fields) {
       if (field.type === "date") initial[field.id] = todayFormatted();
+      if (field.type === "time") initial[field.id] = nowFormatted();
       if (field.type === "checkbox") initial[field.id] = "false";
     }
     return initial;
@@ -133,7 +138,16 @@ export function SigningView({
                   type="text"
                   value={value ?? ""}
                   onChange={(e) => setValue(field.id, e.target.value)}
-                  placeholder={field.label ?? (field.type === "date" ? "Date" : "Text")}
+                  placeholder={
+                    field.label ??
+                    (field.type === "date"
+                      ? "Date"
+                      : field.type === "time"
+                        ? "Time"
+                        : field.type === "text"
+                          ? "Full Name"
+                          : "Text")
+                  }
                   className="absolute border border-stone-400 bg-white text-sm text-stone-900 px-1 focus:outline-none focus:ring-2 focus:ring-amber-600"
                   style={style}
                 />

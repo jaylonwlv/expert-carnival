@@ -7,7 +7,11 @@ import { sendEmail, escapeHtml } from "@/lib/email";
 import { buildTrackerUrl } from "@/lib/trackerUrl";
 import type { PlacedFieldPayload } from "@/lib/signatureFields";
 
-export async function createSignatureRequest(documentId: string, fields: PlacedFieldPayload[]) {
+export async function createSignatureRequest(
+  documentId: string,
+  fields: PlacedFieldPayload[],
+  requiresIdAcknowledgment: boolean
+) {
   if (fields.length === 0) {
     throw new Error("Place at least one field before sending");
   }
@@ -21,6 +25,7 @@ export async function createSignatureRequest(documentId: string, fields: PlacedF
     data: {
       documentId: document.id,
       clientId: document.clientId,
+      requiresIdAcknowledgment,
       fields: {
         create: fields.map((f) => ({
           type: f.type,

@@ -8,19 +8,24 @@ import type { SignatureFieldType } from "@/lib/signature";
 
 type EditorField = PlacedFieldPayload & { id: string; pageSize: PageSize };
 
+// A field smaller than this is too small to click or read reliably.
+const MIN_FIELD_SIZE_PX = 16;
+
 export function PdfFieldEditor({
   fileUrl,
   onSend,
 }: {
   fileUrl: string;
-  onSend: (fields: PlacedFieldPayload[]) => Promise<void>;
+  onSend: (fields: PlacedFieldPayload[], requiresIdAcknowledgment: boolean) => Promise<void>;
 }) {
   const router = useRouter();
   const [armedType, setArmedType] = useState<SignatureFieldType | null>(null);
   const [fields, setFields] = useState<EditorField[]>([]);
+  const [requiresIdAcknowledgment, setRequiresIdAcknowledgment] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const dragState = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
+  const resizeState = useRef<{ id: string; startClientX: number; startClientY: number; startWidthPx: number; startHeightPx: number } | null>(null);
 
   function handlePageClick(pageIndex: number, xPx: number, yPx: number, size: PageSize) {
     if (!armedType) return;
@@ -74,6 +79,43 @@ export function PdfFieldEditor({
     dragState.current = null;
   }
 
+  function handlePointerDownOnResizeHandle(e: React.PointerEvent, field: EditorField) {
+    e.stopPropagation();
+    resizeState.current = {
+      id: field.id,
+      startClientX: e.clientX,
+      startClientY: e.clientY,
+      startWidthPx: field.widthPct * field.pageSize.width,
+      startHeightPx: field.heightPct * field.pageSize.height,
+    };
+    (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+  }
+
+  function handlePointerMoveOnResizeHandle(e: React.PointerEvent, field: EditorField) {
+    const state = resizeState.current;
+    if (state?.id !== field.id) return;
+    const maxWidthPx = field.pageSize.width - field.xPct * field.pageSize.width;
+    const maxHeightPx = field.pageSize.height - field.yPct * field.pageSize.height;
+    const widthPx = Math.max(
+      MIN_FIELD_SIZE_PX,
+      Math.min(state.startWidthPx + (e.clientX - state.startClientX), maxWidthPx)
+    );
+    const heightPx = Math.max(
+      MIN_FIELD_SIZE_PX,
+      Math.min(state.startHeightPx + (e.clientY - state.startClientY), maxHeightPx)
+    );
+
+    setFields((prev) =>
+      prev.map((f) =>
+        f.id === field.id ? { ...f, widthPct: widthPx / f.pageSize.width, heightPct: heightPx / f.pageSize.height } : f
+      )
+    );
+  }
+
+  function handlePointerUpOnResizeHandle() {
+    resizeState.current = null;
+  }
+
   function removeField(id: string) {
     setFields((prev) => prev.filter((f) => f.id !== id));
   }
@@ -92,7 +134,8 @@ export function PdfFieldEditor({
           heightPct: f.heightPct,
           label: f.label,
           sortOrder: f.sortOrder,
-        }))
+        })),
+        requiresIdAcknowledgment
       );
       router.refresh();
     } catch (err) {
@@ -159,10 +202,28 @@ export function PdfFieldEditor({
                 >
                   ×
                 </button>
+                <div
+                  onPointerDown={(e) => handlePointerDownOnResizeHandle(e, field)}
+                  onPointerMove={(e) => handlePointerMoveOnResizeHandle(e, field)}
+                  onPointerUp={handlePointerUpOnResizeHandle}
+                  className="absolute right-0 bottom-0 w-3 h-3 translate-x-1/2 translate-y-1/2 rounded-full bg-indigo-600 border border-white opacity-0 group-hover:opacity-100 transition cursor-nwse-resize"
+                  aria-label="Resize field"
+                />
               </div>
             ))
         }
       />
+
+      <label className="flex items-start gap-2 text-sm text-stone-700 bg-stone-50 border border-stone-200 rounded-lg p-3">
+        <input
+          type="checkbox"
+          checked={requiresIdAcknowledgment}
+          onChange={(e) => setRequiresIdAcknowledgment(e.target.checked)}
+          className="mt-0.5 rounded"
+        />
+        This is the client&apos;s first document (e.g. Duties Owed) — require them to confirm it matches their
+        valid ID before they can view and sign it.
+      </label>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="flex items-center justify-between pt-3 border-t border-stone-100">

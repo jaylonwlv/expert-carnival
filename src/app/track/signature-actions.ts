@@ -8,11 +8,30 @@ import { getSignedDownloadUrl } from "@/lib/documents";
 import { stampSignedPdf, type FieldToStamp } from "@/lib/signature";
 import { logActivity } from "@/lib/activity";
 import { sendEmail, escapeHtml } from "@/lib/email";
+import { buildTrackerUrl } from "@/lib/trackerUrl";
 
 async function clientIp(): Promise<string | null> {
   const headerList = await headers();
   const forwardedFor = headerList.get("x-forwarded-for");
   return forwardedFor?.split(",")[0]?.trim() ?? null;
+}
+
+export async function acknowledgeIdentity(requestId: string, token: string) {
+  const request = await prisma.signatureRequest.findUnique({
+    where: { id: requestId },
+    include: { client: true },
+  });
+
+  if (!request || request.client.token !== token) {
+    throw new Error("Signature request not found");
+  }
+
+  await prisma.signatureRequest.update({
+    where: { id: requestId },
+    data: { idAcknowledgedAt: new Date() },
+  });
+
+  revalidatePath(`/track/${token}/sign/${requestId}`);
 }
 
 export async function submitSignature(
@@ -129,6 +148,17 @@ export async function submitSignature(
         to: agentEmail,
         subject: `${request.client.name} signed "${request.document.filename}"`,
         html: `<p>${escapeHtml(request.client.name)} just signed "${escapeHtml(request.document.filename)}". The signed copy is in their document gallery.</p>`,
+      });
+    }
+
+    if (request.client.email) {
+      const signPageUrl = `${await buildTrackerUrl(request.client.token)}/sign/${requestId}`;
+      await sendEmail({
+        to: request.client.email,
+        subject: `You signed "${request.document.filename}"`,
+        html: `<p>Hi ${escapeHtml(request.client.name.split(" ")[0])},</p><p>This confirms you signed "${escapeHtml(
+          request.document.filename
+        )}" on ${escapeHtml(signedAt.toLocaleString())}.</p><p><a href="${signPageUrl}">View your signed copy</a></p>`,
       });
     }
 

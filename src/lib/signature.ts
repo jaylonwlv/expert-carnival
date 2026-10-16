@@ -1,6 +1,6 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
-export type SignatureFieldType = "signature" | "initials" | "date" | "text" | "checkbox";
+export type SignatureFieldType = "signature" | "initials" | "date" | "time" | "text" | "checkbox";
 
 export type FieldToStamp = {
   type: SignatureFieldType;
@@ -67,7 +67,7 @@ export async function stampSignedPdf(
         });
       }
     } else {
-      // date | text
+      // date | time | text
       const fontSize = Math.min(height * 0.7, 12);
       page.drawText(field.value, {
         x: x + 2,

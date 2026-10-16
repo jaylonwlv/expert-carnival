@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSignedDownloadUrl } from "@/lib/documents";
 import { SigningView } from "@/components/SigningView";
+import { IdentityAcknowledgment } from "@/components/IdentityAcknowledgment";
 import type { SignatureFieldType } from "@/lib/signature";
-import { submitSignature } from "../../../signature-actions";
+import { submitSignature, acknowledgeIdentity } from "../../../signature-actions";
 
 export default async function SignPage({
   params,
@@ -27,8 +28,28 @@ export default async function SignPage({
     await prisma.signatureRequest.update({ where: { id: requestId }, data: { status: "viewed", viewedAt: new Date() } });
   }
 
-  const fileUrl = await getSignedDownloadUrl(request.document.pathname);
   const onSubmit = submitSignature.bind(null, requestId, token);
+  const onAcknowledge = acknowledgeIdentity.bind(null, requestId, token);
+
+  const needsIdAcknowledgment =
+    request.status !== "signed" && request.requiresIdAcknowledgment && !request.idAcknowledgedAt;
+
+  // The acknowledgment gate doesn't show the PDF at all, so there's no reason
+  // to pay for a signed-URL round trip to Vercel Blob before the client even
+  // gets past it. Once signed, the document to show is the stamped copy
+  // (their signature baked in, plus the audit page) -- not the original,
+  // pre-signature source file that request.document still points at.
+  let viewUrl: string | null = null;
+  if (!needsIdAcknowledgment) {
+    if (request.status === "signed" && request.signedDocumentId) {
+      const signedDocument = await prisma.document.findUnique({ where: { id: request.signedDocumentId } });
+      viewUrl = signedDocument
+        ? await getSignedDownloadUrl(signedDocument.pathname)
+        : await getSignedDownloadUrl(request.document.pathname);
+    } else {
+      viewUrl = await getSignedDownloadUrl(request.document.pathname);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#faf8f4]">
@@ -52,13 +73,18 @@ export default async function SignPage({
             <p className="text-sm font-medium text-emerald-700">
               You signed this document on {request.signedAt?.toLocaleString()}.
             </p>
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-stone-700 hover:underline">
+            {/* viewUrl is always resolved here: this branch only runs when
+                needsIdAcknowledgment is false, which is what gates whether
+                viewUrl gets computed above. */}
+            <a href={viewUrl!} target="_blank" rel="noopener noreferrer" className="text-sm text-stone-700 hover:underline">
               View the document
             </a>
           </div>
+        ) : needsIdAcknowledgment ? (
+          <IdentityAcknowledgment documentFilename={request.document.filename} onAcknowledge={onAcknowledge} />
         ) : (
           <SigningView
-            fileUrl={fileUrl}
+            fileUrl={viewUrl!}
             defaultSignerName={request.client.name}
             fields={request.fields.map((f) => ({
               id: f.id,

@@ -71,19 +71,25 @@ model Document {
 }
 
 model SignatureRequest {
-  id               String           @id @default(cuid())
-  documentId       String           @unique
-  document         Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  clientId         String
-  client           Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  status           String           @default("pending") // pending | viewed | signed
-  fields           SignatureField[]
-  viewedAt         DateTime?
-  signedAt         DateTime?
-  signedByName     String?
-  signedIp         String?
-  signedDocumentId String?
-  createdAt        DateTime         @default(now())
+  id                       String           @id @default(cuid())
+  documentId               String           @unique
+  document                 Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  clientId                 String
+  client                   Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  status                   String           @default("pending") // pending | viewed | signed
+  fields                   SignatureField[]
+  viewedAt                 DateTime?
+  // Gates the signing view behind an ID-match confirmation step first --
+  // meant for whichever document a realtor sends first (e.g. Duties Owed),
+  // set per-request rather than detected automatically, so later documents
+  // for the same client don't re-ask once the client has already confirmed.
+  requiresIdAcknowledgment Boolean          @default(false)
+  idAcknowledgedAt         DateTime?
+  signedAt                 DateTime?
+  signedByName             String?
+  signedIp                 String?
+  signedDocumentId         String?
+  createdAt                DateTime         @default(now())
 
   @@index([clientId])
 }
@@ -92,7 +98,7 @@ model SignatureField {
   id        String           @id @default(cuid())
   requestId String
   request   SignatureRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  type      String // signature | initials | date | text | checkbox
+  type      String // signature | initials | date | time | text | checkbox
   page      Int
   xPct      Float
   yPct      Float
