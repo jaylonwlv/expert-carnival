@@ -60,9 +60,9 @@ export default async function ClientDocumentsPage({
             {documents.length} {documents.length === 1 ? "document" : "documents"}
           </p>
           {documents.length > 0 && (
-            <p className="text-xs text-stone-400 mt-0.5">
-              Download links below are valid for 72 hours after this page loads — reopen it anytime for a fresh
-              link.
+            <p className="text-xs text-stone-600 mt-0.5">
+              Download links below are valid for <span className="font-semibold">72 hours</span> after this page
+              loads — reopen it anytime for a fresh link.
             </p>
           )}
         </div>

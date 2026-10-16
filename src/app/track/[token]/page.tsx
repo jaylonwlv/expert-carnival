@@ -162,8 +162,9 @@ export default async function TrackPage({
 
           {documents.length > 0 && (
             <>
-              <p className="text-xs text-stone-400 -mt-2">
-                Links below are valid for 72 hours after this page loads — reopen it anytime for a fresh link.
+              <p className="text-xs text-stone-600 -mt-2">
+                Links below are valid for <span className="font-semibold">72 hours</span> after this page loads —
+                reopen it anytime for a fresh link.
               </p>
               <ul className="divide-y divide-stone-100">
                 {documents.map((doc) => (
