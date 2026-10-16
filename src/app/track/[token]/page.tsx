@@ -161,27 +161,32 @@ export default async function TrackPage({
           </p>
 
           {documents.length > 0 && (
-            <ul className="divide-y divide-stone-100">
-              {documents.map((doc) => (
-                <li key={doc.id} className="flex items-center gap-3 py-2.5 first:pt-0">
-                  <FileTypeIcon kind={fileKindLabel(doc.contentType, doc.filename)} size="sm" />
-                  <a
-                    href={doc.downloadUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 text-sm font-medium text-stone-900 hover:underline truncate"
-                  >
-                    {doc.filename}
-                  </a>
-                  {doc.signer && (
-                    <span className="text-xs font-medium text-sky-700 bg-sky-50 rounded-full px-2 py-0.5 shrink-0">
-                      {doc.signer.name}
-                    </span>
-                  )}
-                  <span className="text-xs text-stone-400 shrink-0">{formatFileSize(doc.size)}</span>
-                </li>
-              ))}
-            </ul>
+            <>
+              <p className="text-xs text-stone-400 -mt-2">
+                Links below are valid for 72 hours after this page loads — reopen it anytime for a fresh link.
+              </p>
+              <ul className="divide-y divide-stone-100">
+                {documents.map((doc) => (
+                  <li key={doc.id} className="flex items-center gap-3 py-2.5 first:pt-0">
+                    <FileTypeIcon kind={fileKindLabel(doc.contentType, doc.filename)} size="sm" />
+                    <a
+                      href={doc.downloadUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 text-sm font-medium text-stone-900 hover:underline truncate"
+                    >
+                      {doc.filename}
+                    </a>
+                    {doc.signer && (
+                      <span className="text-xs font-medium text-sky-700 bg-sky-50 rounded-full px-2 py-0.5 shrink-0">
+                        {doc.signer.name}
+                      </span>
+                    )}
+                    <span className="text-xs text-stone-400 shrink-0">{formatFileSize(doc.size)}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
 
           <p className="text-xs text-stone-500">

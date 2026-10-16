@@ -59,6 +59,12 @@ export default async function ClientDocumentsPage({
           <p className="text-sm text-stone-500">
             {documents.length} {documents.length === 1 ? "document" : "documents"}
           </p>
+          {documents.length > 0 && (
+            <p className="text-xs text-stone-400 mt-0.5">
+              Download links below are valid for 72 hours after this page loads — reopen it anytime for a fresh
+              link.
+            </p>
+          )}
         </div>
 
         <DocumentGallery
