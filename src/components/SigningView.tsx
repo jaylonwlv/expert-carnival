@@ -44,6 +44,13 @@ export function SigningView({
     }
     return initial;
   });
+  // Date/time fields start pre-filled with the moment this view mounted, as
+  // a convenience default -- but a client can take minutes (or, with Date,
+  // even cross into the next day) between opening the page and actually
+  // submitting. Tracking which of those two fields the client has
+  // deliberately edited lets handleSubmit refresh any still-untouched one to
+  // the real submission moment, instead of stamping a stale mount-time value.
+  const [touchedFieldIds, setTouchedFieldIds] = useState<Set<string>>(new Set());
   const [padFor, setPadFor] = useState<SigningField | null>(null);
   const [signerName, setSignerName] = useState(defaultSignerName);
   const [consented, setConsented] = useState(false);
@@ -52,6 +59,11 @@ export function SigningView({
 
   function setValue(fieldId: string, value: string) {
     setValues((prev) => ({ ...prev, [fieldId]: value }));
+  }
+
+  function handleDateOrTimeInput(fieldId: string, value: string) {
+    setValue(fieldId, value);
+    setTouchedFieldIds((prev) => new Set(prev).add(fieldId));
   }
 
   const requiredUnfilled = fields.filter(
@@ -64,7 +76,13 @@ export function SigningView({
     setSubmitting(true);
     setError(null);
     try {
-      await onSubmit(values, signerName.trim());
+      const finalValues = { ...values };
+      for (const field of fields) {
+        if (touchedFieldIds.has(field.id)) continue;
+        if (field.type === "date") finalValues[field.id] = todayFormatted();
+        if (field.type === "time") finalValues[field.id] = nowFormatted();
+      }
+      await onSubmit(finalValues, signerName.trim());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong submitting your signature.");
       setSubmitting(false);
@@ -137,7 +155,11 @@ export function SigningView({
                   key={field.id}
                   type="text"
                   value={value ?? ""}
-                  onChange={(e) => setValue(field.id, e.target.value)}
+                  onChange={(e) =>
+                    field.type === "date" || field.type === "time"
+                      ? handleDateOrTimeInput(field.id, e.target.value)
+                      : setValue(field.id, e.target.value)
+                  }
                   placeholder={
                     field.label ??
                     (field.type === "date"

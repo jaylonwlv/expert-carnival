@@ -8,6 +8,8 @@ import { IdentityAcknowledgment } from "@/components/IdentityAcknowledgment";
 import type { SignatureFieldType } from "@/lib/signature";
 import { submitSignature, acknowledgeIdentity } from "../../../signature-actions";
 
+const AGENT_NAME = process.env.NEXT_PUBLIC_AGENT_NAME ?? "your agent";
+
 export default async function SignPage({
   params,
 }: {
@@ -40,12 +42,23 @@ export default async function SignPage({
   // (their signature baked in, plus the audit page) -- not the original,
   // pre-signature source file that request.document still points at.
   let viewUrl: string | null = null;
+  // Documents aren't protected from deletion once they're the target of a
+  // signedDocumentId reference, so that lookup can come back empty (e.g. an
+  // admin cleaning up the gallery deletes what looks like a stray file but
+  // is actually the signed copy). Falling back to the unsigned original in
+  // that case would silently show the wrong document under a "you signed
+  // this" banner -- surfacing it as missing instead is the honest result.
+  let signedCopyMissing = false;
   if (!needsIdAcknowledgment) {
-    if (request.status === "signed" && request.signedDocumentId) {
-      const signedDocument = await prisma.document.findUnique({ where: { id: request.signedDocumentId } });
-      viewUrl = signedDocument
-        ? await getSignedDownloadUrl(signedDocument.pathname)
-        : await getSignedDownloadUrl(request.document.pathname);
+    if (request.status === "signed") {
+      const signedDocument = request.signedDocumentId
+        ? await prisma.document.findUnique({ where: { id: request.signedDocumentId } })
+        : null;
+      if (signedDocument) {
+        viewUrl = await getSignedDownloadUrl(signedDocument.pathname);
+      } else {
+        signedCopyMissing = true;
+      }
     } else {
       viewUrl = await getSignedDownloadUrl(request.document.pathname);
     }
@@ -73,12 +86,20 @@ export default async function SignPage({
             <p className="text-sm font-medium text-emerald-700">
               You signed this document on {request.signedAt?.toLocaleString()}.
             </p>
-            {/* viewUrl is always resolved here: this branch only runs when
-                needsIdAcknowledgment is false, which is what gates whether
-                viewUrl gets computed above. */}
-            <a href={viewUrl!} target="_blank" rel="noopener noreferrer" className="text-sm text-stone-700 hover:underline">
-              View the document
-            </a>
+            {signedCopyMissing ? (
+              <p className="text-sm text-red-600">
+                Your signed copy couldn&apos;t be found. Please contact {AGENT_NAME} so they can send you another
+                copy.
+              </p>
+            ) : (
+              // viewUrl is always resolved here: this branch only runs when
+              // needsIdAcknowledgment is false and signedCopyMissing is
+              // false, which is what gates whether viewUrl gets computed
+              // above.
+              <a href={viewUrl!} target="_blank" rel="noopener noreferrer" className="text-sm text-stone-700 hover:underline">
+                View the document
+              </a>
+            )}
           </div>
         ) : needsIdAcknowledgment ? (
           <IdentityAcknowledgment documentFilename={request.document.filename} onAcknowledge={onAcknowledge} />
