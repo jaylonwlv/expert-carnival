@@ -68,6 +68,12 @@ export default async function CaliforniaPage({
           ))}
         </ul>
 
+        <p className="text-center text-xs lg:text-sm font-medium text-amber-900 bg-amber-50/90 border border-amber-200 rounded-lg px-3 py-2 lg:px-4 lg:py-3 mb-5 lg:mb-8">
+          Every month in California is another month of state income tax you won&apos;t pay in Nevada.
+          The sooner you start, the sooner that savings begins -- and the earlier you lock in, the
+          more home and financing options you&apos;ll have.
+        </p>
+
         <div id="lead-form" className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-8 lg:p-10">
           <LeadForm
             action={action}
