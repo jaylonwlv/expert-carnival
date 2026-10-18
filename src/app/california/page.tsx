@@ -33,16 +33,14 @@ export default async function CaliforniaPage({
 
       <div className="relative z-10 w-full max-w-md lg:max-w-2xl">
         <div id="hero" className="text-center mb-7 lg:mb-10">
-          <div className="inline-block bg-white/90 backdrop-blur-sm rounded-full pl-4 pr-5 py-2 lg:pl-5 lg:pr-6 lg:py-2.5 shadow-sm mb-6 lg:mb-8">
-            <Image
-              src="/logo.png"
-              alt="Relocation Engine"
-              width={680}
-              height={546}
-              className="h-7 lg:h-9 w-auto"
-              priority
-            />
-          </div>
+          <Image
+            src="/logo-white.png"
+            alt="Relocation Engine"
+            width={680}
+            height={546}
+            className="h-12 lg:h-16 w-auto mx-auto mb-6 lg:mb-8"
+            priority
+          />
           <p className="text-xs lg:text-sm font-semibold uppercase tracking-wide text-amber-400 mb-3 lg:mb-4">
             Free relocation guide · 2026 Edition
           </p>
