@@ -4,12 +4,12 @@ import { useEffect, useRef } from "react";
 
 // Hero background for the dedicated lead-capture pages (/california,
 // /optin): Paulin's own b-roll -- pool, spiral stairs, atrium, patio --
-// concatenated into one 28s sequence (public/broll/landing-sequence.mp4),
+// concatenated into one 26.5s sequence (public/broll/landing-sequence.mp4),
 // crisp (not blurred, unlike the previous single-clip version) under a
 // dark scrim so white text stays readable over it.
 //
 // Same deferred-load rationale as the rest of this session's video work:
-// the poster frame paints immediately, and the real ~8.5MB clip only
+// the poster frame paints immediately, and the real ~11MB clip only
 // attaches once the browser is idle, so it never competes with the page's
 // fonts/logo/lead form for bandwidth on first load. Skipped entirely under
 // prefers-reduced-motion -- the CSS swap below (.landing-video /
@@ -23,7 +23,7 @@ export function LandingSequenceBackground() {
     if (!video) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // This clip is ~12.6MB -- skip it on a slow or metered connection and
+    // This clip is ~11MB -- skip it on a slow or metered connection and
     // let the poster (already the fallback for prefers-reduced-motion)
     // stand in instead. `navigator.connection` is Chromium/Android-only;
     // everywhere else this is simply undefined and the clip loads as
