@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { STAGES } from "@/lib/stages";
 import { stageColor, avatarColor, initials } from "@/lib/stageColors";
 import { timeAgo } from "@/lib/format";
@@ -18,26 +19,72 @@ type ClientRow = {
   updatedAt: Date;
 };
 
+const SEARCH_DEBOUNCE_MS = 300;
+
 export function ClientList({
   clients,
   deleteAction,
+  query,
+  stageFilter,
+  page,
+  totalPages,
+  hasAnyClients,
 }: {
   clients: ClientRow[];
   deleteAction: (clientId: string) => void;
+  // The list below is already the server-filtered, server-paginated page
+  // for these three -- search and stage filtering happen in the database
+  // (see admin/page.tsx) so they cover every client, not just whatever
+  // page happens to be loaded in the browser right now.
+  query: string;
+  stageFilter: string;
+  page: number;
+  totalPages: number;
+  hasAnyClients: boolean;
 }) {
-  const [query, setQuery] = useState("");
-  const [stageFilter, setStageFilter] = useState<string>("all");
+  const router = useRouter();
+  const pathname = usePathname();
+  const [inputValue, setInputValue] = useState(query);
+  const [syncedQuery, setSyncedQuery] = useState(query);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const normalizedQuery = query.trim().toLowerCase();
-  const filtered = clients.filter((client) => {
-    const matchesQuery =
-      normalizedQuery === "" ||
-      [client.name, client.email, client.phone].some((field) =>
-        field?.toLowerCase().includes(normalizedQuery)
-      );
-    const matchesStage = stageFilter === "all" || client.currentStage === Number(stageFilter);
-    return matchesQuery && matchesStage;
-  });
+  // Keeps the box in sync on back/forward navigation, which bypasses the
+  // debounce below entirely. Adjusting state during render (rather than in
+  // an effect) avoids an extra, cascading render on every query change.
+  if (query !== syncedQuery) {
+    setSyncedQuery(query);
+    setInputValue(query);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  function navigate(next: { q?: string; stage?: string; page?: number }) {
+    const nextQuery = next.q ?? query;
+    const nextStage = next.stage ?? stageFilter;
+    const nextPage = next.page ?? 1;
+
+    const params = new URLSearchParams();
+    if (nextQuery) params.set("q", nextQuery);
+    if (nextStage !== "all") params.set("stage", nextStage);
+    if (nextPage > 1) params.set("page", String(nextPage));
+
+    const search = params.toString();
+    router.push(search ? `${pathname}?${search}` : pathname);
+  }
+
+  function handleQueryChange(value: string) {
+    setInputValue(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => navigate({ q: value, page: 1 }), SEARCH_DEBOUNCE_MS);
+  }
+
+  function handleStageChange(value: string) {
+    navigate({ stage: value, page: 1 });
+  }
 
   return (
     <div className="space-y-4">
@@ -56,15 +103,15 @@ export function ClientList({
           </svg>
           <input
             type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            value={inputValue}
+            onChange={(e) => handleQueryChange(e.target.value)}
             placeholder="Search by name, email, or phone"
             className="w-full rounded-lg border border-stone-300 pl-9 pr-3 py-2.5 text-sm text-stone-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-600"
           />
         </div>
         <select
           value={stageFilter}
-          onChange={(e) => setStageFilter(e.target.value)}
+          onChange={(e) => handleStageChange(e.target.value)}
           className="rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-600"
         >
           <option value="all">All stages</option>
@@ -76,17 +123,17 @@ export function ClientList({
         </select>
       </div>
 
-      {filtered.length === 0 ? (
+      {clients.length === 0 ? (
         <div className="bg-white rounded-2xl border border-stone-200 py-16 text-center">
           <p className="text-sm text-stone-500">
-            {clients.length === 0
+            {!hasAnyClients
               ? "No clients yet. Add your first client to get started."
               : "No clients match your search."}
           </p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-stone-200 divide-y divide-stone-100 overflow-hidden shadow-sm">
-          {filtered.map((client) => {
+          {clients.map((client) => {
             const stage = STAGES[client.currentStage];
             const color = stageColor(client.currentStage);
             // 0 at "Lead" (nothing's happened yet), 100 at "Moved In" --
@@ -136,6 +183,32 @@ export function ClientList({
               </div>
             );
           })}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-stone-500">
+            Page {page} of {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={page <= 1}
+              onClick={() => navigate({ page: page - 1 })}
+              className="rounded-md border border-stone-300 bg-white px-3 py-1.5 text-sm font-medium text-stone-700 shadow-sm transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              disabled={page >= totalPages}
+              onClick={() => navigate({ page: page + 1 })}
+              className="rounded-md border border-stone-300 bg-white px-3 py-1.5 text-sm font-medium text-stone-700 shadow-sm transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -1,19 +1,60 @@
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
 import { STAGES } from "@/lib/stages";
 import { ClientList } from "@/components/ClientList";
 import { deleteClient, logout } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminPage() {
-  const clients = await prisma.client.findMany({
-    orderBy: { updatedAt: "desc" },
-  });
+const PAGE_SIZE = 20;
 
-  const movedIn = clients.filter((c) => c.currentStage === STAGES.length - 1).length;
-  const active = clients.length - movedIn;
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; q?: string; stage?: string }>;
+}) {
+  const params = await searchParams;
+  const query = (params.q ?? "").trim();
+  const stageFilter = params.stage ?? "all";
+  const requestedPage = Math.max(1, Number(params.page) || 1);
+
+  const where: Prisma.ClientWhereInput = {
+    ...(query
+      ? {
+          OR: [
+            { name: { contains: query, mode: "insensitive" } },
+            { email: { contains: query, mode: "insensitive" } },
+            { phone: { contains: query, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+    ...(stageFilter !== "all" ? { currentStage: Number(stageFilter) } : {}),
+  };
+
+  // The stat cards always reflect every client, independent of the search
+  // box/stage filter below them, so they're counted separately from the
+  // (possibly filtered) list.
+  const [totalClients, movedIn, filteredCount] = await Promise.all([
+    prisma.client.count(),
+    prisma.client.count({ where: { currentStage: STAGES.length - 1 } }),
+    prisma.client.count({ where }),
+  ]);
+  const active = totalClients - movedIn;
+
+  // Clamp instead of trusting the URL's ?page= as-is -- otherwise narrowing
+  // a search/stage filter while on a later page would skip past the end of
+  // the now-smaller result set and silently render nothing.
+  const totalPages = Math.max(1, Math.ceil(filteredCount / PAGE_SIZE));
+  const page = Math.min(requestedPage, totalPages);
+
+  const clients = await prisma.client.findMany({
+    where,
+    orderBy: { updatedAt: "desc" },
+    skip: (page - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
+  });
 
   return (
     <div className="min-h-screen bg-[#faf8f4]">
@@ -38,12 +79,20 @@ export default async function AdminPage() {
 
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
         <div className="grid grid-cols-3 gap-5">
-          <StatCard label="Total clients" value={clients.length} icon={<PeopleIcon />} chip="bg-amber-50 text-amber-700" />
+          <StatCard label="Total clients" value={totalClients} icon={<PeopleIcon />} chip="bg-amber-50 text-amber-700" />
           <StatCard label="Active" value={active} icon={<ClockIcon />} chip="bg-sky-50 text-sky-700" />
           <StatCard label="Moved in" value={movedIn} icon={<HomeIcon />} chip="bg-emerald-50 text-emerald-700" />
         </div>
 
-        <ClientList clients={clients} deleteAction={deleteClient} />
+        <ClientList
+          clients={clients}
+          deleteAction={deleteClient}
+          query={query}
+          stageFilter={stageFilter}
+          page={page}
+          totalPages={totalPages}
+          hasAnyClients={totalClients > 0}
+        />
       </main>
     </div>
   );
