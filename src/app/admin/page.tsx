@@ -57,16 +57,27 @@ export default async function AdminPage({
   // would just show a generic "Something went wrong", since Next.js (and
   // React, on top of it) redacts the real server-side error before it
   // reaches the browser in production.
-  let totalClients: number, movedIn: number, filteredCount: number, clients: Awaited<ReturnType<typeof prisma.client.findMany>>;
+  let totalClients: number,
+    movedIn: number,
+    filteredCount: number,
+    clients: Awaited<ReturnType<typeof prisma.client.findMany>>,
+    calculatorStats: { page: string; count: number; avgIncome: number | null }[];
   try {
     // The stat cards always reflect every client, independent of the
     // search box/stage filter below them, so they're counted separately
     // from the (possibly filtered) list.
-    [totalClients, movedIn, filteredCount] = await Promise.all([
+    let rawCalculatorStats;
+    [totalClients, movedIn, filteredCount, rawCalculatorStats] = await Promise.all([
       prisma.client.count(),
       prisma.client.count({ where: { currentStage: STAGES.length - 1 } }),
       prisma.client.count({ where }),
+      prisma.calculatorInteraction.groupBy({ by: ["page"], _count: { _all: true }, _avg: { income: true } }),
     ]);
+    calculatorStats = rawCalculatorStats.map((s) => ({
+      page: s.page,
+      count: s._count._all,
+      avgIncome: s._avg.income,
+    }));
 
     // Clamp instead of trusting the URL's ?page= as-is -- otherwise
     // narrowing a search/stage filter while on a later page would skip
@@ -122,6 +133,8 @@ export default async function AdminPage({
           <StatCard label="Moved in" value={movedIn} icon={<HomeIcon />} chip="bg-emerald-50 text-emerald-700" />
         </div>
 
+        <CalculatorEngagement stats={calculatorStats} />
+
         <ClientList
           clients={clients}
           deleteAction={deleteClient}
@@ -132,6 +145,39 @@ export default async function AdminPage({
           hasAnyClients={totalClients > 0}
         />
       </main>
+    </div>
+  );
+}
+
+// How many visitors actually drag the tax calculator's slider, by which
+// page it's on -- the engagement signal that replaced giving the
+// calculator its own CTA (see CalculatorInteraction in the schema).
+function CalculatorEngagement({
+  stats,
+}: {
+  stats: { page: string; count: number; avgIncome: number | null }[];
+}) {
+  return (
+    <div className="bg-white rounded-2xl border border-stone-200 p-5 shadow-sm">
+      <p className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-3">
+        Calculator engagement
+      </p>
+      {stats.length === 0 ? (
+        <p className="text-sm text-stone-400">No one has used the savings calculator yet.</p>
+      ) : (
+        <div className="flex flex-wrap gap-8">
+          {stats.map((s) => (
+            <div key={s.page}>
+              <p className="text-2xl font-semibold text-stone-900 tabular-nums">{s.count}</p>
+              <p className="text-xs text-stone-500 capitalize">
+                {s.page}
+                {s.avgIncome != null &&
+                  ` · avg ${s.avgIncome.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })} income`}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
