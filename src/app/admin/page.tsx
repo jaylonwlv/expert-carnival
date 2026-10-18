@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { STAGES } from "@/lib/stages";
 import { ClientList } from "@/components/ClientList";
+import { DatabaseUnavailable } from "@/components/DatabaseUnavailable";
+import { isDatabaseConnectivityError } from "@/lib/dbErrors";
 import { deleteClient, logout } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -48,28 +50,49 @@ export default async function AdminPage({
     ...(stageFilter !== "all" ? { currentStage: Number(stageFilter) } : {}),
   };
 
-  // The stat cards always reflect every client, independent of the search
-  // box/stage filter below them, so they're counted separately from the
-  // (possibly filtered) list.
-  const [totalClients, movedIn, filteredCount] = await Promise.all([
-    prisma.client.count(),
-    prisma.client.count({ where: { currentStage: STAGES.length - 1 } }),
-    prisma.client.count({ where }),
-  ]);
-  const active = totalClients - movedIn;
+  // This is the first thing almost any admin session touches right after
+  // login, so a database that's unreachable shows up here as "login is
+  // broken" -- catching it here and saying so directly is the only way to
+  // say that: a thrown error reaching the root error.tsx boundary instead
+  // would just show a generic "Something went wrong", since Next.js (and
+  // React, on top of it) redacts the real server-side error before it
+  // reaches the browser in production.
+  let totalClients: number, movedIn: number, filteredCount: number, clients: Awaited<ReturnType<typeof prisma.client.findMany>>;
+  try {
+    // The stat cards always reflect every client, independent of the
+    // search box/stage filter below them, so they're counted separately
+    // from the (possibly filtered) list.
+    [totalClients, movedIn, filteredCount] = await Promise.all([
+      prisma.client.count(),
+      prisma.client.count({ where: { currentStage: STAGES.length - 1 } }),
+      prisma.client.count({ where }),
+    ]);
 
-  // Clamp instead of trusting the URL's ?page= as-is -- otherwise narrowing
-  // a search/stage filter while on a later page would skip past the end of
-  // the now-smaller result set and silently render nothing.
+    // Clamp instead of trusting the URL's ?page= as-is -- otherwise
+    // narrowing a search/stage filter while on a later page would skip
+    // past the end of the now-smaller result set and silently render
+    // nothing.
+    const totalPagesForQuery = Math.max(1, Math.ceil(filteredCount / PAGE_SIZE));
+    const clampedPage = Math.min(requestedPage, totalPagesForQuery);
+
+    clients = await prisma.client.findMany({
+      where,
+      orderBy: { updatedAt: "desc" },
+      skip: (clampedPage - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    });
+  } catch (error) {
+    if (!isDatabaseConnectivityError(error)) throw error;
+    const retryParams = new URLSearchParams();
+    if (params.q) retryParams.set("q", params.q);
+    if (params.stage) retryParams.set("stage", params.stage);
+    if (params.page) retryParams.set("page", params.page);
+    const qs = retryParams.toString();
+    return <DatabaseUnavailable retryHref={qs ? `/admin?${qs}` : "/admin"} />;
+  }
+  const active = totalClients - movedIn;
   const totalPages = Math.max(1, Math.ceil(filteredCount / PAGE_SIZE));
   const page = Math.min(requestedPage, totalPages);
-
-  const clients = await prisma.client.findMany({
-    where,
-    orderBy: { updatedAt: "desc" },
-    skip: (page - 1) * PAGE_SIZE,
-    take: PAGE_SIZE,
-  });
 
   return (
     <div className="min-h-screen bg-[#faf8f4]">
