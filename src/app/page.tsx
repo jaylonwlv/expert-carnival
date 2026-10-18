@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LeadForm } from "@/components/LeadForm";
+import { LandingBackground } from "@/components/LandingBackground";
 import { submitLead } from "./lead-actions";
 
 export const metadata = {
@@ -37,19 +38,23 @@ export default async function HomePage({
   const action = submitLead.bind(null, "homepage", "/");
 
   return (
-    <div className="min-h-screen bg-[#faf8f4] flex flex-col">
-      <header className="bg-white border-b border-stone-200">
-        <div className="max-w-5xl mx-auto px-4 py-3">
-          <Image src="/logo.png" alt="Relocation Engine" width={680} height={546} className="h-10 w-auto" priority />
-        </div>
-      </header>
-
-      <main className="flex-1">
-        <section className="max-w-5xl mx-auto px-4 py-16 md:py-24 text-center">
-          <h1 className="text-3xl md:text-5xl font-bold text-stone-900 leading-tight max-w-3xl mx-auto">
+    <div className="min-h-screen flex flex-col">
+      <section className="relative overflow-hidden">
+        <LandingBackground fixed={false} />
+        <div className="relative z-10 max-w-3xl mx-auto px-4 py-20 md:py-28 text-center">
+          <Image
+            src="/logo.png"
+            alt="Relocation Engine"
+            width={680}
+            height={546}
+            className="h-10 w-auto mx-auto mb-8"
+            style={{ filter: "brightness(0) invert(1)" }}
+            priority
+          />
+          <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight">
             Relocating to Las Vegas? We&apos;ll handle everything.
           </h1>
-          <p className="text-base md:text-lg text-stone-600 mt-5 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg text-stone-300 mt-5 max-w-2xl mx-auto leading-relaxed">
             Full-service relocation support — from financing and home selection through closing and
             move-in — for California sellers and military PCS moves alike.
           </p>
@@ -57,20 +62,22 @@ export default async function HomePage({
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
               href="/california"
-              className="rounded-md border border-stone-300 bg-white text-stone-800 text-sm font-medium px-4 py-2.5 shadow-sm hover:shadow-md hover:bg-stone-50 transition"
+              className="rounded-md border border-white/30 bg-white/10 backdrop-blur-sm text-white text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-white/20 transition"
             >
               Moving from California?
             </Link>
             <Link
               href="/optin"
-              className="rounded-md border border-stone-300 bg-white text-stone-800 text-sm font-medium px-4 py-2.5 shadow-sm hover:shadow-md hover:bg-stone-50 transition"
+              className="rounded-md border border-white/30 bg-white/10 backdrop-blur-sm text-white text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-white/20 transition"
             >
               PCS orders to Las Vegas?
             </Link>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="max-w-5xl mx-auto px-4 py-10">
+      <main className="flex-1 bg-[#faf8f4]">
+        <section className="max-w-5xl mx-auto px-4 py-16">
           <div className="grid sm:grid-cols-2 gap-5">
             {SERVICES.map((service) => (
               <div key={service.title} className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
@@ -81,7 +88,7 @@ export default async function HomePage({
           </div>
         </section>
 
-        <section className="max-w-xl mx-auto px-4 py-12">
+        <section className="max-w-xl mx-auto px-4 pb-16">
           <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
             <h2 className="text-lg font-semibold text-stone-900 text-center">
               Get your free California to Las Vegas relocation guide
@@ -99,7 +106,7 @@ export default async function HomePage({
         </section>
       </main>
 
-      <footer className="border-t border-stone-200 py-6 text-center">
+      <footer className="border-t border-stone-200 py-6 text-center bg-[#faf8f4]">
         <Link href="/admin" className="text-xs text-stone-400 hover:text-stone-600 transition">
           Agent login
         </Link>

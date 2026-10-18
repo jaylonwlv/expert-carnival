@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LeadForm } from "@/components/LeadForm";
-import { GuideCover } from "@/components/GuideCover";
+import { LandingBackground } from "@/components/LandingBackground";
 import { submitLead } from "../lead-actions";
 
 export const metadata = {
@@ -19,49 +19,47 @@ export default async function CaliforniaPage({
   const action = submitLead.bind(null, "california", "/california");
 
   return (
-    <div className="min-h-screen bg-[#faf8f4]">
-      <header className="bg-white border-b border-stone-200">
-        <div className="max-w-5xl mx-auto px-4 py-3">
-          <Link href="/">
-            <Image src="/logo.png" alt="Relocation Engine" width={680} height={546} className="h-10 w-auto" priority />
-          </Link>
-        </div>
-      </header>
+    <div className="relative min-h-screen flex items-center justify-center px-4 py-16">
+      <LandingBackground />
 
-      <main className="max-w-5xl mx-auto px-4 py-12 md:py-20">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 mb-3">
-              Free relocation guide
-            </p>
-            <h1 className="text-3xl md:text-4xl font-bold text-stone-900 leading-tight">
-              Get My Relocation Roadmap
-            </h1>
-            <p className="text-base text-stone-600 mt-4 leading-relaxed">
-              Reclaim your wealth and space. See how relocating to Nevada lowers your cost of living
-              while elevating your lifestyle.
-            </p>
-
-            <div className="mt-8 bg-white rounded-xl border border-stone-200 shadow-sm p-6">
-              <LeadForm
-                action={action}
-                submitLabel="Get My Relocation Roadmap"
-                submitted={params.lead_submitted === "1"}
-                error={params.lead_error}
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-center order-first md:order-last">
-            <GuideCover
-              title="CALIFORNIA TO LAS VEGAS RELOCATION GUIDE"
-              subtitle="A Comprehensive Guide for Buyers & Investors, 2026 Edition"
-              detail="A Complete Tax & Equity Transfer Strategy"
-              credit="Paulin Korensia & Associates Relocation Team"
+      <div className="relative z-10 w-full max-w-md">
+        <div className="text-center mb-7">
+          <Link href="/" className="inline-block mb-6">
+            <Image
+              src="/logo.png"
+              alt="Relocation Engine"
+              width={680}
+              height={546}
+              className="h-9 w-auto mx-auto"
+              style={{ filter: "brightness(0) invert(1)" }}
+              priority
             />
-          </div>
+          </Link>
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-400 mb-3">
+            Free relocation guide · 2026 Edition
+          </p>
+          <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+            Get My Relocation Roadmap
+          </h1>
+          <p className="text-sm md:text-base text-stone-300 mt-3 leading-relaxed">
+            Reclaim your wealth and space. See how relocating to Nevada lowers your cost of living
+            while elevating your lifestyle.
+          </p>
         </div>
-      </main>
+
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-8">
+          <LeadForm
+            action={action}
+            submitLabel="Get My Relocation Roadmap"
+            submitted={params.lead_submitted === "1"}
+            error={params.lead_error}
+          />
+        </div>
+
+        <p className="text-center text-xs text-stone-400 mt-5">
+          A Complete Tax &amp; Equity Transfer Strategy — Paulin Korensia &amp; Associates Relocation Team
+        </p>
+      </div>
     </div>
   );
 }
