@@ -54,4 +54,14 @@ export const STAGE_EMAIL_TRIGGERS: Record<string, EmailTrigger> = {
     body: (firstName, trackerUrl) =>
       wrap(firstName, "Congratulations! You're officially under contract on your new home.", trackerUrl),
   },
+  // Every other stage below this one has a trigger; without one here, the
+  // first message a client gets after the actual finish line was the
+  // post-move review request (api/cron/review-requests), a few days later --
+  // reviews-first, congratulations never, at the one moment that should
+  // feel warmest.
+  "Moved In": {
+    subject: "Welcome home!",
+    body: (firstName, trackerUrl) =>
+      wrap(firstName, "Congratulations -- you're officially a Las Vegas resident! Welcome home.", trackerUrl),
+  },
 };

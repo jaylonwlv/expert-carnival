@@ -14,7 +14,7 @@ import { logActivity } from "@/lib/activity";
 import { parseAppointmentInput, formatAppointment } from "@/lib/format";
 import type { ChecklistStatus } from "@/lib/checklist";
 import { allNeighborhoodNames } from "@/lib/neighborhoods";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, escapeHtml } from "@/lib/email";
 import { CHECKLIST_EMAIL_TRIGGERS, STAGE_EMAIL_TRIGGERS } from "@/lib/emailTriggers";
 import { buildTrackerUrl } from "@/lib/trackerUrl";
 
@@ -201,6 +201,33 @@ export async function createDocumentRecords(
   });
 
   await logActivity(clientId, `Uploaded ${filenames.map((f) => `"${f}"`).join(", ")}.`);
+
+  // A document the client can't see yet shouldn't prompt them to go look --
+  // but one they can is the exact case the tracker's "you always know where
+  // things stand" promise is actually about, and uploading it here was
+  // previously the one path that promise didn't apply to: nothing told the
+  // client it existed unless they happened to revisit the link on their own
+  // (the signature-request flow already notifies; this is everything else --
+  // a disclosure, an estimate, anything just shared to view or download).
+  if (visibleToClient) {
+    const client = await prisma.client.findUnique({ where: { id: clientId } });
+    if (client?.email) {
+      const firstName = client.name.split(" ")[0];
+      const trackerUrl = await buildTrackerUrl(client.token);
+      const isSingle = filenames.length === 1;
+      await sendEmail({
+        to: client.email,
+        subject: isSingle ? "A new document is available" : "New documents are available",
+        html: `
+          <p>Hi ${escapeHtml(firstName)},</p>
+          <p>${isSingle ? `A new document ("${escapeHtml(filenames[0])}")` : `${filenames.length} new documents`}
+          ${isSingle ? "is" : "are"} available in your tracker.</p>
+          <p><a href="${trackerUrl}">View your documents</a></p>
+        `,
+      });
+      await logActivity(clientId, `Emailed ${client.name}: new document(s) available.`);
+    }
+  }
 
   revalidatePath(`/admin/clients/${clientId}`);
   revalidatePath(`/admin/clients/${clientId}/documents`);
