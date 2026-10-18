@@ -14,17 +14,17 @@ function formatUsd(value: number): string {
 // Interactive stand-in for the static CA-vs-NV comparison table buried in
 // the PDF guide -- same underlying math, but something a visitor can play
 // with before ever filling out the form. See lib/caTax.ts for the figures.
-export function TaxSavingsCalculator() {
+export function TaxSavingsCalculator({ large = false }: { large?: boolean }) {
   const [income, setIncome] = useState(DEFAULT_INCOME);
   const caTax = estimateCaliforniaTax(income);
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-5">
-      <p className="text-xs font-semibold uppercase tracking-wide text-stone-400 mb-3">
+    <div className={`bg-white rounded-xl border border-stone-200 shadow-sm p-5 ${large ? "lg:p-7" : ""}`}>
+      <p className={`text-xs font-semibold uppercase tracking-wide text-stone-400 mb-3 ${large ? "lg:text-sm lg:mb-4" : ""}`}>
         See your savings
       </p>
 
-      <label htmlFor="household-income" className="block text-sm font-medium text-stone-700 mb-1">
+      <label htmlFor="household-income" className={`block text-sm font-medium text-stone-700 mb-1 ${large ? "lg:text-base" : ""}`}>
         Household income
       </label>
       <input
@@ -37,23 +37,23 @@ export function TaxSavingsCalculator() {
         onChange={(e) => setIncome(Number(e.target.value))}
         className="w-full accent-amber-600"
       />
-      <p className="text-sm text-stone-900 font-semibold">{formatUsd(income)}</p>
+      <p className={`text-sm text-stone-900 font-semibold ${large ? "lg:text-base" : ""}`}>{formatUsd(income)}</p>
 
-      <div className="grid grid-cols-2 gap-3 mt-4">
-        <div className="rounded-lg bg-stone-50 border border-stone-200 p-3">
-          <p className="text-xs text-stone-500">California tax (est.)</p>
-          <p className="text-lg font-semibold text-stone-900">{formatUsd(caTax)}</p>
+      <div className={`grid grid-cols-2 gap-3 mt-4 ${large ? "lg:gap-4 lg:mt-5" : ""}`}>
+        <div className={`rounded-lg bg-stone-50 border border-stone-200 p-3 ${large ? "lg:p-4" : ""}`}>
+          <p className={`text-xs text-stone-500 ${large ? "lg:text-sm" : ""}`}>California tax (est.)</p>
+          <p className={`text-lg font-semibold text-stone-900 ${large ? "lg:text-2xl" : ""}`}>{formatUsd(caTax)}</p>
         </div>
-        <div className="rounded-lg bg-green-50 border border-green-200 p-3">
-          <p className="text-xs text-green-700">Nevada tax</p>
-          <p className="text-lg font-semibold text-green-800">$0</p>
+        <div className={`rounded-lg bg-green-50 border border-green-200 p-3 ${large ? "lg:p-4" : ""}`}>
+          <p className={`text-xs text-green-700 ${large ? "lg:text-sm" : ""}`}>Nevada tax</p>
+          <p className={`text-lg font-semibold text-green-800 ${large ? "lg:text-2xl" : ""}`}>$0</p>
         </div>
       </div>
 
-      <p className="text-sm font-semibold text-stone-900 mt-4">
+      <p className={`text-sm font-semibold text-stone-900 mt-4 ${large ? "lg:text-base lg:mt-5" : ""}`}>
         Estimated annual savings: <span className="text-amber-700">{formatUsd(caTax)}</span>
       </p>
-      <p className="text-xs text-stone-400 mt-2 leading-relaxed">
+      <p className={`text-xs text-stone-400 mt-2 leading-relaxed ${large ? "lg:text-sm" : ""}`}>
         Estimates use 2025 California state income tax brackets for a married couple filing jointly,
         standard deduction only. Simplified for illustration -- not tax advice. Consult a licensed CPA
         or tax advisor for guidance specific to your household.

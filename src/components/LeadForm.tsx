@@ -9,10 +9,12 @@ export function LeadForm({
   action,
   submitLabel,
   submitted,
+  large,
 }: {
   action: (prevState: LeadFormState, formData: FormData) => Promise<LeadFormState>;
   submitLabel: string;
   submitted?: boolean;
+  large?: boolean;
 }) {
   // A validation error now comes back as state on this same render, not a
   // redirect to a fresh page load -- so a visitor who scrolled down, filled
@@ -23,9 +25,9 @@ export function LeadForm({
 
   if (submitted) {
     return (
-      <div className="rounded-xl bg-green-50 border border-green-200 px-5 py-8 text-center">
-        <p className="text-sm font-semibold text-green-800">You&apos;re all set!</p>
-        <p className="text-sm text-green-700 mt-1">
+      <div className={`rounded-xl bg-green-50 border border-green-200 px-5 py-8 text-center ${large ? "lg:px-7 lg:py-10" : ""}`}>
+        <p className={`text-sm font-semibold text-green-800 ${large ? "lg:text-base" : ""}`}>You&apos;re all set!</p>
+        <p className={`text-sm text-green-700 mt-1 ${large ? "lg:text-base" : ""}`}>
           Check your email now — your guide is on its way, and we&apos;ll be in touch soon.
         </p>
       </div>
@@ -36,15 +38,15 @@ export function LeadForm({
     <form
       key={JSON.stringify(state)}
       action={formAction}
-      className="space-y-4"
+      className={`space-y-4 ${large ? "lg:space-y-5" : ""}`}
     >
       {state.error && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+        <p className={`text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2 ${large ? "lg:text-base" : ""}`}>
           {state.error === "invalid_email" ? "Please enter a valid email address." : "Please fill in all fields."}
         </p>
       )}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-stone-700 mb-1">
+        <label htmlFor="name" className={`block text-sm font-medium text-stone-700 mb-1 ${large ? "lg:text-base" : ""}`}>
           Your full name
         </label>
         <input
@@ -53,11 +55,11 @@ export function LeadForm({
           required
           autoComplete="name"
           defaultValue={state.values?.name}
-          className="w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
+          className={`w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600 ${large ? "lg:px-4 lg:py-3 lg:text-base" : ""}`}
         />
       </div>
       <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-stone-700 mb-1">
+        <label htmlFor="phone" className={`block text-sm font-medium text-stone-700 mb-1 ${large ? "lg:text-base" : ""}`}>
           Your phone number
         </label>
         <input
@@ -67,11 +69,11 @@ export function LeadForm({
           required
           autoComplete="tel"
           defaultValue={state.values?.phone}
-          className="w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
+          className={`w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600 ${large ? "lg:px-4 lg:py-3 lg:text-base" : ""}`}
         />
       </div>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1">
+        <label htmlFor="email" className={`block text-sm font-medium text-stone-700 mb-1 ${large ? "lg:text-base" : ""}`}>
           Your email address
         </label>
         <input
@@ -81,10 +83,10 @@ export function LeadForm({
           required
           autoComplete="email"
           defaultValue={state.values?.email}
-          className="w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
+          className={`w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600 ${large ? "lg:px-4 lg:py-3 lg:text-base" : ""}`}
         />
       </div>
-      <label className="flex items-start gap-2.5 text-xs text-stone-500 leading-relaxed">
+      <label className={`flex items-start gap-2.5 text-xs text-stone-500 leading-relaxed ${large ? "lg:text-sm" : ""}`}>
         <input
           type="checkbox"
           name="smsConsent"
@@ -107,11 +109,11 @@ export function LeadForm({
       </label>
       <SubmitButton
         pendingText="Submitting…"
-        className="w-full rounded-md bg-amber-600 text-white text-sm font-semibold py-3 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
+        className={`w-full rounded-md bg-amber-600 text-white text-sm font-semibold py-3 shadow-sm hover:shadow-md hover:bg-amber-700 transition ${large ? "lg:text-base lg:py-3.5" : ""}`}
       >
         {submitLabel}
       </SubmitButton>
-      <p className="text-center text-xs text-stone-400">
+      <p className={`text-center text-xs text-stone-400 ${large ? "lg:text-sm" : ""}`}>
         Paulin will reach out personally within one business day — no spam, no pressure.
       </p>
     </form>

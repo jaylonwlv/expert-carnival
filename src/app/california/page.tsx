@@ -34,31 +34,31 @@ export default async function CaliforniaPage({
       <LandingSequenceBackground />
       <StickyCtaBar heroId="hero" formId="lead-form" label="Get My Relocation Roadmap ↓" />
 
-      <div className="relative z-10 w-full max-w-md">
-        <div id="hero" className="text-center mb-7">
-          <div className="inline-block bg-white/90 backdrop-blur-sm rounded-full pl-4 pr-5 py-2 shadow-sm mb-6">
+      <div className="relative z-10 w-full max-w-md lg:max-w-2xl">
+        <div id="hero" className="text-center mb-7 lg:mb-10">
+          <div className="inline-block bg-white/90 backdrop-blur-sm rounded-full pl-4 pr-5 py-2 lg:pl-5 lg:pr-6 lg:py-2.5 shadow-sm mb-6 lg:mb-8">
             <Image
               src="/logo.png"
               alt="Relocation Engine"
               width={680}
               height={546}
-              className="h-7 w-auto"
+              className="h-7 lg:h-9 w-auto"
               priority
             />
           </div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-amber-400 mb-3">
+          <p className="text-xs lg:text-sm font-semibold uppercase tracking-wide text-amber-400 mb-3 lg:mb-4">
             Free relocation guide · 2026 Edition
           </p>
-          <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+          <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-white leading-tight">
             Get My Relocation Roadmap
           </h1>
-          <p className="text-sm md:text-base text-white/85 mt-3 leading-relaxed">
+          <p className="text-sm md:text-base lg:text-xl text-white/85 mt-3 lg:mt-5 leading-relaxed lg:max-w-xl lg:mx-auto">
             Reclaim your wealth and space. See how relocating to Nevada lowers your cost of living
             while elevating your lifestyle.
           </p>
         </div>
 
-        <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs font-medium text-white/85 mb-5">
+        <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 lg:gap-x-6 text-xs lg:text-base font-medium text-white/85 mb-5 lg:mb-8">
           {VALUE_PROPS.map((item) => (
             <li key={item} className="flex items-center gap-1.5">
               <span className="text-amber-400">✓</span> {item}
@@ -66,23 +66,24 @@ export default async function CaliforniaPage({
           ))}
         </ul>
 
-        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-sm p-4 mb-5">
+        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-sm p-4 lg:p-6 mb-5 lg:mb-8">
           <HowItWorksSteps steps={HOW_IT_WORKS} />
         </div>
 
-        <div className="mb-5">
-          <TaxSavingsCalculator />
+        <div className="mb-5 lg:mb-8">
+          <TaxSavingsCalculator large />
         </div>
 
-        <div id="lead-form" className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-8">
+        <div id="lead-form" className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-8 lg:p-10">
           <LeadForm
             action={action}
             submitLabel="Get My Relocation Roadmap"
             submitted={params.lead_submitted === "1"}
+            large
           />
         </div>
 
-        <p className="text-center text-xs text-white/70 mt-5">
+        <p className="text-center text-xs lg:text-sm text-white/70 mt-5 lg:mt-7">
           A Complete Tax &amp; Equity Transfer Strategy — Paulin Korensia &amp; Associates Relocation Team
         </p>
         <MinimalSiteFooter />
