@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { LeadForm } from "@/components/LeadForm";
 import { LandingBackground } from "@/components/LandingBackground";
+import { MinimalSiteFooter } from "@/components/SiteFooter";
 import { submitLead } from "../lead-actions";
 
 // Placeholder copy -- Paulin's providing the real PCS guide copy separately.
@@ -61,6 +62,7 @@ export default async function OptinPage({
         <p className="text-center text-xs text-stone-700 mt-5">
           VA Loan Benefits &amp; Housing Strategy — Paulin Korensia &amp; Associates Relocation Team
         </p>
+        <MinimalSiteFooter />
       </div>
     </div>
   );

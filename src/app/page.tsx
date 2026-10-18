@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { LeadForm } from "@/components/LeadForm";
 import { LandingBackground } from "@/components/LandingBackground";
+import { SiteFooter } from "@/components/SiteFooter";
 import { submitLead } from "./lead-actions";
 
 export const metadata = {
@@ -105,11 +106,7 @@ export default async function HomePage({
         </section>
       </main>
 
-      <footer className="border-t border-stone-200 py-6 text-center bg-[#faf8f4]">
-        <Link href="/admin" className="text-xs text-stone-400 hover:text-stone-600 transition">
-          Agent login
-        </Link>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

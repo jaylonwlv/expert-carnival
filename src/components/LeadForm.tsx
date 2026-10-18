@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SubmitButton } from "@/components/SubmitButton";
 
 export function LeadForm({
@@ -69,7 +70,15 @@ export function LeadForm({
         <span>
           Yes, I would like to receive automated text messages from Relocation Engine LLC at the phone
           number provided above. Consent is not a condition of purchase. Message and data rates may
-          apply. Message frequency varies. Reply STOP to opt out, HELP for help.
+          apply. Message frequency varies. Reply STOP to opt out, HELP for help. See our{" "}
+          <Link href="/sms-terms" className="underline hover:text-stone-700">
+            SMS Terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="underline hover:text-stone-700">
+            Privacy Policy
+          </Link>
+          .
         </span>
       </label>
       <SubmitButton

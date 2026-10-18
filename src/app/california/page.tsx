@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { LeadForm } from "@/components/LeadForm";
 import { LandingBackground } from "@/components/LandingBackground";
+import { MinimalSiteFooter } from "@/components/SiteFooter";
 import { submitLead } from "../lead-actions";
 
 export const metadata = {
@@ -58,6 +59,7 @@ export default async function CaliforniaPage({
         <p className="text-center text-xs text-stone-700 mt-5">
           A Complete Tax &amp; Equity Transfer Strategy — Paulin Korensia &amp; Associates Relocation Team
         </p>
+        <MinimalSiteFooter />
       </div>
     </div>
   );
