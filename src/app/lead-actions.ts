@@ -6,37 +6,35 @@ import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activity";
 import { sendEmail, escapeHtml } from "@/lib/email";
 import { sendSms } from "@/lib/sms";
+import { buildAbsoluteUrl } from "@/lib/trackerUrl";
 
 export type LeadSource = "homepage" | "california" | "optin";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// The homepage and /california share one lead magnet (same PDF, same
-// workflow -- confirmed by Paulin). /optin (PCS) gets its own guide once
-// that copy and cover image exist; until then OPTIN_GUIDE_PDF_URL is unset
-// and the email just says the guide is coming separately.
-const GUIDE_BY_SOURCE: Record<LeadSource, { pdfEnvVar: string; subject: string; title: string }> = {
+// The homepage and /california share one lead magnet -- confirmed by
+// Paulin. Both PDFs live in public/guides, so the link is just this app's
+// own domain -- no external hosting/env var to configure.
+const GUIDE_BY_SOURCE: Record<LeadSource, { pdfPath: string; subject: string; title: string }> = {
   homepage: {
-    pdfEnvVar: "CALIFORNIA_GUIDE_PDF_URL",
+    pdfPath: "/guides/California-to-Las-Vegas-Relocation-Guide-2026.pdf",
     subject: "Your California to Las Vegas Relocation Guide",
     title: "California to Las Vegas Relocation Guide",
   },
   california: {
-    pdfEnvVar: "CALIFORNIA_GUIDE_PDF_URL",
+    pdfPath: "/guides/California-to-Las-Vegas-Relocation-Guide-2026.pdf",
     subject: "Your California to Las Vegas Relocation Guide",
     title: "California to Las Vegas Relocation Guide",
   },
   optin: {
-    pdfEnvVar: "OPTIN_GUIDE_PDF_URL",
+    pdfPath: "/guides/PCS-to-Las-Vegas-Relocation-Guide-2026.pdf",
     subject: "Your PCS to Las Vegas Relocation Guide",
     title: "PCS to Las Vegas Relocation Guide",
   },
 };
 
-function leadMagnetEmailHtml(firstName: string, title: string, pdfUrl: string | undefined): string {
-  const downloadBlock = pdfUrl
-    ? `<p><a href="${pdfUrl}" style="display:inline-block;background:#d97706;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;">Download your guide</a></p>`
-    : `<p>Your guide is on its way separately -- we'll follow up shortly.</p>`;
+function leadMagnetEmailHtml(firstName: string, title: string, pdfUrl: string): string {
+  const downloadBlock = `<p><a href="${pdfUrl}" style="display:inline-block;background:#d97706;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;">Download your guide</a></p>`;
 
   return `
     <div style="font-family:sans-serif;color:#1c1917;">
@@ -82,7 +80,7 @@ export async function submitLead(source: LeadSource, path: string, formData: For
 
   const firstName = name.split(" ")[0];
   const guide = GUIDE_BY_SOURCE[source];
-  const pdfUrl = process.env[guide.pdfEnvVar];
+  const pdfUrl = await buildAbsoluteUrl(guide.pdfPath);
 
   await sendEmail({
     to: email,
@@ -90,26 +88,22 @@ export async function submitLead(source: LeadSource, path: string, formData: For
     html: leadMagnetEmailHtml(firstName, guide.title, pdfUrl),
   });
 
-  const notifyTo = process.env.LEAD_NOTIFICATION_EMAIL;
-  if (notifyTo) {
-    await sendEmail({
-      to: notifyTo,
-      subject: `New lead: ${name}`,
-      html: `
-        <div style="font-family:sans-serif;color:#1c1917;">
-          <p>New lead from <strong>${escapeHtml(sourceLabel)}</strong>:</p>
-          <ul>
-            <li>Name: ${escapeHtml(name)}</li>
-            <li>Phone: ${escapeHtml(phone)}</li>
-            <li>Email: ${escapeHtml(email)}</li>
-            <li>SMS consent: ${smsConsent ? "Yes" : "No"}</li>
-          </ul>
-        </div>
-      `,
-    });
-  } else {
-    console.log(`[lead] LEAD_NOTIFICATION_EMAIL not set -- would notify about new lead "${name}"`);
-  }
+  const notifyTo = process.env.LEAD_NOTIFICATION_EMAIL ?? "guide@relocationengine.com";
+  await sendEmail({
+    to: notifyTo,
+    subject: `New lead: ${name}`,
+    html: `
+      <div style="font-family:sans-serif;color:#1c1917;">
+        <p>New lead from <strong>${escapeHtml(sourceLabel)}</strong>:</p>
+        <ul>
+          <li>Name: ${escapeHtml(name)}</li>
+          <li>Phone: ${escapeHtml(phone)}</li>
+          <li>Email: ${escapeHtml(email)}</li>
+          <li>SMS consent: ${smsConsent ? "Yes" : "No"}</li>
+        </ul>
+      </div>
+    `,
+  });
 
   if (smsConsent) {
     await sendSms({
