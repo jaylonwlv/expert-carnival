@@ -4,7 +4,7 @@ import { Playfair_Display } from "next/font/google";
 import { LeadForm } from "@/components/LeadForm";
 import { SiteFooter } from "@/components/SiteFooter";
 import { TaxSavingsCalculator } from "@/components/TaxSavingsCalculator";
-import { HeroVideo } from "@/components/HeroVideo";
+import { BRollVideo } from "@/components/BRollVideo";
 import { submitLead } from "./lead-actions";
 
 // Scoped to this page only -- the display serif is part of the homepage's
@@ -17,24 +17,67 @@ export const metadata = {
     "Full-service relocation to Las Vegas, from financing and home selection through closing and move-in.",
 };
 
+// Paulin's own b-roll, not stock footage -- one clip per service so each
+// gets its own full-bleed moment instead of sharing a single hero loop.
 const SERVICES = [
   {
     title: "Financing & budget",
     body: "We work with your lender to confirm your pre-approval and total moving budget before you ever look at a listing.",
+    videoSrc: "/broll/pool.mp4",
+    poster: "/broll/pool-poster.jpg",
   },
   {
     title: "Home & area selection",
     body: "Curated listings and neighborhood breakdowns based on your must-haves — no generic search results.",
+    videoSrc: "/broll/patio.mp4",
+    poster: "/broll/patio-poster.jpg",
   },
   {
     title: "Touring, offers & closing",
     body: "From scheduling tours to negotiating your offer to the final walkthrough, we're with you at every step.",
+    videoSrc: "/broll/staircase.mp4",
+    poster: "/broll/staircase-poster.jpg",
   },
   {
     title: "A tracker just for you",
     body: "Once you're signed on, you get a private link that always shows exactly where your move stands.",
+    videoSrc: "/broll/interior-water.mp4",
+    poster: "/broll/interior-water-poster.jpg",
   },
 ];
+
+function EditorialRow({
+  index,
+  title,
+  body,
+  videoSrc,
+  poster,
+  reverse,
+}: {
+  index: string;
+  title: string;
+  body: string;
+  videoSrc: string;
+  poster: string;
+  reverse?: boolean;
+}) {
+  return (
+    <div className="grid md:grid-cols-2">
+      <div className={`relative h-[50vh] md:h-[70vh] ${reverse ? "md:order-2" : ""}`}>
+        <BRollVideo src={videoSrc} poster={poster} />
+      </div>
+      <div className="flex items-center bg-white">
+        <div className="max-w-md mx-auto px-8 py-16 md:py-0">
+          <p className="text-xs font-semibold text-amber-700 mb-3">{index}</p>
+          <h3 className={`${playfair.className} text-2xl md:text-3xl text-stone-900 leading-snug`}>
+            {title}
+          </h3>
+          <p className="text-sm md:text-base text-stone-600 mt-4 leading-relaxed">{body}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default async function HomePage({
   searchParams,
@@ -46,8 +89,8 @@ export default async function HomePage({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <section className="relative min-h-[88vh] flex flex-col overflow-hidden bg-stone-900">
-        <HeroVideo />
+      <section className="relative min-h-[92vh] flex flex-col overflow-hidden bg-stone-900">
+        <BRollVideo src="/broll/hero-glass.mp4" poster="/broll/hero-glass-poster.jpg" priority />
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/10 to-black/70" />
 
         <header className="relative z-10">
@@ -99,25 +142,32 @@ export default async function HomePage({
       </section>
 
       <main className="flex-1">
-        <section className="bg-white">
-          <div className="max-w-4xl mx-auto px-4 py-20 md:py-24">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 text-center mb-3">
-              How we help
+        <section className="relative bg-stone-50 py-24 md:py-32 overflow-hidden">
+          <p
+            aria-hidden
+            className={`${playfair.className} absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-[20vw] leading-none text-stone-200/80 select-none whitespace-nowrap pointer-events-none`}
+          >
+            Las Vegas
+          </p>
+          <div className="relative max-w-2xl mx-auto px-4 text-center">
+            <p className={`${playfair.className} text-2xl md:text-3xl text-stone-900 leading-snug`}>
+              A new chapter, without the guesswork — the financing, the search, and everything
+              after the keys, handled by one team.
             </p>
-            <h2 className={`${playfair.className} text-3xl md:text-4xl text-stone-900 text-center mb-14`}>
-              Everything handled, start to finish.
-            </h2>
-            <div className="grid sm:grid-cols-2 gap-x-10 gap-y-10">
-              {SERVICES.map((service, i) => (
-                <div key={service.title} className="border-t border-stone-200 pt-5">
-                  <p className="text-xs font-semibold text-amber-700 mb-2">0{i + 1}</p>
-                  <h3 className="text-base font-semibold text-stone-900">{service.title}</h3>
-                  <p className="text-sm text-stone-600 mt-2 leading-relaxed">{service.body}</p>
-                </div>
-              ))}
-            </div>
           </div>
         </section>
+
+        {SERVICES.map((service, i) => (
+          <EditorialRow
+            key={service.title}
+            index={`0${i + 1}`}
+            title={service.title}
+            body={service.body}
+            videoSrc={service.videoSrc}
+            poster={service.poster}
+            reverse={i % 2 === 1}
+          />
+        ))}
 
         <section className="bg-stone-900 py-20 md:py-24">
           <div className="max-w-xl mx-auto px-4 text-center mb-10">
