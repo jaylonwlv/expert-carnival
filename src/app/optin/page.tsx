@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { LeadForm } from "@/components/LeadForm";
-import { LandingBackground } from "@/components/LandingBackground";
+import { LandingSequenceBackground } from "@/components/LandingSequenceBackground";
 import { MinimalSiteFooter } from "@/components/SiteFooter";
 import { HowItWorksSteps } from "@/components/HowItWorksSteps";
 import { submitLead } from "../lead-actions";
@@ -28,39 +28,41 @@ export default async function OptinPage({
 
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 py-16">
-      <LandingBackground />
+      <LandingSequenceBackground />
 
       <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-7">
-          <Image
-            src="/logo.png"
-            alt="Relocation Engine"
-            width={680}
-            height={546}
-            className="h-16 w-auto mx-auto mb-6"
-            priority
-          />
-          <p className="hero-text-glow text-xs font-semibold uppercase tracking-wide text-amber-700 mb-3">
+          <div className="inline-block bg-white/90 backdrop-blur-sm rounded-full pl-4 pr-5 py-2 shadow-sm mb-6">
+            <Image
+              src="/logo.png"
+              alt="Relocation Engine"
+              width={680}
+              height={546}
+              className="h-7 w-auto"
+              priority
+            />
+          </div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-400 mb-3">
             Free relocation guide · 2026 Edition
           </p>
-          <h1 className="hero-text-glow text-3xl md:text-4xl font-bold text-stone-900 leading-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">
             Get My Nellis &amp; Creech PCS Roadmap
           </h1>
-          <p className="hero-text-glow text-sm md:text-base text-stone-800 mt-3 leading-relaxed">
+          <p className="text-sm md:text-base text-white/85 mt-3 leading-relaxed">
             Make the most of your PCS to Nellis AFB or Creech AFB. See how to use your VA loan
             benefits, lower your cost of living, and find the right neighborhood for your family.
           </p>
         </div>
 
-        <ul className="hero-text-glow flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs font-medium text-stone-800 mb-5">
+        <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs font-medium text-white/85 mb-5">
           {VALUE_PROPS.map((item) => (
             <li key={item} className="flex items-center gap-1.5">
-              <span className="text-amber-600">✓</span> {item}
+              <span className="text-amber-400">✓</span> {item}
             </li>
           ))}
         </ul>
 
-        <p className="hero-text-glow text-center text-xs font-medium text-amber-900 bg-amber-50/90 border border-amber-200 rounded-lg px-3 py-2 mb-5">
+        <p className="text-center text-xs font-medium text-amber-900 bg-amber-50/90 border border-amber-200 rounded-lg px-3 py-2 mb-5">
           Orders in hand? DoD guidance recommends starting within 30 days of receiving them — the
           earlier you start, the more mover and home options you&apos;ll have.
         </p>
@@ -77,7 +79,7 @@ export default async function OptinPage({
           />
         </div>
 
-        <p className="hero-text-glow text-center text-xs text-stone-700 mt-5">
+        <p className="text-center text-xs text-white/70 mt-5">
           VA Loan Benefits &amp; Housing Strategy — Paulin Korensia &amp; Associates Relocation Team
         </p>
         <MinimalSiteFooter />

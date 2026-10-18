@@ -80,16 +80,16 @@ export function SiteFooter() {
 // reachable from a page that collects SMS consent.
 export function MinimalSiteFooter() {
   return (
-    <p className="text-center text-xs text-stone-500 mt-3">
-      <Link href="/privacy" className="underline hover:text-stone-700">
+    <p className="text-center text-xs text-white/60 mt-3">
+      <Link href="/privacy" className="underline hover:text-white">
         Privacy Policy
       </Link>
       {" · "}
-      <Link href="/terms" className="underline hover:text-stone-700">
+      <Link href="/terms" className="underline hover:text-white">
         Terms
       </Link>
       {" · "}
-      <Link href="/sms-terms" className="underline hover:text-stone-700">
+      <Link href="/sms-terms" className="underline hover:text-white">
         SMS Terms
       </Link>
     </p>
