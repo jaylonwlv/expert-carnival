@@ -7,20 +7,26 @@ import { BUSINESS } from "@/lib/business";
 // number right under the form is what makes "a licensed realtor, not a
 // funnel" legible at a glance, right where it matters most.
 //
-// Full-body photo (paulin.jpg, the same one /about uses), framed in a
-// rounded rectangle at its real 2:3 aspect ratio rather than cropped into
-// a circle -- width/height below are that exact ratio (1333:2000) scaled
-// down, so object-cover has nothing to crop.
+// Full-body photo (paulin.jpg, the same one /about uses) in a circular
+// frame -- object-contain, not object-cover, so the whole photo (her
+// included) is scaled to fit inside the circle rather than cropped by it.
+// A circle pinches in toward its top and bottom, so object-cover's usual
+// edge-to-edge crop would clip her head/feet there; object-contain keeps
+// the full frame visible, letterboxed, with the background (already
+// present on all sides in the source photo) filling the rest of the
+// circle instead of her.
 export function RealtorBubble() {
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-sm p-4 lg:p-5 mt-5 lg:mt-7 flex items-center gap-4 text-left">
-      <Image
-        src="/team/paulin.jpg"
-        alt={BUSINESS.licensee}
-        width={133}
-        height={200}
-        className="w-20 lg:w-24 h-auto rounded-xl object-cover shrink-0"
-      />
+      <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full overflow-hidden bg-stone-100 shrink-0 flex items-center justify-center">
+        <Image
+          src="/team/paulin.jpg"
+          alt={BUSINESS.licensee}
+          width={133}
+          height={200}
+          className="w-full h-full object-contain"
+        />
+      </div>
       <div>
         <p className="text-sm lg:text-base font-semibold text-stone-900">{BUSINESS.licensee}</p>
         <p className="text-xs lg:text-sm font-medium text-amber-700">
