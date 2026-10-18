@@ -7,26 +7,25 @@ import { BUSINESS } from "@/lib/business";
 // number right under the form is what makes "a licensed realtor, not a
 // funnel" legible at a glance, right where it matters most.
 //
-// Full-body photo (paulin.jpg, the same one /about uses) in a circular
-// frame -- object-contain, not object-cover, so the whole photo (her
-// included) is scaled to fit inside the circle rather than cropped by it.
-// A circle pinches in toward its top and bottom, so object-cover's usual
-// edge-to-edge crop would clip her head/feet there; object-contain keeps
-// the full frame visible, letterboxed, with the background (already
-// present on all sides in the source photo) filling the rest of the
-// circle instead of her.
+// A full-body photo is roughly 1:3.8 (tall and narrow) -- object-contain
+// inside a circle leaves it letterboxed with the narrow photo's own
+// corners rounded off by the circle, which reads as an oval rather than a
+// clean circular portrait; object-cover on the full-body shot, on the
+// other hand, clips her head/feet (a circle pinches in at its top and
+// bottom). paulin-bust.jpg is a waist-up crop instead -- close enough to
+// a square aspect ratio that object-cover fills the circle edge to edge,
+// trimming only a sliver off the very top/bottom, nowhere near her face
+// or hands.
 export function RealtorBubble() {
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-sm p-4 lg:p-5 mt-5 lg:mt-7 flex items-center gap-4 text-left">
-      <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full overflow-hidden bg-stone-100 shrink-0 flex items-center justify-center">
-        <Image
-          src="/team/paulin.jpg"
-          alt={BUSINESS.licensee}
-          width={133}
-          height={200}
-          className="w-full h-full object-contain"
-        />
-      </div>
+      <Image
+        src="/team/paulin-bust.jpg"
+        alt={BUSINESS.licensee}
+        width={160}
+        height={160}
+        className="w-20 h-20 lg:w-24 lg:h-24 rounded-full object-cover shrink-0"
+      />
       <div>
         <p className="text-sm lg:text-base font-semibold text-stone-900">{BUSINESS.licensee}</p>
         <p className="text-xs lg:text-sm font-medium text-amber-700">
