@@ -69,6 +69,16 @@ export async function submitLead(
   _prevState: LeadFormState,
   formData: FormData
 ): Promise<LeadFormState> {
+  // Honeypot: a field real visitors never see or tab to (LeadForm positions
+  // it off-screen and marks it aria-hidden/tabIndex=-1), named "company" --
+  // generic enough that a bot filling every field it finds on a lead form
+  // tends to fill it anyway. A filled value means this wasn't a person;
+  // pretend success without writing anything or sending any email/SMS, so
+  // nothing here tips the bot off that it was caught.
+  if (String(formData.get("company") ?? "").trim()) {
+    redirect(`${path}?lead_submitted=1`);
+  }
+
   const name = String(formData.get("name") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
