@@ -3,7 +3,17 @@ import Link from "next/link";
 import { LeadForm } from "@/components/LeadForm";
 import { LandingBackground } from "@/components/LandingBackground";
 import { MinimalSiteFooter } from "@/components/SiteFooter";
+import { HowItWorksSteps } from "@/components/HowItWorksSteps";
+import { TaxSavingsCalculator } from "@/components/TaxSavingsCalculator";
 import { submitLead } from "../lead-actions";
+
+const VALUE_PROPS = [
+  "No state income tax in Nevada",
+  "Same budget, 2-3x more home",
+  "Full support, financing to closing",
+];
+
+const HOW_IT_WORKS = ["Get your free guide", "Paulin calls you", "We find your next home"];
 
 export const metadata = {
   title: "California to Las Vegas Relocation Guide · Relocation Engine",
@@ -45,6 +55,22 @@ export default async function CaliforniaPage({
             Reclaim your wealth and space. See how relocating to Nevada lowers your cost of living
             while elevating your lifestyle.
           </p>
+        </div>
+
+        <ul className="hero-text-glow flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs font-medium text-stone-800 mb-5">
+          {VALUE_PROPS.map((item) => (
+            <li key={item} className="flex items-center gap-1.5">
+              <span className="text-amber-600">✓</span> {item}
+            </li>
+          ))}
+        </ul>
+
+        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-sm p-4 mb-5">
+          <HowItWorksSteps steps={HOW_IT_WORKS} />
+        </div>
+
+        <div className="mb-5">
+          <TaxSavingsCalculator />
         </div>
 
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-8">

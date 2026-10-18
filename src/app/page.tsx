@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { LeadForm } from "@/components/LeadForm";
 import { SiteFooter } from "@/components/SiteFooter";
+import { TaxSavingsCalculator } from "@/components/TaxSavingsCalculator";
 import { submitLead } from "./lead-actions";
 
 export const metadata = {
@@ -86,7 +87,9 @@ export default async function HomePage({
           </div>
         </section>
 
-        <section className="max-w-xl mx-auto px-4 pb-16">
+        <section className="max-w-xl mx-auto px-4 pb-16 space-y-5">
+          <TaxSavingsCalculator />
+
           <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
             <h2 className="text-lg font-semibold text-stone-900 text-center">
               Get your free California to Las Vegas relocation guide

@@ -87,6 +87,9 @@ export function LeadForm({
       >
         {submitLabel}
       </SubmitButton>
+      <p className="text-center text-xs text-stone-400">
+        Paulin will reach out personally within one business day — no spam, no pressure.
+      </p>
     </form>
   );
 }
