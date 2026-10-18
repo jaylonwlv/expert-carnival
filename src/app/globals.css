@@ -43,19 +43,12 @@ body {
   animation: toast-fade 2.5s ease forwards;
 }
 
-/* The hero background video (LandingSequenceBackground) swaps for its
-   still poster frame under reduced motion, rather than autoplaying
-   regardless. */
-.landing-video-fallback {
-  display: none;
-}
-
+/* The hero background video (LandingSequenceBackground) stays hidden under
+   reduced motion, leaving its own next/image poster (always rendered
+   underneath it) as the still fallback. */
 @media (prefers-reduced-motion: reduce) {
   .landing-video {
     display: none;
-  }
-  .landing-video-fallback {
-    display: block;
   }
 }
 

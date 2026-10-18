@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { nanoid } from "nanoid";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activity";
@@ -118,19 +119,27 @@ export async function submitLead(
 
   const notifyTo = process.env.LEAD_NOTIFICATION_EMAIL ?? BUSINESS.email;
 
-  // These three sends are independent of each other -- run them together
-  // instead of back-to-back so a slow Resend/Twilio response doesn't add
-  // to the visitor's wait on every one of them in turn.
-  await Promise.all([
-    sendEmail({
-      to: email,
-      subject: guide.subject,
-      html: leadMagnetEmailHtml(firstName, guide.title, pdfUrl),
-    }),
-    sendEmail({
-      to: notifyTo,
-      subject: `New lead: ${name}`,
-      html: `
+  // The lead is already safely committed above -- none of these three sends
+  // can change that (sendEmail/sendSms both swallow their own errors), and
+  // the visitor's "you're all set" confirmation doesn't need any of them to
+  // have actually gone out yet. Running them via `after()` instead of
+  // awaiting lets the redirect fire as soon as the DB write lands, rather
+  // than holding the visitor's spinner hostage to however long Resend/Twilio
+  // take to respond. `after()` (not a bare fire-and-forget) is what keeps
+  // this work alive past the response on a serverless deployment, where an
+  // un-awaited promise can otherwise get cut off the instant the response
+  // is sent.
+  after(() =>
+    Promise.all([
+      sendEmail({
+        to: email,
+        subject: guide.subject,
+        html: leadMagnetEmailHtml(firstName, guide.title, pdfUrl),
+      }),
+      sendEmail({
+        to: notifyTo,
+        subject: `New lead: ${name}`,
+        html: `
         <div style="font-family:sans-serif;color:#1c1917;">
           <p>New lead from <strong>${escapeHtml(sourceLabel)}</strong>:</p>
           <ul>
@@ -141,16 +150,17 @@ export async function submitLead(
           </ul>
         </div>
       `,
-    }),
-    ...(smsConsent
-      ? [
-          sendSms({
-            to: phone,
-            body: `Hi ${firstName}, this is Relocation Engine -- thanks for reaching out! We'll be in touch soon. Reply STOP to opt out.`,
-          }),
-        ]
-      : []),
-  ]);
+      }),
+      ...(smsConsent
+        ? [
+            sendSms({
+              to: phone,
+              body: `Hi ${firstName}, this is Relocation Engine -- thanks for reaching out! We'll be in touch soon. Reply STOP to opt out.`,
+            }),
+          ]
+        : []),
+    ])
+  );
 
   redirect(`${path}?lead_submitted=1`);
 }
