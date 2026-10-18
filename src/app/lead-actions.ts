@@ -11,6 +11,19 @@ import { BUSINESS } from "@/lib/business";
 
 export type LeadSource = "homepage" | "california" | "optin";
 
+// Returned to useActionState rather than carried via a redirect's query
+// string -- a validation failure stays on the same render, so the visitor's
+// scroll position and everything else they've typed survive it. Only a
+// validation error returns state; success still redirects (nothing to
+// preserve once the lead's in).
+export type LeadFormState = {
+  error?: "missing" | "invalid_email";
+  // React resets uncontrolled form fields after every action dispatch,
+  // success or failure alike -- echoing back what was typed (and keying
+  // the form on it in LeadForm) is what actually keeps it on screen.
+  values?: { name: string; phone: string; email: string; smsConsent: boolean };
+};
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // The homepage and /california share one lead magnet -- confirmed by
@@ -48,17 +61,23 @@ function leadMagnetEmailHtml(firstName: string, title: string, pdfUrl: string): 
   `;
 }
 
-export async function submitLead(source: LeadSource, path: string, formData: FormData) {
+export async function submitLead(
+  source: LeadSource,
+  path: string,
+  _prevState: LeadFormState,
+  formData: FormData
+): Promise<LeadFormState> {
   const name = String(formData.get("name") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const smsConsent = formData.get("smsConsent") === "on";
+  const values = { name, phone, email, smsConsent };
 
   if (!name || !phone || !email) {
-    redirect(`${path}?lead_error=missing`);
+    return { error: "missing", values };
   }
   if (!EMAIL_RE.test(email)) {
-    redirect(`${path}?lead_error=invalid_email`);
+    return { error: "invalid_email", values };
   }
 
   const isPCS = source === "optin";

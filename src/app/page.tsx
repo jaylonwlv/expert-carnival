@@ -33,7 +33,7 @@ const SERVICES = [
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ lead_submitted?: string; lead_error?: string }>;
+  searchParams: Promise<{ lead_submitted?: string }>;
 }) {
   const params = await searchParams;
   const action = submitLead.bind(null, "homepage", "/");
@@ -101,7 +101,6 @@ export default async function HomePage({
               action={action}
               submitLabel="Get My Free Guide"
               submitted={params.lead_submitted === "1"}
-              error={params.lead_error}
             />
           </div>
         </section>

@@ -1,17 +1,26 @@
+"use client";
+
+import { useActionState } from "react";
 import Link from "next/link";
 import { SubmitButton } from "@/components/SubmitButton";
+import type { LeadFormState } from "@/app/lead-actions";
 
 export function LeadForm({
   action,
   submitLabel,
   submitted,
-  error,
 }: {
-  action: (formData: FormData) => void | Promise<void>;
+  action: (prevState: LeadFormState, formData: FormData) => Promise<LeadFormState>;
   submitLabel: string;
   submitted?: boolean;
-  error?: string;
 }) {
+  // A validation error now comes back as state on this same render, not a
+  // redirect to a fresh page load -- so a visitor who scrolled down, filled
+  // the form in, and mistyped their email doesn't lose that scroll position
+  // or get an empty form back. Success still redirects via `submitted`
+  // (the one path where there's nothing left to preserve).
+  const [state, formAction] = useActionState(action, {});
+
   if (submitted) {
     return (
       <div className="rounded-xl bg-green-50 border border-green-200 px-5 py-8 text-center">
@@ -24,10 +33,14 @@ export function LeadForm({
   }
 
   return (
-    <form action={action} className="space-y-4">
-      {error && (
+    <form
+      key={JSON.stringify(state)}
+      action={formAction}
+      className="space-y-4"
+    >
+      {state.error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
-          {error === "invalid_email" ? "Please enter a valid email address." : "Please fill in all fields."}
+          {state.error === "invalid_email" ? "Please enter a valid email address." : "Please fill in all fields."}
         </p>
       )}
       <div>
@@ -39,6 +52,7 @@ export function LeadForm({
           name="name"
           required
           autoComplete="name"
+          defaultValue={state.values?.name}
           className="w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
         />
       </div>
@@ -52,6 +66,7 @@ export function LeadForm({
           type="tel"
           required
           autoComplete="tel"
+          defaultValue={state.values?.phone}
           className="w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
         />
       </div>
@@ -65,11 +80,17 @@ export function LeadForm({
           type="email"
           required
           autoComplete="email"
+          defaultValue={state.values?.email}
           className="w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
         />
       </div>
       <label className="flex items-start gap-2.5 text-xs text-stone-500 leading-relaxed">
-        <input type="checkbox" name="smsConsent" className="mt-0.5 rounded border-stone-300" />
+        <input
+          type="checkbox"
+          name="smsConsent"
+          defaultChecked={state.values?.smsConsent}
+          className="mt-0.5 rounded border-stone-300"
+        />
         <span>
           Yes, I would like to receive automated text messages from Relocation Engine LLC at the phone
           number provided above. Consent is not a condition of purchase. Message and data rates may

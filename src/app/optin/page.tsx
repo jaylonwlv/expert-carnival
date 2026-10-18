@@ -21,7 +21,7 @@ const HOW_IT_WORKS = ["Get your free guide", "Paulin calls you", "We plan around
 export default async function OptinPage({
   searchParams,
 }: {
-  searchParams: Promise<{ lead_submitted?: string; lead_error?: string }>;
+  searchParams: Promise<{ lead_submitted?: string }>;
 }) {
   const params = await searchParams;
   const action = submitLead.bind(null, "optin", "/optin");
@@ -74,7 +74,6 @@ export default async function OptinPage({
             action={action}
             submitLabel="Get My PCS Relocation Roadmap"
             submitted={params.lead_submitted === "1"}
-            error={params.lead_error}
           />
         </div>
 

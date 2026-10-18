@@ -24,7 +24,7 @@ export const metadata = {
 export default async function CaliforniaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ lead_submitted?: string; lead_error?: string }>;
+  searchParams: Promise<{ lead_submitted?: string }>;
 }) {
   const params = await searchParams;
   const action = submitLead.bind(null, "california", "/california");
@@ -77,7 +77,6 @@ export default async function CaliforniaPage({
             action={action}
             submitLabel="Get My Relocation Roadmap"
             submitted={params.lead_submitted === "1"}
-            error={params.lead_error}
           />
         </div>
 
