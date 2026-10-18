@@ -63,6 +63,11 @@ export function ClientList({
   }, []);
 
   function navigate(next: { q?: string; stage?: string; page?: number }) {
+    // Without this, a page/stage click made just after typing could be
+    // immediately undone once the still-pending debounced search below
+    // fires and navigates again, overwriting it back to page 1.
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
     const nextQuery = next.q ?? query;
     const nextStage = next.stage ?? stageFilter;
     const nextPage = next.page ?? 1;

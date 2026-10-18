@@ -17,8 +17,23 @@ export default async function AdminPage({
 }) {
   const params = await searchParams;
   const query = (params.q ?? "").trim();
-  const stageFilter = params.stage ?? "all";
-  const requestedPage = Math.max(1, Number(params.page) || 1);
+
+  // Both of these come straight off the URL, which a bookmark, a shared
+  // link, or just hand-editing the address bar can put anything into -- an
+  // unparseable or out-of-range value has to fall back to a sane default
+  // rather than reach Prisma, which rejects a non-integer Int filter (NaN,
+  // a float, an out-of-range stage) by throwing instead of matching nothing.
+  const parsedStage = Number(params.stage);
+  const stageFilter =
+    params.stage !== undefined &&
+    Number.isInteger(parsedStage) &&
+    parsedStage >= 0 &&
+    parsedStage < STAGES.length
+      ? params.stage!
+      : "all";
+
+  const parsedPage = Number(params.page);
+  const requestedPage = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 
   const where: Prisma.ClientWhereInput = {
     ...(query

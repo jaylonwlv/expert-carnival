@@ -44,6 +44,35 @@ export default async function TrackPage({
     notFound();
   }
 
+  // A client is never sent this link until the realtor has called them and
+  // moved them past "Lead" (index 0) -- but if one does land here early
+  // (the link gets shared ahead of that call), clientStages[0] is "Signed
+  // On": without this guard the page would tell them they're signed on
+  // while the badge still renders in Lead's own color, a visibly
+  // contradictory, factually wrong status. Showing an honest "not started
+  // yet" message instead keeps the defensive intent the slice below
+  // already states without substituting a more-advanced stage.
+  if (client.currentStage === 0) {
+    return (
+      <div className="min-h-screen bg-[#faf8f4] flex flex-col">
+        <header className="bg-white border-b border-stone-200">
+          <div className="max-w-2xl mx-auto px-4 py-3">
+            <Image src="/logo.png" alt={COMPANY_NAME} width={680} height={546} className="h-16 w-auto" priority />
+          </div>
+        </header>
+        <main className="flex-1 max-w-2xl mx-auto px-4 py-16 text-center">
+          <h1 className="text-xl font-semibold text-stone-900">
+            Hi {client.name.split(" ")[0]}, thanks for reaching out!
+          </h1>
+          <p className="text-sm text-stone-600 mt-2 leading-relaxed">
+            {AGENT_NAME} will be in touch personally soon to get your move started. Check back here
+            once that happens — this is where you&apos;ll track every step along the way.
+          </p>
+        </main>
+      </div>
+    );
+  }
+
   // "Lead" (index 0) is realtor-only -- a client is never sent this link
   // until the realtor has called them and moved them past it, but showing
   // it defensively anyway (rather than assuming that always holds) keeps
