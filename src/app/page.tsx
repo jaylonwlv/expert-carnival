@@ -53,7 +53,7 @@ export default async function HomePage({
           <h1 className="text-3xl md:text-5xl font-bold text-stone-900 leading-tight">
             Relocating to Las Vegas? We&apos;ll handle everything.
           </h1>
-          <p className="text-base md:text-lg text-stone-600 mt-5 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg text-stone-800 mt-5 max-w-2xl mx-auto leading-relaxed">
             Full-service relocation support — from financing and home selection through closing and
             move-in — for California sellers and military PCS moves alike.
           </p>

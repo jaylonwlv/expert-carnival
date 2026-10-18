@@ -43,7 +43,7 @@ export default async function OptinPage({
           <h1 className="text-3xl md:text-4xl font-bold text-stone-900 leading-tight">
             Get My PCS Relocation Roadmap
           </h1>
-          <p className="text-sm md:text-base text-stone-600 mt-3 leading-relaxed">
+          <p className="text-sm md:text-base text-stone-800 mt-3 leading-relaxed">
             Make the most of your PCS to Las Vegas. See how to use your VA loan benefits, lower your
             cost of living, and find the right neighborhood for your family.
           </p>
@@ -58,7 +58,7 @@ export default async function OptinPage({
           />
         </div>
 
-        <p className="text-center text-xs text-stone-500 mt-5">
+        <p className="text-center text-xs text-stone-700 mt-5">
           VA Loan Benefits &amp; Housing Strategy — Paulin Korensia &amp; Associates Relocation Team
         </p>
       </div>

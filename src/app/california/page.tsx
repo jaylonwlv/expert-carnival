@@ -40,7 +40,7 @@ export default async function CaliforniaPage({
           <h1 className="text-3xl md:text-4xl font-bold text-stone-900 leading-tight">
             Get My Relocation Roadmap
           </h1>
-          <p className="text-sm md:text-base text-stone-600 mt-3 leading-relaxed">
+          <p className="text-sm md:text-base text-stone-800 mt-3 leading-relaxed">
             Reclaim your wealth and space. See how relocating to Nevada lowers your cost of living
             while elevating your lifestyle.
           </p>
@@ -55,7 +55,7 @@ export default async function CaliforniaPage({
           />
         </div>
 
-        <p className="text-center text-xs text-stone-500 mt-5">
+        <p className="text-center text-xs text-stone-700 mt-5">
           A Complete Tax &amp; Equity Transfer Strategy — Paulin Korensia &amp; Associates Relocation Team
         </p>
       </div>
