@@ -89,7 +89,10 @@ export function ClientList({
           {filtered.map((client) => {
             const stage = STAGES[client.currentStage];
             const color = stageColor(client.currentStage);
-            const progress = ((client.currentStage + 1) / STAGES.length) * 100;
+            // 0 at "Lead" (nothing's happened yet), 100 at "Moved In" --
+            // unlike the other STAGES.length usages, +1/STAGES.length would
+            // show a lead who hasn't been contacted as already ~11% done.
+            const progress = (client.currentStage / (STAGES.length - 1)) * 100;
             return (
               <div
                 key={client.id}

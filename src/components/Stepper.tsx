@@ -1,11 +1,22 @@
 import { Stage } from "@/lib/stages";
 import { stageColor } from "@/lib/stageColors";
 
-export function Stepper({ stages, currentIndex }: { stages: Stage[]; currentIndex: number }) {
+export function Stepper({
+  stages,
+  currentIndex,
+  colorOffset = 0,
+}: {
+  stages: Stage[];
+  currentIndex: number;
+  // STAGE_COLORS is indexed against the full STAGES array; when `stages`
+  // here is a slice of it (the client-facing tracker drops "Lead"), pass
+  // how far that slice starts into the full array so colors still line up.
+  colorOffset?: number;
+}) {
   return (
     <ol>
       {stages.map((stage, index) => {
-        const color = stageColor(index);
+        const color = stageColor(index + colorOffset);
         const isDone = index < currentIndex;
         const isCurrent = index === currentIndex;
         const isLast = index === stages.length - 1;

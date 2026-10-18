@@ -51,7 +51,10 @@ export default async function TrackPage({
   const clientStages = STAGES.slice(1);
   const clientStageIndex = Math.max(0, client.currentStage - 1);
   const stage = clientStages[clientStageIndex];
-  const color = stageColor(clientStageIndex);
+  // STAGE_COLORS is indexed against the full STAGES array (index 0 =
+  // "Lead"), so the badge/progress-bar color here keys off the raw
+  // currentStage, not the client-facing, Lead-excluded clientStageIndex.
+  const color = stageColor(client.currentStage);
   const firstName = client.name.split(" ")[0];
   const uploadForClient = createClientDocumentRecords.bind(null, token);
   const tourStops = client.tourStops as TourStop[] | null;
@@ -149,7 +152,7 @@ export default async function TrackPage({
         </section>
 
         <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-5">
-          <Stepper stages={clientStages} currentIndex={clientStageIndex} />
+          <Stepper stages={clientStages} currentIndex={clientStageIndex} colorOffset={1} />
         </section>
 
         {tourStops && tourStops.length >= 2 && (

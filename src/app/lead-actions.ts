@@ -7,6 +7,7 @@ import { logActivity } from "@/lib/activity";
 import { sendEmail, escapeHtml } from "@/lib/email";
 import { sendSms } from "@/lib/sms";
 import { buildAbsoluteUrl } from "@/lib/trackerUrl";
+import { BUSINESS } from "@/lib/business";
 
 export type LeadSource = "homepage" | "california" | "optin";
 
@@ -82,35 +83,41 @@ export async function submitLead(source: LeadSource, path: string, formData: For
   const guide = GUIDE_BY_SOURCE[source];
   const pdfUrl = await buildAbsoluteUrl(guide.pdfPath);
 
-  await sendEmail({
-    to: email,
-    subject: guide.subject,
-    html: leadMagnetEmailHtml(firstName, guide.title, pdfUrl),
-  });
+  const notifyTo = process.env.LEAD_NOTIFICATION_EMAIL ?? BUSINESS.email;
 
-  const notifyTo = process.env.LEAD_NOTIFICATION_EMAIL ?? "guide@relocationengine.com";
-  await sendEmail({
-    to: notifyTo,
-    subject: `New lead: ${name}`,
-    html: `
-      <div style="font-family:sans-serif;color:#1c1917;">
-        <p>New lead from <strong>${escapeHtml(sourceLabel)}</strong>:</p>
-        <ul>
-          <li>Name: ${escapeHtml(name)}</li>
-          <li>Phone: ${escapeHtml(phone)}</li>
-          <li>Email: ${escapeHtml(email)}</li>
-          <li>SMS consent: ${smsConsent ? "Yes" : "No"}</li>
-        </ul>
-      </div>
-    `,
-  });
-
-  if (smsConsent) {
-    await sendSms({
-      to: phone,
-      body: `Hi ${firstName}, this is Relocation Engine -- thanks for reaching out! We'll be in touch soon. Reply STOP to opt out.`,
-    });
-  }
+  // These three sends are independent of each other -- run them together
+  // instead of back-to-back so a slow Resend/Twilio response doesn't add
+  // to the visitor's wait on every one of them in turn.
+  await Promise.all([
+    sendEmail({
+      to: email,
+      subject: guide.subject,
+      html: leadMagnetEmailHtml(firstName, guide.title, pdfUrl),
+    }),
+    sendEmail({
+      to: notifyTo,
+      subject: `New lead: ${name}`,
+      html: `
+        <div style="font-family:sans-serif;color:#1c1917;">
+          <p>New lead from <strong>${escapeHtml(sourceLabel)}</strong>:</p>
+          <ul>
+            <li>Name: ${escapeHtml(name)}</li>
+            <li>Phone: ${escapeHtml(phone)}</li>
+            <li>Email: ${escapeHtml(email)}</li>
+            <li>SMS consent: ${smsConsent ? "Yes" : "No"}</li>
+          </ul>
+        </div>
+      `,
+    }),
+    ...(smsConsent
+      ? [
+          sendSms({
+            to: phone,
+            body: `Hi ${firstName}, this is Relocation Engine -- thanks for reaching out! We'll be in touch soon. Reply STOP to opt out.`,
+          }),
+        ]
+      : []),
+  ]);
 
   redirect(`${path}?lead_submitted=1`);
 }
