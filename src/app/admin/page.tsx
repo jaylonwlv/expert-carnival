@@ -61,23 +61,25 @@ export default async function AdminPage({
     movedIn: number,
     filteredCount: number,
     clients: Awaited<ReturnType<typeof prisma.client.findMany>>,
-    calculatorStats: { page: string; count: number; avgIncome: number | null }[];
+    leadsByType: { california: number; pcs: number };
   try {
     // The stat cards always reflect every client, independent of the
     // search box/stage filter below them, so they're counted separately
-    // from the (possibly filtered) list.
-    let rawCalculatorStats;
-    [totalClients, movedIn, filteredCount, rawCalculatorStats] = await Promise.all([
+    // from the (possibly filtered) list. Grouping by isPCS is scoped to
+    // source: { not: null } -- that's what tells an actual lead-form
+    // submission apart from a client Paulin added by hand, who shouldn't
+    // count here either way.
+    let rawLeadsByType;
+    [totalClients, movedIn, filteredCount, rawLeadsByType] = await Promise.all([
       prisma.client.count(),
       prisma.client.count({ where: { currentStage: STAGES.length - 1 } }),
       prisma.client.count({ where }),
-      prisma.calculatorInteraction.groupBy({ by: ["page"], _count: { _all: true }, _avg: { income: true } }),
+      prisma.client.groupBy({ by: ["isPCS"], where: { source: { not: null } }, _count: { _all: true } }),
     ]);
-    calculatorStats = rawCalculatorStats.map((s) => ({
-      page: s.page,
-      count: s._count._all,
-      avgIncome: s._avg.income,
-    }));
+    leadsByType = {
+      california: rawLeadsByType.find((r) => !r.isPCS)?._count._all ?? 0,
+      pcs: rawLeadsByType.find((r) => r.isPCS)?._count._all ?? 0,
+    };
 
     // Clamp instead of trusting the URL's ?page= as-is -- otherwise
     // narrowing a search/stage filter while on a later page would skip
@@ -133,7 +135,7 @@ export default async function AdminPage({
           <StatCard label="Moved in" value={movedIn} icon={<HomeIcon />} chip="bg-emerald-50 text-emerald-700" />
         </div>
 
-        <CalculatorEngagement stats={calculatorStats} />
+        <LeadsByType leads={leadsByType} />
 
         <ClientList
           clients={clients}
@@ -149,33 +151,33 @@ export default async function AdminPage({
   );
 }
 
-// How many visitors actually drag the tax calculator's slider, by which
-// page it's on -- the engagement signal that replaced giving the
-// calculator its own CTA (see CalculatorInteraction in the schema).
-function CalculatorEngagement({
-  stats,
-}: {
-  stats: { page: string; count: number; avgIncome: number | null }[];
-}) {
+// At-a-glance split of lead-form submissions by relocation type -- isPCS
+// is what each landing page actually sets based on which one the visitor
+// came through (optin = PCS, homepage/california = standard), not a
+// separate field to keep in sync (see submitLead in app/lead-actions.ts).
+function LeadsByType({ leads }: { leads: { california: number; pcs: number } }) {
+  const total = leads.california + leads.pcs;
   return (
     <div className="bg-white rounded-2xl border border-stone-200 p-5 shadow-sm">
       <p className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-3">
-        Calculator engagement
+        Leads by type
       </p>
-      {stats.length === 0 ? (
-        <p className="text-sm text-stone-400">No one has used the savings calculator yet.</p>
+      {total === 0 ? (
+        <p className="text-sm text-stone-400">No lead-form submissions yet.</p>
       ) : (
         <div className="flex flex-wrap gap-8">
-          {stats.map((s) => (
-            <div key={s.page}>
-              <p className="text-2xl font-semibold text-stone-900 tabular-nums">{s.count}</p>
-              <p className="text-xs text-stone-500 capitalize">
-                {s.page}
-                {s.avgIncome != null &&
-                  ` · avg ${s.avgIncome.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })} income`}
-              </p>
-            </div>
-          ))}
+          <div>
+            <p className="text-2xl font-semibold text-stone-900 tabular-nums">{total}</p>
+            <p className="text-xs text-stone-500">Total leads</p>
+          </div>
+          <div>
+            <p className="text-2xl font-semibold text-stone-900 tabular-nums">{leads.california}</p>
+            <p className="text-xs text-stone-500">California</p>
+          </div>
+          <div>
+            <p className="text-2xl font-semibold text-stone-900 tabular-nums">{leads.pcs}</p>
+            <p className="text-xs text-stone-500">PCS</p>
+          </div>
         </div>
       )}
     </div>
