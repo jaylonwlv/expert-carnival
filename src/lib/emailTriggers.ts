@@ -25,12 +25,12 @@ export const CHECKLIST_EMAIL_TRIGGERS: Record<string, EmailTrigger> = {
   preapproval_letter: {
     subject: "You're pre-approved!",
     body: (firstName, trackerUrl) =>
-      wrap(firstName, "Great news — your mortgage pre-approval is in.", trackerUrl),
+      wrap(firstName, "Great news! Your mortgage pre-approval is in.", trackerUrl),
   },
   loan_conditions_cleared: {
     subject: "Your loan has been approved",
     body: (firstName, trackerUrl) =>
-      wrap(firstName, "Your lender has cleared your loan conditions — your loan is approved.", trackerUrl),
+      wrap(firstName, "Your lender has cleared your loan conditions. Your loan is approved.", trackerUrl),
   },
   inspection_completed: {
     subject: "Your home inspection is complete",
@@ -39,12 +39,12 @@ export const CHECKLIST_EMAIL_TRIGGERS: Record<string, EmailTrigger> = {
   offer_submitted: {
     subject: "Your offer has been submitted",
     body: (firstName, trackerUrl) =>
-      wrap(firstName, "Your offer has been submitted to the seller — we'll let you know as soon as we hear back.", trackerUrl),
+      wrap(firstName, "Your offer has been submitted to the seller. We'll let you know as soon as we hear back.", trackerUrl),
   },
   clear_to_close: {
     subject: "You're clear to close!",
     body: (firstName, trackerUrl) =>
-      wrap(firstName, "You're clear to close — contingencies are cleared and closing is coming up.", trackerUrl),
+      wrap(firstName, "You're clear to close. Contingencies are cleared and closing is coming up.", trackerUrl),
   },
 };
 
@@ -52,6 +52,6 @@ export const STAGE_EMAIL_TRIGGERS: Record<string, EmailTrigger> = {
   "Under Contract": {
     subject: "You're under contract!",
     body: (firstName, trackerUrl) =>
-      wrap(firstName, "Congratulations — you're officially under contract on your new home.", trackerUrl),
+      wrap(firstName, "Congratulations! You're officially under contract on your new home.", trackerUrl),
   },
 };

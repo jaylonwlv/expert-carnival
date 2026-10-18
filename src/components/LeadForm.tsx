@@ -28,7 +28,7 @@ export function LeadForm({
       <div className={`rounded-xl bg-green-50 border border-green-200 px-5 py-8 text-center ${large ? "lg:px-7 lg:py-10" : ""}`}>
         <p className={`text-sm font-semibold text-green-800 ${large ? "lg:text-base" : ""}`}>You&apos;re all set!</p>
         <p className={`text-sm text-green-700 mt-1 ${large ? "lg:text-base" : ""}`}>
-          Check your email now — your guide is on its way, and we&apos;ll be in touch soon.
+          Check your email now: your guide is on its way, and we&apos;ll be in touch soon.
         </p>
       </div>
     );
@@ -114,7 +114,7 @@ export function LeadForm({
         {submitLabel}
       </SubmitButton>
       <p className={`text-center text-xs text-stone-400 ${large ? "lg:text-sm" : ""}`}>
-        Paulin will reach out personally within one business day — no spam, no pressure.
+        Paulin will reach out personally within one business day. No spam, no pressure.
       </p>
     </form>
   );

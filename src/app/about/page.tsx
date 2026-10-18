@@ -19,7 +19,7 @@ const TEAM = [
     name: "Noah",
     title: "Operations Director",
     photo: "/team/noah.jpg",
-    blurb: "Keeps the moving pieces — financing, scheduling, document flow — coordinated from lead to closing.",
+    blurb: "Keeps the moving pieces (financing, scheduling, document flow) coordinated from lead to closing.",
   },
   {
     name: "Daniel",
@@ -44,7 +44,7 @@ export default function AboutPage() {
         <section className="max-w-3xl mx-auto px-4 pt-16 pb-10 text-center">
           <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 mb-3">About us</p>
           <h1 className="text-3xl md:text-4xl font-bold text-stone-900 leading-tight">
-            Full-service relocation, run by people — not a form.
+            Full-service relocation, run by people, not a form.
           </h1>
           <p className="text-base text-stone-600 mt-5 leading-relaxed">
             {BUSINESS.legalName} helps California sellers and military families PCSing to Nevada move
@@ -74,7 +74,7 @@ export default function AboutPage() {
               </p>
               <h2 className="text-2xl font-bold text-stone-900">{BUSINESS.licensee}</h2>
               <p className="text-sm text-stone-600 mt-3 leading-relaxed">
-                Paulin is the realtor on the team — the one who gets on the phone with you, walks
+                Paulin is the realtor on the team: the one who gets on the phone with you, walks
                 neighborhoods, negotiates your offer, and sees your file through to closing. Every
                 client working with {BUSINESS.legalName} is working with her directly.
               </p>

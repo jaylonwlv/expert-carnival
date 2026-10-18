@@ -28,7 +28,7 @@ const SERVICES = [
   },
   {
     title: "Home & area selection",
-    body: "Curated listings and neighborhood breakdowns based on your must-haves — no generic search results.",
+    body: "Curated listings and neighborhood breakdowns based on your must-haves, not generic search results.",
     videoSrc: "/broll/patio.mp4",
     poster: "/broll/patio-poster.jpg",
   },
@@ -119,8 +119,8 @@ export default async function HomePage({
               We&apos;ll handle everything.
             </h1>
             <p className="text-base md:text-lg text-white/85 mt-5 max-w-2xl mx-auto leading-relaxed">
-              Full-service relocation support — from financing and home selection through closing and
-              move-in — for California sellers and military PCS moves alike.
+              Full-service relocation support, from financing and home selection through closing and
+              move-in, for California sellers and military PCS moves alike.
             </p>
 
             <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -151,7 +151,7 @@ export default async function HomePage({
           </p>
           <div className="relative max-w-2xl mx-auto px-4 text-center">
             <p className={`${playfair.className} text-2xl md:text-3xl text-stone-900 leading-snug`}>
-              A new chapter, without the guesswork — the financing, the search, and everything
+              A new chapter, without the guesswork: the financing, the search, and everything
               after the keys, handled by one team.
             </p>
           </div>

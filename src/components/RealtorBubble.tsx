@@ -27,7 +27,7 @@ export function RealtorBubble() {
           Licensed Nevada Realtor · License #{BUSINESS.nvLicense}
         </p>
         <p className="text-xs lg:text-sm text-stone-500 mt-1 leading-relaxed">
-          You&apos;ll work with me personally, start to finish — no call centers, no hand-offs.
+          You&apos;ll work with me personally, start to finish. No call centers, no hand-offs.
         </p>
       </div>
     </div>

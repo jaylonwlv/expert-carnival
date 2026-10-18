@@ -120,11 +120,11 @@ export default function PrivacyPage() {
         <li>
           <strong>California residents:</strong> under the California Consumer Privacy Act (CCPA/CPRA),
           you have the right to know what personal information we collect, request deletion of it, and
-          opt out of its &quot;sale&quot; or &quot;sharing&quot; — which we do not do.
+          opt out of its &quot;sale&quot; or &quot;sharing,&quot; which we do not do.
         </li>
         <li>
           <strong>Nevada residents:</strong> under NRS 603A, you have the right to opt out of the sale
-          of certain covered information — which, again, we do not sell.
+          of certain covered information, which, again, we do not sell.
         </li>
       </ul>
 

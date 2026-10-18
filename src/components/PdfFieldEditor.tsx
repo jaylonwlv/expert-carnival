@@ -226,7 +226,7 @@ export function PdfFieldEditor({
           onChange={(e) => setRequiresIdAcknowledgment(e.target.checked)}
           className="mt-0.5 rounded"
         />
-        This is the client&apos;s first document (e.g. Duties Owed) — require them to confirm it matches their
+        This is the client&apos;s first document (e.g. Duties Owed). Require them to confirm it matches their
         valid ID before they can view and sign it.
       </label>
 

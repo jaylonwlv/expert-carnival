@@ -162,12 +162,12 @@ export const STAGE_CHECKLISTS: StageChecklist[] = [
       },
       {
         key: "va_appraisal_completed",
-        label: "VA appraisal completed — any required MPR repairs cleared",
+        label: "VA appraisal completed, any required MPR repairs cleared",
         relevantFor: "pcs",
       },
       {
         key: "pest_report_if_required",
-        label: "Termite/pest report ordered if required (seller pays — buyer cannot pay this fee on a VA loan)",
+        label: "Termite/pest report ordered if required (seller pays; buyer cannot pay this fee on a VA loan)",
         relevantFor: "pcs",
       },
       {

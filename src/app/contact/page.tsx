@@ -25,7 +25,7 @@ export default function ContactPage() {
             We&apos;d love to hear from you.
           </h1>
           <p className="text-base text-stone-600 mt-5 leading-relaxed">
-            Whether you&apos;re moving from California or PCSing to Las Vegas, reach out directly —
+            Whether you&apos;re moving from California or PCSing to Las Vegas, reach out directly,
             or start with one of our free relocation guides below.
           </p>
         </section>

@@ -66,7 +66,7 @@ export default async function TrackPage({
           </h1>
           <p className="text-sm text-stone-600 mt-2 leading-relaxed">
             {AGENT_NAME} will be in touch personally soon to get your move started. Check back here
-            once that happens — this is where you&apos;ll track every step along the way.
+            once that happens. This is where you&apos;ll track every step along the way.
           </p>
         </main>
       </div>
@@ -201,8 +201,8 @@ export default async function TrackPage({
           {documents.length > 0 && (
             <>
               <p className="text-xs text-stone-600 -mt-2">
-                Links below are valid for <span className="font-semibold">72 hours</span> after this page loads —
-                reopen it anytime for a fresh link.
+                Links below are valid for <span className="font-semibold">72 hours</span> after this page loads.
+                Reopen it anytime for a fresh link.
               </p>
               <ul className="divide-y divide-stone-100">
                 {documents.map((doc) => (

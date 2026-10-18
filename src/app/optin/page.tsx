@@ -12,7 +12,7 @@ import { submitLead } from "../lead-actions";
 export const metadata = {
   title: "Nellis & Creech PCS Relocation Guide · Relocation Engine",
   description:
-    "Get your free guide to a PCS move to Nellis AFB or Creech AFB — VA loan benefits, housing strategy, and what to expect.",
+    "Get your free guide to a PCS move to Nellis AFB or Creech AFB: VA loan benefits, housing strategy, and what to expect.",
 };
 
 const VALUE_PROPS = ["$0 down with your VA loan", "BAH often covers your mortgage", "Housing matched to your commute"];
@@ -63,7 +63,7 @@ export default async function OptinPage({
         </ul>
 
         <p className="text-center text-xs lg:text-sm font-medium text-amber-900 bg-amber-50/90 border border-amber-200 rounded-lg px-3 py-2 lg:px-4 lg:py-3 mb-5 lg:mb-8">
-          Orders in hand? DoD guidance recommends starting within 30 days of receiving them — the
+          Orders in hand? DoD guidance recommends starting within 30 days of receiving them. The
           earlier you start, the more mover and home options you&apos;ll have.
         </p>
 
@@ -79,7 +79,7 @@ export default async function OptinPage({
         <RealtorBubble />
 
         <p className="text-center text-xs lg:text-sm text-white/70 mt-5 lg:mt-7">
-          VA Loan Benefits &amp; Housing Strategy — Paulin Korensia &amp; Associates Relocation Team
+          VA Loan Benefits &amp; Housing Strategy by Paulin Korensia &amp; Associates Relocation Team
         </p>
         <MinimalSiteFooter />
       </div>

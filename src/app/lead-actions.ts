@@ -56,7 +56,7 @@ function leadMagnetEmailHtml(firstName: string, title: string, pdfUrl: string): 
       <p>Thanks for requesting the <strong>${escapeHtml(title)}</strong>. Here it is:</p>
       ${downloadBlock}
       <p>We'll be in touch soon to see how we can help with your move.</p>
-      <p>— Relocation Engine</p>
+      <p>Relocation Engine</p>
     </div>
   `;
 }

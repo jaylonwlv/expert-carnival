@@ -38,21 +38,21 @@ export const STAGES: Stage[] = [
   {
     title: "Offer Submitted",
     summary: "Your offer is in and your agent is negotiating on your behalf.",
-    nextSteps: "We're waiting on the seller's response — accepted, countered, or we look at backups.",
+    nextSteps: "We're waiting on the seller's response: accepted, countered, or we look at backups.",
   },
   {
     title: "Under Contract",
     summary: "You're under contract. Now it's inspections, appraisal, and loan finalization.",
-    nextSteps: "Stay reachable for your lender and inspector — we'll flag anything you need to sign.",
+    nextSteps: "Stay reachable for your lender and inspector. We'll flag anything you need to sign.",
   },
   {
     title: "Closing",
-    summary: "You're in the final stretch — closing documents and funding are being finalized.",
+    summary: "You're in the final stretch. Closing documents and funding are being finalized.",
     nextSteps: "Once funds are confirmed, you'll get your keys.",
   },
   {
     title: "Moved In",
     summary: "Welcome home! You're officially a Las Vegas resident.",
-    nextSteps: "Let us know if you need local recommendations — thank you for trusting us with your move.",
+    nextSteps: "Let us know if you need local recommendations. Thank you for trusting us with your move.",
   },
 ];

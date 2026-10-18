@@ -15,7 +15,7 @@ const VALUE_PROPS = [
 export const metadata = {
   title: "California to Las Vegas Relocation Guide · Relocation Engine",
   description:
-    "Get your free guide to relocating from California to Las Vegas — lower your cost of living, keep your equity, elevate your lifestyle.",
+    "Get your free guide to relocating from California to Las Vegas: lower your cost of living, keep your equity, elevate your lifestyle.",
 };
 
 export default async function CaliforniaPage({
@@ -75,7 +75,7 @@ export default async function CaliforniaPage({
         <RealtorBubble />
 
         <p className="text-center text-xs lg:text-sm text-white/70 mt-5 lg:mt-7">
-          A Complete Tax &amp; Equity Transfer Strategy — Paulin Korensia &amp; Associates Relocation Team
+          A Complete Tax &amp; Equity Transfer Strategy by Paulin Korensia &amp; Associates Relocation Team
         </p>
         <MinimalSiteFooter />
       </div>
