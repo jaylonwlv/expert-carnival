@@ -3,6 +3,7 @@ import { LeadForm } from "@/components/LeadForm";
 import { LandingSequenceBackground } from "@/components/LandingSequenceBackground";
 import { MinimalSiteFooter } from "@/components/SiteFooter";
 import { HowItWorksSteps } from "@/components/HowItWorksSteps";
+import { StickyCtaBar } from "@/components/StickyCtaBar";
 import { submitLead } from "../lead-actions";
 
 // Placeholder copy -- Paulin's providing the real PCS guide copy separately.
@@ -29,9 +30,10 @@ export default async function OptinPage({
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 py-16">
       <LandingSequenceBackground />
+      <StickyCtaBar heroId="hero" formId="lead-form" label="Get My PCS Relocation Roadmap ↓" />
 
       <div className="relative z-10 w-full max-w-md lg:max-w-2xl">
-        <div className="text-center mb-7 lg:mb-10">
+        <div id="hero" className="text-center mb-7 lg:mb-10">
           <div className="inline-block bg-white/90 backdrop-blur-sm rounded-full pl-4 pr-5 py-2 lg:pl-5 lg:pr-6 lg:py-2.5 shadow-sm mb-6 lg:mb-8">
             <Image
               src="/logo.png"
@@ -71,7 +73,7 @@ export default async function OptinPage({
           <HowItWorksSteps steps={HOW_IT_WORKS} />
         </div>
 
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-8 lg:p-10">
+        <div id="lead-form" className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-8 lg:p-10">
           <LeadForm
             action={action}
             submitLabel="Get My PCS Relocation Roadmap"

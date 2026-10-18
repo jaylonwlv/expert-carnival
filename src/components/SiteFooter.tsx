@@ -77,21 +77,34 @@ export function SiteFooter() {
 // Compact version for the dedicated lead-capture pages (/california,
 // /optin), where a full nav footer would compete with the single
 // conversion goal -- just the links that compliance actually needs
-// reachable from a page that collects SMS consent.
+// reachable from a page that collects SMS consent, plus a tap-to-call
+// fallback. The form is the primary path, so the call link is deliberately
+// below everything else, not competing for attention above the fold -- but
+// some visitors who are already sold just want to talk to Paulin directly
+// rather than type into a form, and until now that path didn't exist
+// anywhere on either page.
 export function MinimalSiteFooter() {
   return (
-    <p className="text-center text-xs text-white/60 mt-3">
-      <Link href="/privacy" className="underline hover:text-white">
-        Privacy Policy
-      </Link>
-      {" · "}
-      <Link href="/terms" className="underline hover:text-white">
-        Terms
-      </Link>
-      {" · "}
-      <Link href="/sms-terms" className="underline hover:text-white">
-        SMS Terms
-      </Link>
-    </p>
+    <div className="text-center mt-3">
+      <p className="text-xs text-white/70">
+        Prefer to talk now?{" "}
+        <a href={BUSINESS.phoneHref} className="underline hover:text-white font-medium">
+          Call {BUSINESS.phone}
+        </a>
+      </p>
+      <p className="text-xs text-white/60 mt-2">
+        <Link href="/privacy" className="underline hover:text-white">
+          Privacy Policy
+        </Link>
+        {" · "}
+        <Link href="/terms" className="underline hover:text-white">
+          Terms
+        </Link>
+        {" · "}
+        <Link href="/sms-terms" className="underline hover:text-white">
+          SMS Terms
+        </Link>
+      </p>
+    </div>
   );
 }

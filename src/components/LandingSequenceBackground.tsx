@@ -23,6 +23,15 @@ export function LandingSequenceBackground() {
     if (!video) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+    // This clip is ~12.6MB -- skip it on a slow or metered connection and
+    // let the poster (already the fallback for prefers-reduced-motion)
+    // stand in instead. `navigator.connection` is Chromium/Android-only;
+    // everywhere else this is simply undefined and the clip loads as
+    // normal, same as before.
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } })
+      .connection;
+    if (connection?.saveData || ["slow-2g", "2g", "3g"].includes(connection?.effectiveType ?? "")) return;
+
     const start = () => {
       const source = document.createElement("source");
       source.src = "/broll/landing-sequence.mp4";

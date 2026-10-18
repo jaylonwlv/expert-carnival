@@ -2,13 +2,26 @@
 
 import { useEffect, useState } from "react";
 
-// /california stacks the hero, value props, how-it-works, and the tax
-// calculator above the form. Measured against the page's actual rendered
-// height (not assumed), the gap between "hero mostly scrolled away" and
-// "form becomes visible" is real but narrow -- so both edges are read as
-// fractions of the viewport height (not fixed pixel guesses) to stay
-// correct across phone sizes: show once the hero is mostly gone, hide once
-// the form is substantially on screen, whichever device this renders on.
+// /california and /optin both stack a hero, value props, and how-it-works
+// (plus, on /california, the tax calculator) above the lead form -- once a
+// visitor has scrolled past the hero, the real submit button can still be
+// below the fold. This floating shortcut shows only in that specific gap.
+//
+// Previously measured as fractions of the viewport height via scroll +
+// getBoundingClientRect, which stopped working once later content/spacing
+// changes shortened the page: "hero mostly gone" and "form visible" ended
+// up true at nearly the same scroll position, so the bar never showed at
+// all on common phone sizes -- confirmed directly via Playwright, not
+// assumed.
+//
+// The second signal is specifically the submit button, not the form card
+// as a whole: the card (inputs + checkbox + legal text + button) is
+// taller than one screen on a short phone, so "the whole card is in view"
+// and "the button itself is in view" are quite different moments -- using
+// the card's own visibility left the floating bar rendered directly on
+// top of the real button for a stretch of scroll, which looked like two
+// near-identical buttons stacked on each other (caught by screenshot, not
+// assumed either).
 export function StickyCtaBar({
   heroId,
   formId,
@@ -18,25 +31,25 @@ export function StickyCtaBar({
   formId: string;
   label: string;
 }) {
-  const [visible, setVisible] = useState(false);
+  const [heroGone, setHeroGone] = useState(false);
+  const [submitButtonVisible, setSubmitButtonVisible] = useState(false);
 
   useEffect(() => {
     const heroEl = document.getElementById(heroId);
     const formEl = document.getElementById(formId);
-    if (!heroEl || !formEl) return;
+    const submitEl = formEl?.querySelector('button[type="submit"]');
+    if (!heroEl || !submitEl) return;
 
-    function update() {
-      const heroMostlyGone = heroEl!.getBoundingClientRect().bottom <= window.innerHeight * 0.3;
-      const formMeaningfullyVisible = formEl!.getBoundingClientRect().top <= window.innerHeight * 0.6;
-      setVisible(heroMostlyGone && !formMeaningfullyVisible);
-    }
+    const heroObserver = new IntersectionObserver(([entry]) => setHeroGone(!entry.isIntersecting), {
+      threshold: 0,
+    });
+    const submitObserver = new IntersectionObserver(([entry]) => setSubmitButtonVisible(entry.isIntersecting));
+    heroObserver.observe(heroEl);
+    submitObserver.observe(submitEl);
 
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
     return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
+      heroObserver.disconnect();
+      submitObserver.disconnect();
     };
   }, [heroId, formId]);
 
@@ -44,7 +57,7 @@ export function StickyCtaBar({
     document.getElementById(formId)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  if (!visible) return null;
+  if (!heroGone || submitButtonVisible) return null;
 
   return (
     <button
