@@ -2,8 +2,8 @@ import Image from "next/image";
 import { LeadForm } from "@/components/LeadForm";
 import { LandingSequenceBackground } from "@/components/LandingSequenceBackground";
 import { MinimalSiteFooter } from "@/components/SiteFooter";
-import { HowItWorksSteps } from "@/components/HowItWorksSteps";
 import { StickyCtaBar } from "@/components/StickyCtaBar";
+import { RealtorBubble } from "@/components/RealtorBubble";
 import { submitLead } from "../lead-actions";
 
 // Placeholder copy -- Paulin's providing the real PCS guide copy separately.
@@ -16,8 +16,6 @@ export const metadata = {
 };
 
 const VALUE_PROPS = ["$0 down with your VA loan", "BAH often covers your mortgage", "Housing matched to your commute"];
-
-const HOW_IT_WORKS = ["Get your free guide", "Paulin calls you", "We plan around your report date"];
 
 export default async function OptinPage({
   searchParams,
@@ -69,10 +67,6 @@ export default async function OptinPage({
           earlier you start, the more mover and home options you&apos;ll have.
         </p>
 
-        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-sm p-4 lg:p-6 mb-5 lg:mb-8">
-          <HowItWorksSteps steps={HOW_IT_WORKS} />
-        </div>
-
         <div id="lead-form" className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-8 lg:p-10">
           <LeadForm
             action={action}
@@ -81,6 +75,8 @@ export default async function OptinPage({
             large
           />
         </div>
+
+        <RealtorBubble />
 
         <p className="text-center text-xs lg:text-sm text-white/70 mt-5 lg:mt-7">
           VA Loan Benefits &amp; Housing Strategy — Paulin Korensia &amp; Associates Relocation Team
