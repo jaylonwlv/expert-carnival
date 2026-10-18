@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 // Full-bleed background video for an editorial section -- the homepage uses
@@ -36,6 +36,12 @@ export function BRollVideo({
   priority?: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  // The video has no frame to show until playback actually starts, so it
+  // sits fully transparent over the poster until then -- without this,
+  // the live first frame (different motion/exposure than the static
+  // poster) pops in the instant it's ready, which reads as a jitter.
+  // Fading it in instead makes that swap imperceptible.
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -101,11 +107,12 @@ export function BRollVideo({
       />
       <video
         ref={videoRef}
-        className={`absolute inset-0 w-full h-full object-cover ${className}`}
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out ${isPlaying ? "opacity-100" : "opacity-0"} ${className}`}
         muted
         loop
         playsInline
         preload="none"
+        onPlaying={() => setIsPlaying(true)}
       />
     </>
   );
