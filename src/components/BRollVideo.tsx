@@ -28,8 +28,10 @@ import Image from "next/image";
 // These clips are raw b-roll, not footage shot to loop seamlessly -- the
 // native `loop` attribute would jump-cut from the last frame straight back
 // to the first the instant playback reaches the end. Looping is handled
-// manually instead (handleTimeUpdate/handleEnded below) so that cut can be
-// masked with the same fade used for the initial poster-to-video handoff.
+// manually instead (handleTimeUpdate/handleEnded below), fading through
+// that cut. The initial poster-to-video handoff, on the other hand, isn't
+// faded -- it just appears once playback starts (see transitionEnabled
+// below).
 const LOOP_FADE_MS = 500;
 
 export function BRollVideo({
@@ -44,13 +46,23 @@ export function BRollVideo({
   priority?: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  // The video has no frame to show until playback actually starts, so it
-  // sits fully transparent over the poster until then -- without this,
-  // the live first frame (different motion/exposure than the static
-  // poster) pops in the instant it's ready, which reads as a jitter.
-  // Fading it in instead makes that swap imperceptible.
+  // isPlaying controls opacity; transitionEnabled controls whether that
+  // change animates. The very first reveal (poster -> live video) should
+  // just appear, not fade -- only the loop's fade-out/fade-in (masking the
+  // jump-cut between the clip's last frame and its first) should animate.
+  // Both start false so the first onPlaying flips isPlaying without
+  // transitionEnabled having caught up yet (same render), landing on
+  // opacity-100 instantly; transitionEnabled then turns on one frame
+  // later, in time for the loop's own fade.
   const [isPlaying, setIsPlaying] = useState(false);
+  const [transitionEnabled, setTransitionEnabled] = useState(false);
   const fadingOutRef = useRef(false);
+
+  useEffect(() => {
+    if (!isPlaying || transitionEnabled) return;
+    const id = requestAnimationFrame(() => setTransitionEnabled(true));
+    return () => cancelAnimationFrame(id);
+  }, [isPlaying, transitionEnabled]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -141,7 +153,7 @@ export function BRollVideo({
       />
       <video
         ref={videoRef}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-out ${isPlaying ? "opacity-100" : "opacity-0"} ${className}`}
+        className={`absolute inset-0 w-full h-full object-cover ${transitionEnabled ? "transition-opacity duration-500 ease-out" : ""} ${isPlaying ? "opacity-100" : "opacity-0"} ${className}`}
         muted
         playsInline
         preload="none"
