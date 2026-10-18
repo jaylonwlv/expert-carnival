@@ -1,10 +1,10 @@
 import Image from "next/image";
-import Link from "next/link";
 import { LeadForm } from "@/components/LeadForm";
 import { LandingBackground } from "@/components/LandingBackground";
 import { MinimalSiteFooter } from "@/components/SiteFooter";
 import { HowItWorksSteps } from "@/components/HowItWorksSteps";
 import { TaxSavingsCalculator } from "@/components/TaxSavingsCalculator";
+import { StickyCtaBar } from "@/components/StickyCtaBar";
 import { submitLead } from "../lead-actions";
 
 const VALUE_PROPS = [
@@ -32,19 +32,18 @@ export default async function CaliforniaPage({
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 py-16">
       <LandingBackground />
+      <StickyCtaBar heroId="hero" formId="lead-form" label="Get My Relocation Roadmap ↓" />
 
       <div className="relative z-10 w-full max-w-md">
-        <div className="text-center mb-7">
-          <Link href="/" className="inline-block mb-6">
-            <Image
-              src="/logo.png"
-              alt="Relocation Engine"
-              width={680}
-              height={546}
-              className="h-16 w-auto mx-auto"
-              priority
-            />
-          </Link>
+        <div id="hero" className="text-center mb-7">
+          <Image
+            src="/logo.png"
+            alt="Relocation Engine"
+            width={680}
+            height={546}
+            className="h-16 w-auto mx-auto mb-6"
+            priority
+          />
           <p className="hero-text-glow text-xs font-semibold uppercase tracking-wide text-amber-700 mb-3">
             Free relocation guide · 2026 Edition
           </p>
@@ -73,7 +72,7 @@ export default async function CaliforniaPage({
           <TaxSavingsCalculator />
         </div>
 
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-8">
+        <div id="lead-form" className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-8">
           <LeadForm
             action={action}
             submitLabel="Get My Relocation Roadmap"

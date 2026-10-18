@@ -17,7 +17,7 @@ export function LeadForm({
       <div className="rounded-xl bg-green-50 border border-green-200 px-5 py-8 text-center">
         <p className="text-sm font-semibold text-green-800">You&apos;re all set!</p>
         <p className="text-sm text-green-700 mt-1">
-          Check your email for your guide — we&apos;ll be in touch soon.
+          Check your email now — your guide is on its way, and we&apos;ll be in touch soon.
         </p>
       </div>
     );
@@ -38,6 +38,7 @@ export function LeadForm({
           id="name"
           name="name"
           required
+          autoComplete="name"
           className="w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
         />
       </div>
@@ -50,6 +51,7 @@ export function LeadForm({
           name="phone"
           type="tel"
           required
+          autoComplete="tel"
           className="w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
         />
       </div>
@@ -62,6 +64,7 @@ export function LeadForm({
           name="email"
           type="email"
           required
+          autoComplete="email"
           className="w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
         />
       </div>

@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { LeadForm } from "@/components/LeadForm";
 import { LandingBackground } from "@/components/LandingBackground";
 import { MinimalSiteFooter } from "@/components/SiteFooter";
@@ -33,16 +32,14 @@ export default async function OptinPage({
 
       <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-7">
-          <Link href="/" className="inline-block mb-6">
-            <Image
-              src="/logo.png"
-              alt="Relocation Engine"
-              width={680}
-              height={546}
-              className="h-16 w-auto mx-auto"
-              priority
-            />
-          </Link>
+          <Image
+            src="/logo.png"
+            alt="Relocation Engine"
+            width={680}
+            height={546}
+            className="h-16 w-auto mx-auto mb-6"
+            priority
+          />
           <p className="hero-text-glow text-xs font-semibold uppercase tracking-wide text-amber-700 mb-3">
             Free relocation guide · 2026 Edition
           </p>
@@ -62,6 +59,11 @@ export default async function OptinPage({
             </li>
           ))}
         </ul>
+
+        <p className="hero-text-glow text-center text-xs font-medium text-amber-900 bg-amber-50/90 border border-amber-200 rounded-lg px-3 py-2 mb-5">
+          Orders in hand? DoD guidance recommends starting within 30 days of receiving them — the
+          earlier you start, the more mover and home options you&apos;ll have.
+        </p>
 
         <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-sm p-4 mb-5">
           <HowItWorksSteps steps={HOW_IT_WORKS} />
