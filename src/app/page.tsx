@@ -48,13 +48,12 @@ export default async function HomePage({
             width={680}
             height={546}
             className="h-10 w-auto mx-auto mb-8"
-            style={{ filter: "brightness(0) invert(1)" }}
             priority
           />
-          <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight">
+          <h1 className="text-3xl md:text-5xl font-bold text-stone-900 leading-tight">
             Relocating to Las Vegas? We&apos;ll handle everything.
           </h1>
-          <p className="text-base md:text-lg text-stone-300 mt-5 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg text-stone-600 mt-5 max-w-2xl mx-auto leading-relaxed">
             Full-service relocation support — from financing and home selection through closing and
             move-in — for California sellers and military PCS moves alike.
           </p>
@@ -62,13 +61,13 @@ export default async function HomePage({
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
               href="/california"
-              className="rounded-md border border-white/30 bg-white/10 backdrop-blur-sm text-white text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-white/20 transition"
+              className="rounded-md border border-stone-300 bg-white/80 backdrop-blur-sm text-stone-800 text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-white transition"
             >
               Moving from California?
             </Link>
             <Link
               href="/optin"
-              className="rounded-md border border-white/30 bg-white/10 backdrop-blur-sm text-white text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-white/20 transition"
+              className="rounded-md border border-stone-300 bg-white/80 backdrop-blur-sm text-stone-800 text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-white transition"
             >
               PCS orders to Las Vegas?
             </Link>

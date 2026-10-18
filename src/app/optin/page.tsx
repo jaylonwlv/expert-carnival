@@ -34,17 +34,16 @@ export default async function OptinPage({
               width={680}
               height={546}
               className="h-9 w-auto mx-auto"
-              style={{ filter: "brightness(0) invert(1)" }}
               priority
             />
           </Link>
-          <p className="text-xs font-semibold uppercase tracking-wide text-amber-400 mb-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 mb-3">
             Free relocation guide · 2026 Edition
           </p>
-          <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-stone-900 leading-tight">
             Get My PCS Relocation Roadmap
           </h1>
-          <p className="text-sm md:text-base text-stone-300 mt-3 leading-relaxed">
+          <p className="text-sm md:text-base text-stone-600 mt-3 leading-relaxed">
             Make the most of your PCS to Las Vegas. See how to use your VA loan benefits, lower your
             cost of living, and find the right neighborhood for your family.
           </p>
@@ -59,7 +58,7 @@ export default async function OptinPage({
           />
         </div>
 
-        <p className="text-center text-xs text-stone-400 mt-5">
+        <p className="text-center text-xs text-stone-500 mt-5">
           VA Loan Benefits &amp; Housing Strategy — Paulin Korensia &amp; Associates Relocation Team
         </p>
       </div>
