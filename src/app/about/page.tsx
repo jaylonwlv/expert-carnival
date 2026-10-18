@@ -65,6 +65,7 @@ export default function AboutPage() {
                 width={1333}
                 height={2000}
                 className="w-full h-64 md:h-full object-cover"
+                priority
               />
             </div>
             <div className="p-6 md:p-8 flex flex-col justify-center">

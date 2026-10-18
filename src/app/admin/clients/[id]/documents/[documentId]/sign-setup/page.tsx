@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSignedDownloadUrl } from "@/lib/documents";
-import { PdfFieldEditor } from "@/components/PdfFieldEditor";
+import { PdfFieldEditorLoader } from "@/components/PdfFieldEditorLoader";
 import { createSignatureRequest } from "../../../../../signature-actions";
 
 export default async function SignSetupPage({
@@ -62,7 +62,7 @@ export default async function SignSetupPage({
           </div>
         ) : (
           <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
-            <PdfFieldEditor fileUrl={fileUrl} onSend={sendAction} />
+            <PdfFieldEditorLoader fileUrl={fileUrl} onSend={sendAction} />
           </div>
         )}
       </main>

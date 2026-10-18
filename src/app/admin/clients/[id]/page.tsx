@@ -49,13 +49,18 @@ export default async function ClientDetailPage({
     notFound();
   }
 
-  await ensureChecklistItems(client.id, client.isPCS);
-  const checklistItems = await prisma.checklistItem.findMany({
-    where: { clientId: client.id },
-    orderBy: [{ stageIndex: "asc" }, { sortOrder: "asc" }],
-  });
-
-  const trackerUrl = await buildTrackerUrl(client.token);
+  // buildTrackerUrl only reads request headers -- it has no dependency on
+  // the checklist chain below, so run both at once instead of paying for
+  // them back-to-back on every admin client-detail page load.
+  const [trackerUrl, checklistItems] = await Promise.all([
+    buildTrackerUrl(client.token),
+    ensureChecklistItems(client.id, client.isPCS).then(() =>
+      prisma.checklistItem.findMany({
+        where: { clientId: client.id },
+        orderBy: [{ stageIndex: "asc" }, { sortOrder: "asc" }],
+      })
+    ),
+  ]);
 
   const updateStageForClient = updateStage.bind(null, client.id);
   const updateNoteForClient = updateNote.bind(null, client.id);

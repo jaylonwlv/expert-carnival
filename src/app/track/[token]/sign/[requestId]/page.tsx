@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSignedDownloadUrl } from "@/lib/documents";
-import { SigningView } from "@/components/SigningView";
+import { SigningViewLoader } from "@/components/SigningViewLoader";
 import { IdentityAcknowledgment } from "@/components/IdentityAcknowledgment";
 import type { SignatureFieldType } from "@/lib/signature";
 import { submitSignature, acknowledgeIdentity } from "../../../signature-actions";
@@ -104,7 +104,7 @@ export default async function SignPage({
         ) : needsIdAcknowledgment ? (
           <IdentityAcknowledgment documentFilename={request.document.filename} onAcknowledge={onAcknowledge} />
         ) : (
-          <SigningView
+          <SigningViewLoader
             fileUrl={viewUrl!}
             defaultSignerName={request.client.name}
             fields={request.fields.map((f) => ({
