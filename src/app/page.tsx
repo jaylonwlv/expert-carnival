@@ -1,9 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Playfair_Display } from "next/font/google";
 import { LeadForm } from "@/components/LeadForm";
 import { SiteFooter } from "@/components/SiteFooter";
 import { TaxSavingsCalculator } from "@/components/TaxSavingsCalculator";
+import { HeroVideo } from "@/components/HeroVideo";
 import { submitLead } from "./lead-actions";
+
+// Scoped to this page only -- the display serif is part of the homepage's
+// editorial redesign, not a site-wide type change.
+const playfair = Playfair_Display({ subsets: ["latin"], weight: ["500", "600"] });
 
 export const metadata = {
   title: "Relocation Engine · Relocate to Las Vegas",
@@ -40,68 +46,104 @@ export default async function HomePage({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <section className="bg-[#faf8f4]">
-        <div className="max-w-3xl mx-auto px-4 py-20 md:py-28 text-center">
-          <Image
-            src="/logo.png"
-            alt="Relocation Engine"
-            width={680}
-            height={546}
-            className="h-16 w-auto mx-auto mb-8"
-            priority
-          />
-          <h1 className="text-3xl md:text-5xl font-bold text-stone-900 leading-tight">
-            Relocating to Las Vegas? We&apos;ll handle everything.
-          </h1>
-          <p className="text-base md:text-lg text-stone-600 mt-5 max-w-2xl mx-auto leading-relaxed">
-            Full-service relocation support — from financing and home selection through closing and
-            move-in — for California sellers and military PCS moves alike.
-          </p>
+      <section className="relative min-h-[88vh] flex flex-col overflow-hidden bg-stone-900">
+        <HeroVideo />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/10 to-black/70" />
 
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/california"
-              className="rounded-md border border-stone-300 bg-white text-stone-800 text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-stone-50 transition"
-            >
-              Moving from California?
-            </Link>
-            <Link
-              href="/optin"
-              className="rounded-md border border-stone-300 bg-white text-stone-800 text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-stone-50 transition"
-            >
-              PCS orders to Las Vegas?
-            </Link>
+        <header className="relative z-10">
+          <div className="max-w-6xl mx-auto px-4 py-5">
+            <div className="inline-block bg-white/90 backdrop-blur-sm rounded-full pl-4 pr-5 py-2 shadow-sm">
+              <Image
+                src="/logo.png"
+                alt="Relocation Engine"
+                width={680}
+                height={546}
+                className="h-7 w-auto"
+                priority
+              />
+            </div>
+          </div>
+        </header>
+
+        <div className="relative z-10 flex-1 flex items-end">
+          <div className="max-w-3xl mx-auto px-4 pb-16 md:pb-20 text-center w-full">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-amber-300 mb-4">
+              California &amp; Military Relocation Specialists
+            </p>
+            <h1 className={`${playfair.className} text-4xl md:text-6xl text-white leading-tight`}>
+              Relocating to Las Vegas?
+              <br />
+              We&apos;ll handle everything.
+            </h1>
+            <p className="text-base md:text-lg text-white/85 mt-5 max-w-2xl mx-auto leading-relaxed">
+              Full-service relocation support — from financing and home selection through closing and
+              move-in — for California sellers and military PCS moves alike.
+            </p>
+
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link
+                href="/california"
+                className="rounded-full border border-white/70 text-white text-sm font-medium px-5 py-2.5 hover:bg-white hover:text-stone-900 transition"
+              >
+                Moving from California?
+              </Link>
+              <Link
+                href="/optin"
+                className="rounded-full border border-white/70 text-white text-sm font-medium px-5 py-2.5 hover:bg-white hover:text-stone-900 transition"
+              >
+                PCS orders to Las Vegas?
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      <main className="flex-1 bg-[#faf8f4]">
-        <section className="max-w-5xl mx-auto px-4 py-16">
-          <div className="grid sm:grid-cols-2 gap-5">
-            {SERVICES.map((service) => (
-              <div key={service.title} className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
-                <h2 className="text-sm font-semibold text-stone-900">{service.title}</h2>
-                <p className="text-sm text-stone-600 mt-2 leading-relaxed">{service.body}</p>
-              </div>
-            ))}
+      <main className="flex-1">
+        <section className="bg-white">
+          <div className="max-w-4xl mx-auto px-4 py-20 md:py-24">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 text-center mb-3">
+              How we help
+            </p>
+            <h2 className={`${playfair.className} text-3xl md:text-4xl text-stone-900 text-center mb-14`}>
+              Everything handled, start to finish.
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-x-10 gap-y-10">
+              {SERVICES.map((service, i) => (
+                <div key={service.title} className="border-t border-stone-200 pt-5">
+                  <p className="text-xs font-semibold text-amber-700 mb-2">0{i + 1}</p>
+                  <h3 className="text-base font-semibold text-stone-900">{service.title}</h3>
+                  <p className="text-sm text-stone-600 mt-2 leading-relaxed">{service.body}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
-        <section className="max-w-xl mx-auto px-4 pb-16 space-y-5">
-          <TaxSavingsCalculator />
-
-          <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-stone-900 text-center">
-              Get your free California to Las Vegas relocation guide
-            </h2>
-            <p className="text-sm text-stone-500 text-center mt-1 mb-6">
-              Tell us a bit about yourself and we&apos;ll send it right over.
+        <section className="bg-stone-900 py-20 md:py-24">
+          <div className="max-w-xl mx-auto px-4 text-center mb-10">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400 mb-3">
+              Get started
             </p>
-            <LeadForm
-              action={action}
-              submitLabel="Get My Free Guide"
-              submitted={params.lead_submitted === "1"}
-            />
+            <h2 className={`${playfair.className} text-3xl md:text-4xl text-white`}>
+              See what the move actually saves you.
+            </h2>
+          </div>
+          <div className="max-w-xl mx-auto px-4 space-y-5">
+            <TaxSavingsCalculator />
+
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-stone-900 text-center">
+                Get your free California to Las Vegas relocation guide
+              </h3>
+              <p className="text-sm text-stone-500 text-center mt-1 mb-6">
+                Tell us a bit about yourself and we&apos;ll send it right over.
+              </p>
+              <LeadForm
+                action={action}
+                submitLabel="Get My Free Guide"
+                submitted={params.lead_submitted === "1"}
+              />
+            </div>
           </div>
         </section>
       </main>
