@@ -43,6 +43,17 @@ body {
   animation: toast-fade 2.5s ease forwards;
 }
 
+/* Extra legibility insurance for text sitting directly over the hero video
+   -- the white scrim in LandingBackground is the main defense, but a video
+   frame can still occasionally be brighter under one letter than another,
+   so a soft white halo keeps the text readable regardless of what's behind
+   it at any given moment. */
+.hero-text-glow {
+  text-shadow:
+    0 1px 3px rgba(255, 255, 255, 0.9),
+    0 0 20px rgba(255, 255, 255, 0.8);
+}
+
 /* The hero background video (LandingBackground) swaps for its still poster
    frame under reduced motion, rather than autoplaying regardless. */
 .landing-video-fallback {

@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LeadForm } from "@/components/LeadForm";
-import { LandingBackground } from "@/components/LandingBackground";
 import { SiteFooter } from "@/components/SiteFooter";
 import { submitLead } from "./lead-actions";
 
@@ -40,9 +39,8 @@ export default async function HomePage({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <section className="relative overflow-hidden">
-        <LandingBackground fixed={false} />
-        <div className="relative z-10 max-w-3xl mx-auto px-4 py-20 md:py-28 text-center">
+      <section className="bg-[#faf8f4]">
+        <div className="max-w-3xl mx-auto px-4 py-20 md:py-28 text-center">
           <Image
             src="/logo.png"
             alt="Relocation Engine"
@@ -54,7 +52,7 @@ export default async function HomePage({
           <h1 className="text-3xl md:text-5xl font-bold text-stone-900 leading-tight">
             Relocating to Las Vegas? We&apos;ll handle everything.
           </h1>
-          <p className="text-base md:text-lg text-stone-800 mt-5 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg text-stone-600 mt-5 max-w-2xl mx-auto leading-relaxed">
             Full-service relocation support — from financing and home selection through closing and
             move-in — for California sellers and military PCS moves alike.
           </p>
@@ -62,13 +60,13 @@ export default async function HomePage({
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
               href="/california"
-              className="rounded-md border border-stone-300 bg-white/80 backdrop-blur-sm text-stone-800 text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-white transition"
+              className="rounded-md border border-stone-300 bg-white text-stone-800 text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-stone-50 transition"
             >
               Moving from California?
             </Link>
             <Link
               href="/optin"
-              className="rounded-md border border-stone-300 bg-white/80 backdrop-blur-sm text-stone-800 text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-white transition"
+              className="rounded-md border border-stone-300 bg-white text-stone-800 text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-stone-50 transition"
             >
               PCS orders to Las Vegas?
             </Link>
