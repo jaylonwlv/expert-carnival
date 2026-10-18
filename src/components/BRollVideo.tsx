@@ -24,6 +24,14 @@ import Image from "next/image";
 //   down the page is never fetched until the visitor has actually
 //   scrolled close to it.
 // Skipped entirely under prefers-reduced-motion (the poster covers it).
+//
+// These clips are raw b-roll, not footage shot to loop seamlessly -- the
+// native `loop` attribute would jump-cut from the last frame straight back
+// to the first the instant playback reaches the end. Looping is handled
+// manually instead (handleTimeUpdate/handleEnded below) so that cut can be
+// masked with the same fade used for the initial poster-to-video handoff.
+const LOOP_FADE_MS = 500;
+
 export function BRollVideo({
   src,
   poster,
@@ -42,6 +50,7 @@ export function BRollVideo({
   // poster) pops in the instant it's ready, which reads as a jitter.
   // Fading it in instead makes that swap imperceptible.
   const [isPlaying, setIsPlaying] = useState(false);
+  const fadingOutRef = useRef(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -74,6 +83,29 @@ export function BRollVideo({
     );
     observer.observe(video);
 
+    // Start fading out once the remaining playback time is less than the
+    // fade's own duration, so the fade finishes right as the clip ends --
+    // by the time `ended` fires and resets/restarts it, the video is
+    // already (or very nearly) invisible, and the poster underneath is
+    // what actually shows through during the cut.
+    function handleTimeUpdate() {
+      if (!video || !video.duration || fadingOutRef.current) return;
+      if (video.duration - video.currentTime <= LOOP_FADE_MS / 1000) {
+        fadingOutRef.current = true;
+        setIsPlaying(false);
+      }
+    }
+
+    function handleEnded() {
+      if (!video) return;
+      fadingOutRef.current = false;
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    }
+
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("ended", handleEnded);
+
     let idleHandle: number | undefined;
     let timeoutId: number | undefined;
     if (typeof window.requestIdleCallback === "function") {
@@ -92,6 +124,8 @@ export function BRollVideo({
       observer.disconnect();
       if (idleHandle !== undefined) window.cancelIdleCallback(idleHandle);
       if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("ended", handleEnded);
     };
   }, [src]);
 
@@ -107,9 +141,8 @@ export function BRollVideo({
       />
       <video
         ref={videoRef}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out ${isPlaying ? "opacity-100" : "opacity-0"} ${className}`}
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-out ${isPlaying ? "opacity-100" : "opacity-0"} ${className}`}
         muted
-        loop
         playsInline
         preload="none"
         onPlaying={() => setIsPlaying(true)}
