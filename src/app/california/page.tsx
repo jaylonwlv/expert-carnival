@@ -47,13 +47,13 @@ export default async function CaliforniaPage({
           <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-white leading-tight">
             Get My Relocation Roadmap
           </h1>
-          <p className="text-sm md:text-base lg:text-xl text-white/85 mt-3 lg:mt-5 leading-relaxed lg:max-w-xl lg:mx-auto">
+          <p className="text-sm md:text-base lg:text-xl text-white mt-3 lg:mt-5 leading-relaxed lg:max-w-xl lg:mx-auto">
             Reclaim your wealth and space. See how relocating to Nevada lowers your cost of living
             while elevating your lifestyle.
           </p>
         </div>
 
-        <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 lg:gap-x-6 text-xs lg:text-base font-medium text-white/85 mb-5 lg:mb-8">
+        <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 lg:gap-x-6 text-xs lg:text-base font-medium text-white mb-5 lg:mb-8">
           {VALUE_PROPS.map((item) => (
             <li key={item} className="flex items-center gap-1.5">
               <span className="text-amber-400">✓</span> {item}
