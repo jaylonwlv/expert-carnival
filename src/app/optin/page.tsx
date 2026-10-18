@@ -1,10 +1,15 @@
 import Image from "next/image";
+import { Playfair_Display } from "next/font/google";
 import { LeadForm } from "@/components/LeadForm";
 import { LandingSequenceBackground } from "@/components/LandingSequenceBackground";
 import { MinimalSiteFooter } from "@/components/SiteFooter";
 import { StickyCtaBar } from "@/components/StickyCtaBar";
 import { RealtorBubble } from "@/components/RealtorBubble";
 import { submitLead } from "../lead-actions";
+
+// Same serif as the homepage's own headlines and /california -- see that
+// page's comment on why this (not the homepage) is where it matters most.
+const playfair = Playfair_Display({ subsets: ["latin"], weight: ["500", "600"] });
 
 // Placeholder copy -- Paulin's providing the real PCS guide copy separately.
 // Structure/workflow mirrors /california exactly so swapping in the final
@@ -40,19 +45,19 @@ export default async function OptinPage({
             className="h-12 lg:h-16 w-auto mx-auto mb-6 lg:mb-8"
             priority
           />
-          <p className="text-xs lg:text-sm font-semibold uppercase tracking-wide text-amber-400 mb-3 lg:mb-4">
+          <p className="text-xs lg:text-sm font-semibold uppercase tracking-wide text-amber-400 mb-3 lg:mb-4 drop-shadow-sm">
             Free relocation guide · 2026 Edition
           </p>
-          <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-white leading-tight">
+          <h1 className={`${playfair.className} text-3xl md:text-4xl lg:text-6xl text-white leading-tight drop-shadow-sm`}>
             Get My Nellis &amp; Creech PCS Roadmap
           </h1>
-          <p className="text-sm md:text-base lg:text-xl text-white mt-3 lg:mt-5 leading-relaxed lg:max-w-xl lg:mx-auto">
+          <p className="text-sm md:text-base lg:text-xl text-white mt-3 lg:mt-5 leading-relaxed lg:max-w-xl lg:mx-auto drop-shadow-sm">
             Make the most of your PCS to Nellis AFB or Creech AFB. See how to use your VA loan
             benefits, lower your cost of living, and find the right neighborhood for your family.
           </p>
         </div>
 
-        <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 lg:gap-x-6 text-xs lg:text-base font-medium text-white mb-5 lg:mb-8">
+        <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 lg:gap-x-6 text-xs lg:text-base font-medium text-white mb-5 lg:mb-8 drop-shadow-sm">
           {VALUE_PROPS.map((item) => (
             <li key={item} className="flex items-center gap-1.5">
               <span className="text-amber-400">✓</span> {item}
@@ -76,7 +81,7 @@ export default async function OptinPage({
 
         <RealtorBubble />
 
-        <p className="text-center text-xs lg:text-sm text-white/70 mt-5 lg:mt-7">
+        <p className="text-center text-xs lg:text-sm text-white/70 mt-5 lg:mt-7 drop-shadow-sm">
           VA Loan Benefits &amp; Housing Strategy by Paulin Korensia &amp; Associates Relocation Team
         </p>
         <MinimalSiteFooter />

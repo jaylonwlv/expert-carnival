@@ -1,10 +1,17 @@
 import Image from "next/image";
+import { Playfair_Display } from "next/font/google";
 import { LeadForm } from "@/components/LeadForm";
 import { LandingSequenceBackground } from "@/components/LandingSequenceBackground";
 import { MinimalSiteFooter } from "@/components/SiteFooter";
 import { StickyCtaBar } from "@/components/StickyCtaBar";
 import { RealtorBubble } from "@/components/RealtorBubble";
 import { submitLead } from "../lead-actions";
+
+// Same serif as the homepage's own headlines (page.tsx) -- this page and
+// /optin are the ones actually carrying paid traffic, so they're the first
+// impression most visitors get, and they shouldn't read as a plainer,
+// more generic page than the homepage they'll likely never see.
+const playfair = Playfair_Display({ subsets: ["latin"], weight: ["500", "600"] });
 
 const VALUE_PROPS = [
   "No state income tax in Nevada",
@@ -41,19 +48,19 @@ export default async function CaliforniaPage({
             className="h-12 lg:h-16 w-auto mx-auto mb-6 lg:mb-8"
             priority
           />
-          <p className="text-xs lg:text-sm font-semibold uppercase tracking-wide text-amber-400 mb-3 lg:mb-4">
+          <p className="text-xs lg:text-sm font-semibold uppercase tracking-wide text-amber-400 mb-3 lg:mb-4 drop-shadow-sm">
             Free relocation guide · 2026 Edition
           </p>
-          <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-white leading-tight">
+          <h1 className={`${playfair.className} text-3xl md:text-4xl lg:text-6xl text-white leading-tight drop-shadow-sm`}>
             Get My Relocation Roadmap
           </h1>
-          <p className="text-sm md:text-base lg:text-xl text-white mt-3 lg:mt-5 leading-relaxed lg:max-w-xl lg:mx-auto">
+          <p className="text-sm md:text-base lg:text-xl text-white mt-3 lg:mt-5 leading-relaxed lg:max-w-xl lg:mx-auto drop-shadow-sm">
             Reclaim your wealth and space. See how relocating to Nevada lowers your cost of living
             while elevating your lifestyle.
           </p>
         </div>
 
-        <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 lg:gap-x-6 text-xs lg:text-base font-medium text-white mb-5 lg:mb-8">
+        <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 lg:gap-x-6 text-xs lg:text-base font-medium text-white mb-5 lg:mb-8 drop-shadow-sm">
           {VALUE_PROPS.map((item) => (
             <li key={item} className="flex items-center gap-1.5">
               <span className="text-amber-400">✓</span> {item}
@@ -72,7 +79,7 @@ export default async function CaliforniaPage({
 
         <RealtorBubble />
 
-        <p className="text-center text-xs lg:text-sm text-white/70 mt-5 lg:mt-7">
+        <p className="text-center text-xs lg:text-sm text-white/70 mt-5 lg:mt-7 drop-shadow-sm">
           A Complete Tax &amp; Equity Transfer Strategy by Paulin Korensia &amp; Associates Relocation Team
         </p>
         <MinimalSiteFooter />

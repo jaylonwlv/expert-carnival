@@ -83,7 +83,14 @@ export function LandingSequenceBackground() {
         onPlaying={() => setIsPlaying(true)}
       />
 
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-black/70" />
+      {/* Lighter than the original flat black/60-45-70 wash -- that read as
+          muddy over Paulin's own photography (confirmed by eye, not just in
+          theory) and this page is the one actually carrying paid traffic,
+          so it's the first real impression most visitors get. Text over it
+          (the hero heading/value props/tagline -- anything not already
+          sitting on its own white card) picks up drop-shadow-sm below to
+          hold contrast now that the backing image is less uniformly dark. */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 to-black/50" />
     </div>
   );
 }
