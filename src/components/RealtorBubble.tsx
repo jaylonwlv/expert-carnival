@@ -7,20 +7,19 @@ import { BUSINESS } from "@/lib/business";
 // number right under the form is what makes "a licensed realtor, not a
 // funnel" legible at a glance, right where it matters most.
 //
-// Uses a dedicated head-and-shoulders crop (paulin-headshot.jpg), not
-// the full-body photo from /about (paulin.jpg): that one is a 2:3
-// portrait, so a plain circular object-cover crop on it centers on her
-// torso, not her face -- cropping it down to an actual headshot ahead of
-// time is the fix, not fighting object-position on a full-body shot.
+// Full-body photo (paulin.jpg, the same one /about uses), framed in a
+// rounded rectangle at its real 2:3 aspect ratio rather than cropped into
+// a circle -- width/height below are that exact ratio (1333:2000) scaled
+// down, so object-cover has nothing to crop.
 export function RealtorBubble() {
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-sm p-4 lg:p-5 mt-5 lg:mt-7 flex items-center gap-4 text-left">
       <Image
-        src="/team/paulin-headshot.jpg"
+        src="/team/paulin.jpg"
         alt={BUSINESS.licensee}
-        width={160}
-        height={160}
-        className="w-16 h-16 lg:w-20 lg:h-20 rounded-full object-cover shrink-0"
+        width={133}
+        height={200}
+        className="w-20 lg:w-24 h-auto rounded-xl object-cover shrink-0"
       />
       <div>
         <p className="text-sm lg:text-base font-semibold text-stone-900">{BUSINESS.licensee}</p>
