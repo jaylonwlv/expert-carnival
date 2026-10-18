@@ -3,7 +3,6 @@ import { LeadForm } from "@/components/LeadForm";
 import { LandingSequenceBackground } from "@/components/LandingSequenceBackground";
 import { MinimalSiteFooter } from "@/components/SiteFooter";
 import { HowItWorksSteps } from "@/components/HowItWorksSteps";
-import { TaxSavingsCalculator } from "@/components/TaxSavingsCalculator";
 import { StickyCtaBar } from "@/components/StickyCtaBar";
 import { submitLead } from "../lead-actions";
 
@@ -68,10 +67,6 @@ export default async function CaliforniaPage({
 
         <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-sm p-4 lg:p-6 mb-5 lg:mb-8">
           <HowItWorksSteps steps={HOW_IT_WORKS} />
-        </div>
-
-        <div className="mb-5 lg:mb-8">
-          <TaxSavingsCalculator large />
         </div>
 
         <div id="lead-form" className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-8 lg:p-10">

@@ -179,7 +179,7 @@ export default async function HomePage({
             </h2>
           </div>
           <div className="max-w-xl mx-auto px-4 space-y-5">
-            <TaxSavingsCalculator />
+            <TaxSavingsCalculator page="homepage" />
 
             <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
               <h3 className="text-lg font-semibold text-stone-900 text-center">

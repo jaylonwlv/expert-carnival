@@ -118,6 +118,19 @@ model SignatureField {
   @@index([requestId])
 }
 
+// How many visitors actually engage with the TaxSavingsCalculator, as a
+// proxy for whether it's pulling its weight -- logged once per page load on
+// the slider's first drag, deliberately not tied to a Client (most
+// visitors who touch the slider never submit the lead form at all).
+model CalculatorInteraction {
+  id        String   @id @default(cuid())
+  page      String
+  income    Int
+  createdAt DateTime @default(now())
+
+  @@index([page])
+}
+
 model ActivityLog {
   id        String   @id @default(cuid())
   clientId  String
