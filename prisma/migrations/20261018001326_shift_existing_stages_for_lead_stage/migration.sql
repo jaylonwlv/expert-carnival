@@ -1,0 +1,11 @@
+-- A new "Lead" stage is being inserted at the front of the STAGES array
+-- (see src/lib/stages.ts), pushing every existing stage index up by one:
+-- Signed On 0->1, Financing & Budget 1->2, ... Moved In 7->8. Every client
+-- already in the pipeline needs its stored currentStage shifted the same
+-- way, or their recorded stage would silently point at the wrong title the
+-- moment the new STAGES array ships.
+--
+-- New clients created after this point (both realtor-added and
+-- lead-capture-form-created) start at the schema default of 0, which now
+-- correctly means "Lead" -- they don't need shifting.
+UPDATE "Client" SET "currentStage" = "currentStage" + 1;

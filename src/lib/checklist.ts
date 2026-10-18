@@ -32,6 +32,11 @@ export type StageChecklist = {
 // not fully confirmed from these searches).
 export const STAGE_CHECKLISTS: StageChecklist[] = [
   {
+    // Lead -- no checklist items; nothing to track until they're signed on.
+    documentHeavy: false,
+    items: [],
+  },
+  {
     // Signed On
     documentHeavy: false,
     items: [

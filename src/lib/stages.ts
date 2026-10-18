@@ -6,6 +6,14 @@ export type Stage = {
 
 export const STAGES: Stage[] = [
   {
+    // Internal only -- never shown on the client's own tracker page. A
+    // client at this stage hasn't been sent a tracker link yet; that stays
+    // a manual step the realtor takes after an actual phone call.
+    title: "Lead",
+    summary: "Submitted a lead form; hasn't been contacted yet.",
+    nextSteps: "Call them, then advance their stage once they're ready to move forward.",
+  },
+  {
     title: "Signed On",
     summary: "You're officially working with your Relocation Engine agent.",
     nextSteps:

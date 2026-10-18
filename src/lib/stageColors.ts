@@ -8,7 +8,10 @@ export type StageColor = {
 
 // A single linear light-green -> dark-green progression, so the client
 // journey reads as "further along" rather than a rainbow of unrelated hues.
+// "Lead" (index 0) is deliberately neutral stone, not green, since it's not
+// part of that progression -- they haven't been contacted yet.
 export const STAGE_COLORS: StageColor[] = [
+  { badgeBg: "bg-stone-100", badgeText: "text-stone-700", solidBg: "bg-stone-300", solidText: "text-stone-900", ring: "ring-neutral-900" },
   { badgeBg: "bg-green-50", badgeText: "text-green-800", solidBg: "bg-green-200", solidText: "text-green-900", ring: "ring-neutral-900" },
   { badgeBg: "bg-green-100", badgeText: "text-green-800", solidBg: "bg-green-300", solidText: "text-green-900", ring: "ring-neutral-900" },
   { badgeBg: "bg-green-200", badgeText: "text-green-900", solidBg: "bg-green-400", solidText: "text-green-950", ring: "ring-neutral-900" },

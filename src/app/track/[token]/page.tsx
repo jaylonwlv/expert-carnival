@@ -44,8 +44,14 @@ export default async function TrackPage({
     notFound();
   }
 
-  const stage = STAGES[client.currentStage];
-  const color = stageColor(client.currentStage);
+  // "Lead" (index 0) is realtor-only -- a client is never sent this link
+  // until the realtor has called them and moved them past it, but showing
+  // it defensively anyway (rather than assuming that always holds) keeps
+  // the term from ever reaching the client even if a link goes out early.
+  const clientStages = STAGES.slice(1);
+  const clientStageIndex = Math.max(0, client.currentStage - 1);
+  const stage = clientStages[clientStageIndex];
+  const color = stageColor(clientStageIndex);
   const firstName = client.name.split(" ")[0];
   const uploadForClient = createClientDocumentRecords.bind(null, token);
   const tourStops = client.tourStops as TourStop[] | null;
@@ -91,7 +97,7 @@ export default async function TrackPage({
               {firstName}&apos;s move to Las Vegas
             </h1>
             <p className="text-sm text-stone-500 mt-1">
-              Step {client.currentStage + 1} of {STAGES.length}
+              Step {clientStageIndex + 1} of {clientStages.length}
             </p>
           </div>
           <span
@@ -143,7 +149,7 @@ export default async function TrackPage({
         </section>
 
         <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-5">
-          <Stepper stages={STAGES} currentIndex={client.currentStage} />
+          <Stepper stages={clientStages} currentIndex={clientStageIndex} />
         </section>
 
         {tourStops && tourStops.length >= 2 && (

@@ -21,6 +21,13 @@ model Client {
   appointmentAt          DateTime?
   preferredNeighborhoods String[]        @default([])
   isPCS                  Boolean         @default(false)
+  // Set when this client originated from a public lead-capture page rather
+  // than being added directly by the realtor -- which page, for marketing
+  // analytics (the homepage and /california share one PDF/workflow but are
+  // still worth telling apart here).
+  source                 String?
+  smsConsent             Boolean         @default(false)
+  smsConsentAt           DateTime?
   tourStops              Json?
   tourSavedAt            DateTime?
   createdAt              DateTime        @default(now())
