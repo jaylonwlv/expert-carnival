@@ -31,7 +31,7 @@ export default async function CaliforniaPage({
               alt="Relocation Engine"
               width={680}
               height={546}
-              className="h-9 w-auto mx-auto"
+              className="h-16 w-auto mx-auto"
               priority
             />
           </Link>

@@ -68,7 +68,7 @@ export default async function SignPage({
     <div className="min-h-screen bg-[#faf8f4]">
       <header className="bg-white border-b border-stone-200">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Image src="/logo.png" alt="Relocation Engine LLC" width={680} height={546} className="h-11 w-auto" priority />
+          <Image src="/logo.png" alt="Relocation Engine LLC" width={680} height={546} className="h-16 w-auto" priority />
           <Link href={`/track/${token}`} className="text-sm font-medium text-stone-500 hover:text-stone-800 transition">
             ← Back
           </Link>

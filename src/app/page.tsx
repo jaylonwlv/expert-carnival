@@ -46,7 +46,7 @@ export default async function HomePage({
             alt="Relocation Engine"
             width={680}
             height={546}
-            className="h-10 w-auto mx-auto mb-8"
+            className="h-16 w-auto mx-auto mb-8"
             priority
           />
           <h1 className="text-3xl md:text-5xl font-bold text-stone-900 leading-tight">

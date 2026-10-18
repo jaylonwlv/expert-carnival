@@ -19,7 +19,7 @@ export default async function AdminPage() {
     <div className="min-h-screen bg-[#faf8f4]">
       <header className="bg-white border-b border-stone-200">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Image src="/logo.png" alt="Relocation Engine LLC" width={680} height={546} className="h-14 w-auto" priority />
+          <Image src="/logo.png" alt="Relocation Engine LLC" width={680} height={546} className="h-20 w-auto" priority />
           <div className="flex items-center gap-4">
             <Link
               href="/admin/clients/new"

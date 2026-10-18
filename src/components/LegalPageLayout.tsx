@@ -17,7 +17,7 @@ export function LegalPageLayout({
       <header className="bg-white border-b border-stone-200">
         <div className="max-w-3xl mx-auto px-4 py-3">
           <Link href="/" className="inline-block">
-            <Image src="/logo.png" alt="Relocation Engine" width={680} height={546} className="h-9 w-auto" />
+            <Image src="/logo.png" alt="Relocation Engine" width={680} height={546} className="h-14 w-auto" />
           </Link>
         </div>
       </header>

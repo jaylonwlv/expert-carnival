@@ -68,7 +68,7 @@ export default async function TrackPage({
     <div className="min-h-screen bg-[#faf8f4]">
       <header className="bg-white border-b border-stone-200">
         <div className="max-w-2xl mx-auto px-4 py-3">
-          <Image src="/logo.png" alt={COMPANY_NAME} width={680} height={546} className="h-11 w-auto" priority />
+          <Image src="/logo.png" alt={COMPANY_NAME} width={680} height={546} className="h-16 w-auto" priority />
         </div>
       </header>
 
