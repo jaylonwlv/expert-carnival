@@ -35,7 +35,7 @@ export default function PrivacyPage() {
         </li>
         <li>
           <strong>Usage Data:</strong> Information about how you interact with our website via
-          cookies, analytics software, and reCAPTCHA security protocols.
+          cookies and analytics software.
         </li>
       </ul>
 
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
         <li>Deliver the relocation guide(s) you requested and respond to your inquiry;</li>
         <li>Provide bespoke real estate advisory, transaction updates, marketing, and coordination services;</li>
         <li>Send you SMS/text messages if you&apos;ve opted in, per the Text Messaging section below;</li>
-        <li>Ensure data security and prevent fraudulent activity on our site via reCAPTCHA verification.</li>
+        <li>Ensure data security and prevent fraudulent or automated activity on our site.</li>
       </ul>
 
       <h2>Text Message (SMS) Communications &amp; Consent</h2>
@@ -100,8 +100,8 @@ export default function PrivacyPage() {
       <h2>Cookies &amp; Analytics</h2>
       <p>
         Our site may use cookies and similar technologies to understand how visitors use our site and
-        to secure our forms against automated abuse (reCAPTCHA). You can control cookies through your
-        browser settings; disabling them may affect site functionality.
+        to secure our forms against automated abuse. You can control cookies through your browser
+        settings; disabling them may affect site functionality.
       </p>
 
       <h2>Security and Data Retention</h2>
