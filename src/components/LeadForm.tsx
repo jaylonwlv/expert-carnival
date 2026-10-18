@@ -114,7 +114,7 @@ export function LeadForm({
         {submitLabel}
       </SubmitButton>
       <p className={`text-center text-xs text-stone-400 ${large ? "lg:text-sm" : ""}`}>
-        Paulin will reach out personally within one business day. No spam, no pressure.
+        Paulin will reach out personally. No spam, no pressure.
       </p>
     </form>
   );
