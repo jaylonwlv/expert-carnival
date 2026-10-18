@@ -30,6 +30,10 @@ model Client {
   smsConsentAt           DateTime?
   tourStops              Json?
   tourSavedAt            DateTime?
+  // Set once the post-move review/referral request has actually been sent
+  // (see api/cron/review-requests) -- guards against sending it twice if the
+  // cron runs again before the client's stage changes.
+  reviewRequestSentAt    DateTime?
   createdAt              DateTime        @default(now())
   updatedAt              DateTime        @updatedAt
   stageUpdatedAt         DateTime        @default(now())

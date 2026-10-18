@@ -11,4 +11,8 @@ export const BUSINESS = {
   nvLicense: "S.0204097",
   licensee: "Paulin Korensia",
   domain: "relocationengine.com",
+  // TODO: replace with the real Google Business Profile short review link
+  // (Business Profile > Ask for reviews > Share review form) before the
+  // post-move review-request cron (api/cron/review-requests) goes live.
+  reviewUrl: "https://g.page/r/REPLACE_ME/review",
 } as const;

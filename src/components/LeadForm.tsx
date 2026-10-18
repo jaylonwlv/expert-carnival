@@ -118,7 +118,8 @@ export function LeadForm({
         {submitLabel}
       </SubmitButton>
       <p className={`text-center text-xs text-stone-400 ${large ? "lg:text-sm" : ""}`}>
-        Paulin will reach out personally. No spam, no pressure.
+        Paulin will reach out personally -- no spam, no pressure, and no cost to you. We&apos;re paid
+        at closing, same as any buyer&apos;s agent.
       </p>
     </form>
   );
