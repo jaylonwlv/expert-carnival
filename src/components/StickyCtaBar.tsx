@@ -37,19 +37,55 @@ export function StickyCtaBar({
   useEffect(() => {
     const heroEl = document.getElementById(heroId);
     const formEl = document.getElementById(formId);
-    const submitEl = formEl?.querySelector('button[type="submit"]');
-    if (!heroEl || !submitEl) return;
+    if (!heroEl || !formEl) return;
 
-    const heroObserver = new IntersectionObserver(([entry]) => setHeroGone(!entry.isIntersecting), {
-      threshold: 0,
-    });
-    const submitObserver = new IntersectionObserver(([entry]) => setSubmitButtonVisible(entry.isIntersecting));
-    heroObserver.observe(heroEl);
-    submitObserver.observe(submitEl);
+    let heroObserver: IntersectionObserver | null = null;
+    let submitObserver: IntersectionObserver | null = null;
+    let currentSubmitEl: Element | null = null;
+
+    // LeadForm remounts its whole <form> -- new DOM nodes included -- on
+    // every validation error (it's keyed on `JSON.stringify(state)`).
+    // Grabbing the submit button once and observing that one node forever
+    // left this watching an orphaned, detached element after the first
+    // mistyped field, permanently frozen at whatever it last reported
+    // (confirmed directly, not assumed). Re-querying on every mutation of
+    // the form container, and re-attaching only when the node actually
+    // changed, keeps this correct across remounts.
+    function attachToSubmitButton() {
+      const submitEl = formEl!.querySelector('button[type="submit"]');
+      if (submitEl === currentSubmitEl) return;
+
+      submitObserver?.disconnect();
+      currentSubmitEl = submitEl;
+
+      if (!submitEl) {
+        setSubmitButtonVisible(false);
+        return;
+      }
+
+      submitObserver = new IntersectionObserver(([entry]) => setSubmitButtonVisible(entry.isIntersecting));
+      submitObserver.observe(submitEl);
+
+      // The hero's own visibility doesn't depend on the form at all, but
+      // there's no point tracking it (or ever showing the bar) on a page
+      // where the form has no submit button to jump to in the first place
+      // (e.g. LeadForm's post-submit "You're all set" view) -- only start
+      // once a real button has actually been found.
+      if (!heroObserver) {
+        heroObserver = new IntersectionObserver(([entry]) => setHeroGone(!entry.isIntersecting), { threshold: 0 });
+        heroObserver.observe(heroEl!);
+      }
+    }
+
+    attachToSubmitButton();
+
+    const mutationObserver = new MutationObserver(attachToSubmitButton);
+    mutationObserver.observe(formEl, { childList: true, subtree: true });
 
     return () => {
-      heroObserver.disconnect();
-      submitObserver.disconnect();
+      heroObserver?.disconnect();
+      submitObserver?.disconnect();
+      mutationObserver.disconnect();
     };
   }, [heroId, formId]);
 

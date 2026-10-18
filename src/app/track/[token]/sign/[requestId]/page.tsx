@@ -5,8 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { getSignedDownloadUrl } from "@/lib/documents";
 import { SigningViewLoader } from "@/components/SigningViewLoader";
 import { IdentityAcknowledgment } from "@/components/IdentityAcknowledgment";
+import { MarkViewedOnMount } from "@/components/MarkViewedOnMount";
 import type { SignatureFieldType } from "@/lib/signature";
-import { submitSignature, acknowledgeIdentity } from "../../../signature-actions";
+import { submitSignature, acknowledgeIdentity, markRequestViewed } from "../../../signature-actions";
 
 const AGENT_NAME = process.env.NEXT_PUBLIC_AGENT_NAME ?? "your agent";
 
@@ -26,12 +27,9 @@ export default async function SignPage({
     notFound();
   }
 
-  if (request.status === "pending") {
-    await prisma.signatureRequest.update({ where: { id: requestId }, data: { status: "viewed", viewedAt: new Date() } });
-  }
-
   const onSubmit = submitSignature.bind(null, requestId, token);
   const onAcknowledge = acknowledgeIdentity.bind(null, requestId, token);
+  const onMarkViewed = markRequestViewed.bind(null, requestId, token);
 
   const needsIdAcknowledgment =
     request.status !== "signed" && request.requiresIdAcknowledgment && !request.idAcknowledgedAt;
@@ -76,6 +74,7 @@ export default async function SignPage({
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-4">
+        {request.status === "pending" && <MarkViewedOnMount onMount={onMarkViewed} />}
         <div>
           <h1 className="text-lg font-semibold text-stone-900">{request.document.filename}</h1>
           <p className="text-sm text-stone-500">Review the document and fill in every highlighted field.</p>

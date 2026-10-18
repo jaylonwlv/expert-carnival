@@ -42,7 +42,11 @@ export function LeadForm({
     >
       {state.error && (
         <p className={`text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2 ${large ? "lg:text-base" : ""}`}>
-          {state.error === "invalid_email" ? "Please enter a valid email address." : "Please fill in all fields."}
+          {state.error === "invalid_email"
+            ? "Please enter a valid email address."
+            : state.error === "db_unavailable"
+              ? "We couldn't save that just now. Please try again in a moment."
+              : "Please fill in all fields."}
         </p>
       )}
       <div>

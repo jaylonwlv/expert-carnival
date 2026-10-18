@@ -8,6 +8,7 @@ import { sendEmail, escapeHtml } from "@/lib/email";
 import { sendSms } from "@/lib/sms";
 import { buildAbsoluteUrl } from "@/lib/trackerUrl";
 import { BUSINESS } from "@/lib/business";
+import { isDatabaseConnectivityError } from "@/lib/dbErrors";
 
 export type LeadSource = "homepage" | "california" | "optin";
 
@@ -17,7 +18,7 @@ export type LeadSource = "homepage" | "california" | "optin";
 // validation error returns state; success still redirects (nothing to
 // preserve once the lead's in).
 export type LeadFormState = {
-  error?: "missing" | "invalid_email";
+  error?: "missing" | "invalid_email" | "db_unavailable";
   // React resets uncontrolled form fields after every action dispatch,
   // success or failure alike -- echoing back what was typed (and keying
   // the form on it in LeadForm) is what actually keeps it on screen.
@@ -82,18 +83,31 @@ export async function submitLead(
 
   const isPCS = source === "optin";
 
-  const client = await prisma.client.create({
-    data: {
-      name,
-      phone,
-      email,
-      token: nanoid(12),
-      isPCS,
-      source,
-      smsConsent,
-      smsConsentAt: smsConsent ? new Date() : null,
-    },
-  });
+  // Unlike the validation checks above, a database hiccup here isn't the
+  // visitor's fault and shouldn't cost them what they typed: without this,
+  // the exception reaches the root error boundary, which unmounts the
+  // whole form -- name/phone/email, gone, with only a generic "Something
+  // went wrong." Catching it here and returning state (same pattern as the
+  // validation errors above) keeps `values` echoed back so they can just
+  // retry immediately.
+  let client;
+  try {
+    client = await prisma.client.create({
+      data: {
+        name,
+        phone,
+        email,
+        token: nanoid(12),
+        isPCS,
+        source,
+        smsConsent,
+        smsConsentAt: smsConsent ? new Date() : null,
+      },
+    });
+  } catch (error) {
+    if (!isDatabaseConnectivityError(error)) throw error;
+    return { error: "db_unavailable", values };
+  }
 
   const sourceLabel = source === "homepage" ? "the homepage" : `/${source}`;
   await logActivity(client.id, `New lead submitted via ${sourceLabel}.`);

@@ -252,10 +252,16 @@ export async function ensureChecklistItems(clientId: string, isPCS: boolean) {
   // PCS client, or vice versa) are no longer relevant -- without this,
   // ensureChecklistItems only ever adds the newly-relevant set and the old
   // one lingers forever, since upsert never removes a row that isn't in
-  // the set it's given.
+  // the set it's given. Excludes items already marked "done": deleting
+  // those would silently erase a real completion (and the record it ever
+  // happened, with no activity-log trace) just because the client's PCS
+  // flag got toggled -- leaving them in place as history is the safer
+  // failure mode than losing them if the flag gets toggled back.
   const staleKeys = [...existingKeys].filter((key) => !expectedKeys.has(key));
   if (staleKeys.length > 0) {
-    await prisma.checklistItem.deleteMany({ where: { clientId, key: { in: staleKeys } } });
+    await prisma.checklistItem.deleteMany({
+      where: { clientId, key: { in: staleKeys }, status: { not: "done" } },
+    });
   }
 
   await Promise.all(

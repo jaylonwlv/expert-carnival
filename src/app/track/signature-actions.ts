@@ -34,6 +34,29 @@ export async function acknowledgeIdentity(requestId: string, token: string) {
   revalidatePath(`/track/${token}/sign/${requestId}`);
 }
 
+// Fired from a client-side effect (MarkViewedOnMount) once the signing page
+// has actually mounted in a real browser -- not from the server component's
+// render itself. A messaging app's link-preview/unfurl bot fetching the
+// signing URL for a thumbnail is an ordinary GET like any other; doing this
+// update at render time flipped the request to "viewed" before the client
+// had ever looked at anything.
+export async function markRequestViewed(requestId: string, token: string) {
+  const request = await prisma.signatureRequest.findUnique({
+    where: { id: requestId },
+    include: { client: true },
+  });
+  if (!request || request.client.token !== token) return;
+  if (request.status !== "pending") return;
+
+  await prisma.signatureRequest.update({
+    where: { id: requestId },
+    data: { status: "viewed", viewedAt: new Date() },
+  });
+
+  revalidatePath(`/admin/clients/${request.clientId}`);
+  revalidatePath(`/admin/clients/${request.clientId}/documents`);
+}
+
 export async function submitSignature(
   requestId: string,
   token: string,
@@ -47,6 +70,13 @@ export async function submitSignature(
 
   if (!request || request.client.token !== token) {
     throw new Error("Signature request not found");
+  }
+  // The ID-acknowledgment gate (sign/[requestId]/page.tsx deciding whether
+  // to render IdentityAcknowledgment vs. the signing view) is only a UI
+  // decision -- it doesn't stop this action from being called directly.
+  // Enforcing it here too is what actually makes it a gate.
+  if (request.requiresIdAcknowledgment && !request.idAcknowledgedAt) {
+    throw new Error("Please confirm your identity before signing");
   }
   if (!signerName.trim()) {
     throw new Error("Name is required");

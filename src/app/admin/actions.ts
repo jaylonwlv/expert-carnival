@@ -155,6 +155,17 @@ export async function saveTourRoute(clientId: string, stops: TourStop[]) {
 }
 
 export async function deleteClient(clientId: string) {
+  // The Document rows cascade-delete with the client (schema: onDelete:
+  // Cascade), but that only removes the DB rows -- nothing deletes the
+  // underlying blobs, unlike deleteDocument below, which does. Without
+  // this, every file ever uploaded to a deleted client (contracts, IDs,
+  // signed documents) leaks in Blob storage forever with no way to find it.
+  const documents = await prisma.document.findMany({
+    where: { clientId },
+    select: { blobUrl: true },
+  });
+  await Promise.all(documents.map((document) => del(document.blobUrl).catch(() => {})));
+
   await prisma.client.delete({ where: { id: clientId } });
   revalidatePath("/admin");
   redirect("/admin");
