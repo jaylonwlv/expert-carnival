@@ -58,3 +58,28 @@ body {
     display: block;
   }
 }
+
+/* Scroll-triggered fade-up reveal (see components/Reveal.tsx) -- starts
+   offset/transparent, the IntersectionObserver in that component adds
+   .reveal-visible once the element scrolls into view. Skipped under
+   prefers-reduced-motion, and overridden back to plainly visible if JS
+   never runs at all (the <noscript> rule in layout.tsx) -- the animation
+   is a progressive enhancement, never a requirement for reading the page. */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.reveal.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

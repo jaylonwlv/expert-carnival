@@ -5,6 +5,7 @@ import { LeadForm } from "@/components/LeadForm";
 import { SiteFooter } from "@/components/SiteFooter";
 import { TaxSavingsCalculator } from "@/components/TaxSavingsCalculator";
 import { BRollVideo } from "@/components/BRollVideo";
+import { Reveal } from "@/components/Reveal";
 import { submitLead } from "./lead-actions";
 
 // Scoped to this page only -- the display serif is part of the homepage's
@@ -67,13 +68,13 @@ function EditorialRow({
         <BRollVideo src={videoSrc} poster={poster} />
       </div>
       <div className="flex items-center bg-white">
-        <div className="max-w-md mx-auto px-8 py-16 md:py-0">
+        <Reveal className="max-w-md mx-auto px-8 py-16 md:py-0">
           <p className="text-xs font-semibold text-amber-700 mb-3">{index}</p>
           <h3 className={`${playfair.className} text-2xl md:text-3xl text-stone-900 leading-snug`}>
             {title}
           </h3>
           <p className="text-sm md:text-base text-stone-600 mt-4 leading-relaxed">{body}</p>
-        </div>
+        </Reveal>
       </div>
     </div>
   );
@@ -149,12 +150,12 @@ export default async function HomePage({
           >
             Las Vegas
           </p>
-          <div className="relative max-w-2xl mx-auto px-4 text-center">
+          <Reveal className="relative max-w-2xl mx-auto px-4 text-center">
             <p className={`${playfair.className} text-2xl md:text-3xl text-stone-900 leading-snug`}>
               A new chapter, without the guesswork: the financing, the search, and everything
               after the keys, handled by one team.
             </p>
-          </div>
+          </Reveal>
         </section>
 
         {SERVICES.map((service, i) => (
@@ -170,14 +171,14 @@ export default async function HomePage({
         ))}
 
         <section className="bg-stone-900 py-20 md:py-24">
-          <div className="max-w-xl mx-auto px-4 text-center mb-10">
+          <Reveal className="max-w-xl mx-auto px-4 text-center mb-10">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400 mb-3">
               Get started
             </p>
             <h2 className={`${playfair.className} text-3xl md:text-4xl text-white`}>
               See what the move actually saves you.
             </h2>
-          </div>
+          </Reveal>
           <div className="max-w-xl mx-auto px-4 space-y-5">
             <TaxSavingsCalculator page="homepage" />
 
