@@ -7,10 +7,12 @@ import { STAGES } from "@/lib/stages";
 import { stageColor, avatarColor, initials } from "@/lib/stageColors";
 import { timeAgo } from "@/lib/format";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import { ActionForm } from "@/components/ActionForm";
 import { PCSBadge } from "@/components/PCSBadge";
 import { TimelineBadge } from "@/components/TimelineBadge";
 import { CampaignBadge } from "@/components/CampaignBadge";
 import { isTimeline } from "@/lib/timeline";
+import { CALL_OUTCOME_LABELS, CALL_OUTCOME_ORDER } from "@/lib/callOutcomes";
 
 type ClientRow = {
   id: string;
@@ -32,6 +34,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 export function ClientList({
   clients,
   deleteAction,
+  logCallOutcomeAction,
   query,
   stageFilter,
   page,
@@ -40,6 +43,7 @@ export function ClientList({
 }: {
   clients: ClientRow[];
   deleteAction: (clientId: string) => void;
+  logCallOutcomeAction: (clientId: string, formData: FormData) => Promise<void>;
   // The list below is already the server-filtered, server-paginated page
   // for these three -- search and stage filtering happen in the database
   // (see admin/page.tsx) so they cover every client, not just whatever
@@ -174,6 +178,29 @@ export function ClientList({
                     {client.email || client.phone || "No contact info"}
                   </p>
                 </Link>
+                {client.currentStage === 0 && (
+                  <ActionForm
+                    action={logCallOutcomeAction.bind(null, client.id)}
+                    toastMessage="Call result logged."
+                    className="w-44 shrink-0 hidden lg:block"
+                  >
+                    <select
+                      name="callOutcome"
+                      defaultValue=""
+                      onChange={(e) => e.currentTarget.form?.requestSubmit()}
+                      className="w-full text-xs text-stone-500 border border-stone-200 rounded-md px-1.5 py-1 focus:outline-none focus:ring-2 focus:ring-amber-600"
+                    >
+                      <option value="" disabled>
+                        Log a call result…
+                      </option>
+                      {CALL_OUTCOME_ORDER.map((outcome) => (
+                        <option key={outcome} value={outcome}>
+                          {CALL_OUTCOME_LABELS[outcome]}
+                        </option>
+                      ))}
+                    </select>
+                  </ActionForm>
+                )}
                 <Link href={`/admin/clients/${client.id}`} className="w-40 shrink-0 hidden sm:block">
                   <span
                     className={`inline-block text-xs font-semibold rounded-full px-2.5 py-1 mb-1.5 ${color.badgeBg} ${color.badgeText}`}

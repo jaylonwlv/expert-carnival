@@ -18,6 +18,7 @@ import { sendEmail, escapeHtml } from "@/lib/email";
 import { CHECKLIST_EMAIL_TRIGGERS, STAGE_EMAIL_TRIGGERS } from "@/lib/emailTriggers";
 import { buildTrackerUrl } from "@/lib/trackerUrl";
 import { TIMELINE_LABELS, TIMELINE_ORDER, type Timeline } from "@/lib/timeline";
+import { CALL_OUTCOME_LABELS, CALL_OUTCOME_ORDER, type CallOutcome } from "@/lib/callOutcomes";
 
 export async function logout() {
   const cookieStore = await cookies();
@@ -441,4 +442,27 @@ export async function setClientTimelineFromForm(clientId: string, formData: Form
   const raw = String(formData.get("timeline") ?? "");
   const timeline = TIMELINE_ORDER.find((t) => t === raw) ?? null;
   await setClientTimeline(clientId, timeline);
+}
+
+// Each pick is its own dated log entry, not a field overwrite -- see
+// lib/callOutcomes.ts for why. revalidating /admin (not just the detail
+// page) is what lets the dropdown's own row re-render after the log lands.
+export async function logCallOutcome(clientId: string, outcome: CallOutcome) {
+  if (!CALL_OUTCOME_ORDER.includes(outcome)) {
+    throw new Error("Invalid call outcome");
+  }
+
+  await logActivity(clientId, `Call result: ${CALL_OUTCOME_LABELS[outcome]}.`);
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/clients/${clientId}`);
+}
+
+export async function logCallOutcomeFromForm(clientId: string, formData: FormData) {
+  const raw = String(formData.get("callOutcome") ?? "");
+  const outcome = CALL_OUTCOME_ORDER.find((o) => o === raw);
+  if (!outcome) {
+    throw new Error("Choose a call result");
+  }
+  await logCallOutcome(clientId, outcome);
 }

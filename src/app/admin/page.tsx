@@ -6,7 +6,7 @@ import { STAGES } from "@/lib/stages";
 import { ClientList } from "@/components/ClientList";
 import { DatabaseUnavailable } from "@/components/DatabaseUnavailable";
 import { isDatabaseConnectivityError } from "@/lib/dbErrors";
-import { deleteClient, logout } from "./actions";
+import { deleteClient, logCallOutcomeFromForm, logout } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -140,6 +140,7 @@ export default async function AdminPage({
         <ClientList
           clients={clients}
           deleteAction={deleteClient}
+          logCallOutcomeAction={logCallOutcomeFromForm}
           query={query}
           stageFilter={stageFilter}
           page={page}
