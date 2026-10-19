@@ -46,3 +46,8 @@ next-env.d.ts
 # sqlite database
 /dev.db
 /dev.db-journal
+
+# scratch output from the deep-research skill -- research notes/reports,
+# not application code
+/research_notes
+/reports
