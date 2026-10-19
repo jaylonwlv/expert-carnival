@@ -9,8 +9,10 @@
 
 // Twilio requires E.164 (+1XXXXXXXXXX). Lead forms collect phone numbers as
 // free text (e.g. "(702) 555-1234"), so normalize at send time rather than
-// rejecting whatever format the person typed.
-function toE164(phone: string): string {
+// rejecting whatever format the person typed. Exported so the inbound SMS
+// webhook (api/webhooks/twilio-sms) can normalize a stored Client.phone the
+// same way before comparing it against Twilio's own already-E.164 `From`.
+export function toE164(phone: string): string {
   if (phone.startsWith("+")) return phone;
   const digits = phone.replace(/\D/g, "");
   if (digits.length === 10) return `+1${digits}`;

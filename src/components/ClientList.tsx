@@ -8,6 +8,8 @@ import { stageColor, avatarColor, initials } from "@/lib/stageColors";
 import { timeAgo } from "@/lib/format";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
 import { PCSBadge } from "@/components/PCSBadge";
+import { TimelineBadge } from "@/components/TimelineBadge";
+import { isTimeline } from "@/lib/timeline";
 
 type ClientRow = {
   id: string;
@@ -16,6 +18,10 @@ type ClientRow = {
   phone: string | null;
   currentStage: number;
   isPCS: boolean;
+  // Prisma's column is a plain String? (not an enum), so this is whatever
+  // was last written to it -- isTimeline is what actually narrows it to a
+  // real Timeline before TimelineBadge ever sees it.
+  timeline: string | null;
   updatedAt: Date;
 };
 
@@ -159,6 +165,7 @@ export function ClientList({
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-stone-900 truncate">{client.name}</p>
                     {client.isPCS && <PCSBadge />}
+                    {isTimeline(client.timeline) && <TimelineBadge timeline={client.timeline} />}
                   </div>
                   <p className="text-sm text-stone-500 truncate">
                     {client.email || client.phone || "No contact info"}

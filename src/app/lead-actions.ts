@@ -10,6 +10,7 @@ import { sendSms } from "@/lib/sms";
 import { buildAbsoluteUrl } from "@/lib/trackerUrl";
 import { BUSINESS } from "@/lib/business";
 import { isDatabaseConnectivityError } from "@/lib/dbErrors";
+import { TIMELINE_SMS_BODY } from "@/lib/timeline";
 
 export type LeadSource = "homepage" | "california" | "optin";
 
@@ -166,6 +167,14 @@ export async function submitLead(
             sendSms({
               to: phone,
               body: `Hi ${firstName}, this is Relocation Engine -- thanks for reaching out! We'll be in touch soon. Reply STOP to opt out.`,
+            }),
+            // Separate text, not folded into the one above -- a reply to
+            // this one is meant to come back as a bare "A"/"B"/"C" (see
+            // lib/timeline.ts), which only works cleanly if the question is
+            // the only thing in the thread asking for a reply.
+            sendSms({
+              to: phone,
+              body: TIMELINE_SMS_BODY[isPCS ? "pcs" : "california"],
             }),
           ]
         : []),

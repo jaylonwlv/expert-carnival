@@ -17,6 +17,7 @@ import { allNeighborhoodNames } from "@/lib/neighborhoods";
 import { sendEmail, escapeHtml } from "@/lib/email";
 import { CHECKLIST_EMAIL_TRIGGERS, STAGE_EMAIL_TRIGGERS } from "@/lib/emailTriggers";
 import { buildTrackerUrl } from "@/lib/trackerUrl";
+import { TIMELINE_LABELS, TIMELINE_ORDER, type Timeline } from "@/lib/timeline";
 
 export async function logout() {
   const cookieStore = await cookies();
@@ -411,4 +412,33 @@ export async function toggleClientPCS(clientId: string) {
 
   revalidatePath(`/admin/clients/${clientId}`);
   revalidatePath("/admin");
+}
+
+// Manual override/fallback alongside the inbound SMS webhook (api/
+// webhooks/twilio-sms) -- for a reply that didn't parse as a bare A/B/C, or
+// one Paulin got by phone instead of text, the timeline still needs a way
+// in that isn't "edit the database directly." `timeline` of `null` clears
+// it back to unknown.
+export async function setClientTimeline(clientId: string, timeline: Timeline | null) {
+  await prisma.client.update({
+    where: { id: clientId },
+    data: { timeline, timelineSetAt: timeline ? new Date() : null },
+  });
+
+  await logActivity(
+    clientId,
+    timeline ? `Timeline manually set to ${TIMELINE_LABELS[timeline]}.` : "Timeline cleared."
+  );
+
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath("/admin");
+}
+
+// ActionForm (client detail page) can only pass a (formData) => Promise<void>
+// action -- this is the adapter that extracts and validates the <select>'s
+// value before delegating to the real update above.
+export async function setClientTimelineFromForm(clientId: string, formData: FormData) {
+  const raw = String(formData.get("timeline") ?? "");
+  const timeline = TIMELINE_ORDER.find((t) => t === raw) ?? null;
+  await setClientTimeline(clientId, timeline);
 }

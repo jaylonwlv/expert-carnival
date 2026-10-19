@@ -34,6 +34,12 @@ model Client {
   // (see api/cron/review-requests) -- guards against sending it twice if the
   // cron runs again before the client's stage changes.
   reviewRequestSentAt    DateTime?
+  // The lead's own reply (A/B/C) to the post-submission timeline-check text
+  // -- "immediate" | "60_90" | "90_120" (see lib/timeline.ts). Set either by
+  // the inbound SMS webhook auto-classifying a reply, or manually by the
+  // realtor from the client detail page when a reply doesn't parse cleanly.
+  timeline               String?
+  timelineSetAt          DateTime?
   createdAt              DateTime        @default(now())
   updatedAt              DateTime        @updatedAt
   stageUpdatedAt         DateTime        @default(now())

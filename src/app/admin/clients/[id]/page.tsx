@@ -15,13 +15,16 @@ import { DocumentUploadForm } from "@/components/DocumentUploadForm";
 import { QuickUploadBar } from "@/components/QuickUploadBar";
 import { ChecklistAccordion, type ChecklistStageData } from "@/components/ChecklistAccordion";
 import { PCSBadge } from "@/components/PCSBadge";
+import { TimelineBadge } from "@/components/TimelineBadge";
 import { StageSwitcher } from "@/components/StageSwitcher";
+import { TIMELINE_LABELS, TIMELINE_ORDER, isTimeline } from "@/lib/timeline";
 import {
   addSigner,
   createDocumentRecords,
   deleteClient,
   removeSigner,
   setChecklistItemStatus,
+  setClientTimelineFromForm,
   toggleClientPCS,
   updateAppointment,
   updateNeighborhoods,
@@ -70,6 +73,7 @@ export default async function ClientDetailPage({
   const updateAppointmentForClient = updateAppointment.bind(null, client.id);
   const updateNeighborhoodsForClient = updateNeighborhoods.bind(null, client.id);
   const toggleClientPCSForClient = toggleClientPCS.bind(null, client.id);
+  const setTimelineForClient = setClientTimelineFromForm.bind(null, client.id);
   const addSignerForClient = addSigner.bind(null, client.id);
   const signerOptions = client.signers.map((signer) => ({ id: signer.id, name: signer.name }));
 
@@ -130,13 +134,31 @@ export default async function ClientDetailPage({
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-semibold text-stone-900">{client.name}</h1>
               {client.isPCS && <PCSBadge />}
+              {isTimeline(client.timeline) && <TimelineBadge timeline={client.timeline} />}
             </div>
             <p className="text-sm text-stone-500">{client.email || "No email"} · {client.phone || "No phone"}</p>
-            <form action={toggleClientPCSForClient}>
-              <button type="submit" className="text-xs text-stone-400 hover:text-stone-600 hover:underline">
-                {client.isPCS ? "Remove PCS tag" : "Mark as PCS relocation"}
-              </button>
-            </form>
+            <div className="flex items-center gap-3 mt-0.5">
+              <form action={toggleClientPCSForClient}>
+                <button type="submit" className="text-xs text-stone-400 hover:text-stone-600 hover:underline">
+                  {client.isPCS ? "Remove PCS tag" : "Mark as PCS relocation"}
+                </button>
+              </form>
+              <ActionForm action={setTimelineForClient} toastMessage="Timeline updated.">
+                <select
+                  name="timeline"
+                  defaultValue={client.timeline ?? ""}
+                  onChange={(e) => e.currentTarget.form?.requestSubmit()}
+                  className="text-xs text-stone-500 border border-stone-200 rounded-md px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-amber-600"
+                >
+                  <option value="">Timeline: unknown</option>
+                  {TIMELINE_ORDER.map((t) => (
+                    <option key={t} value={t}>
+                      {TIMELINE_LABELS[t]}
+                    </option>
+                  ))}
+                </select>
+              </ActionForm>
+            </div>
           </div>
           <span
             className={`ml-auto text-xs font-semibold rounded-full px-3 py-1.5 ${currentStageColor.badgeBg} ${currentStageColor.badgeText}`}
