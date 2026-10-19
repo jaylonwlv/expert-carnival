@@ -12,11 +12,12 @@ import Image from "next/image";
 // Same deferred-load rationale as the rest of this session's video work:
 // the poster frame paints immediately, and the real ~11MB clip only
 // attaches once the browser is idle, so it never competes with the page's
-// fonts/logo/lead form for bandwidth on first load. Skipped entirely under
-// prefers-reduced-motion (the video element itself stays hidden via the
-// .landing-video rule in globals.css; the next/image poster below is what
-// shows through either way, so there's no separate fallback image to keep
-// in sync with it).
+// fonts/logo/lead form for bandwidth on first load -- that deferral is what
+// actually keeps this from delaying page load, on any device, not a width
+// check. Skipped entirely under prefers-reduced-motion (the video element
+// itself stays hidden via the .landing-video rule in globals.css; the
+// next/image poster below is what shows through either way, so there's no
+// separate fallback image to keep in sync with it).
 //
 // The poster is a next/image `fill`, not the <video>'s own `poster`
 // attribute -- same reasoning as BRollVideo.tsx: a <video poster> is
@@ -32,16 +33,13 @@ export function LandingSequenceBackground() {
     if (!video) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // This clip is ~11MB -- skip it on a narrow (phone-width) viewport
-    // outright, since this is specifically the page-load-to-form-submission
-    // conversion surface and a multi-megabyte autoplay download has no
-    // business competing with that on mobile data. Also skip it on a slow
-    // or metered connection, same as before -- but `navigator.connection` is
-    // Chromium/Android-only (Safari/iOS never implemented it), so that check
-    // alone silently never fires for a huge share of real mobile visitors;
-    // the width check is what actually covers them.
-    if (window.innerWidth < 768) return;
-
+    // This clip is ~11MB -- still skip it on a connection that's actually
+    // slow or metered (the visitor's own signal that a multi-megabyte
+    // download isn't welcome right now), but otherwise play it on every
+    // device, phones included. `navigator.connection` is Chromium/Android-
+    // only (Safari/iOS never implemented it), so this doesn't catch every
+    // slow connection -- but the idle-deferred load above already means a
+    // slow connection just makes the video arrive later, not the page.
     const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } })
       .connection;
     if (connection?.saveData || ["slow-2g", "2g", "3g"].includes(connection?.effectiveType ?? "")) return;
