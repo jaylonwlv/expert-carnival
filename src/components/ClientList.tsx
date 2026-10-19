@@ -9,6 +9,7 @@ import { timeAgo } from "@/lib/format";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
 import { PCSBadge } from "@/components/PCSBadge";
 import { TimelineBadge } from "@/components/TimelineBadge";
+import { CampaignBadge } from "@/components/CampaignBadge";
 import { isTimeline } from "@/lib/timeline";
 
 type ClientRow = {
@@ -22,6 +23,7 @@ type ClientRow = {
   // was last written to it -- isTimeline is what actually narrows it to a
   // real Timeline before TimelineBadge ever sees it.
   timeline: string | null;
+  utmSource: string | null;
   updatedAt: Date;
 };
 
@@ -166,6 +168,7 @@ export function ClientList({
                     <p className="font-medium text-stone-900 truncate">{client.name}</p>
                     {client.isPCS && <PCSBadge />}
                     {isTimeline(client.timeline) && <TimelineBadge timeline={client.timeline} />}
+                    {client.utmSource && <CampaignBadge source={client.utmSource} />}
                   </div>
                   <p className="text-sm text-stone-500 truncate">
                     {client.email || client.phone || "No contact info"}

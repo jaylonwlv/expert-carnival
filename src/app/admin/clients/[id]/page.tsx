@@ -82,6 +82,19 @@ export default async function ClientDetailPage({
 
   const currentStageColor = stageColor(client.currentStage);
 
+  // Only the fields this specific lead actually has -- most clients Paulin
+  // adds by hand, or anyone who landed without a tagged link, will have
+  // none of these, and the section above is skipped entirely rather than
+  // rendering a card full of "--".
+  const attributionFields: [string, string][] = [
+    ["Source", client.utmSource],
+    ["Medium", client.utmMedium],
+    ["Campaign", client.utmCampaign],
+    ["Ad content", client.utmContent],
+    ["Term", client.utmTerm],
+  ].filter((entry): entry is [string, string] => Boolean(entry[1]));
+  const hasAttribution = attributionFields.length > 0;
+
   const NEIGHBORHOODS_STAGE_TITLE = "Home & Area Selection";
   const TOUR_STAGE_TITLE = "Touring Homes";
 
@@ -166,6 +179,22 @@ export default async function ClientDetailPage({
             {STAGES[client.currentStage].title}
           </span>
         </div>
+
+        {hasAttribution && (
+          <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-4">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-stone-400 mb-2">
+              Campaign attribution
+            </h2>
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
+              {attributionFields.map(([label, value]) => (
+                <div key={label} className="contents">
+                  <dt className="text-stone-500">{label}</dt>
+                  <dd className="text-stone-900 truncate">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
 
         <QuickUploadBar
           context={{ kind: "admin", clientId: client.id }}
