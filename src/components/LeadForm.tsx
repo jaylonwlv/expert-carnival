@@ -44,18 +44,6 @@ export function LeadForm({
       action={formAction}
       className={`space-y-4 ${large ? "lg:space-y-5" : ""}`}
     >
-      {/* Honeypot -- off-screen and unreachable by Tab, so no real visitor
-          ever sees or fills it; a generically-named field like "company"
-          is exactly the kind an automated form-filler tends to fill in
-          regardless. See the matching check in lead-actions.ts. */}
-      <input
-        type="text"
-        name="company"
-        tabIndex={-1}
-        autoComplete="off"
-        aria-hidden="true"
-        className="absolute w-px h-px opacity-0 -left-[9999px]"
-      />
       {state.error && (
         <p className={`text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2 ${large ? "lg:text-base" : ""}`}>
           {state.error === "invalid_email"
@@ -74,6 +62,7 @@ export function LeadForm({
           name="name"
           required
           autoComplete="name"
+          autoCapitalize="words"
           defaultValue={state.values?.name}
           className={`w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-600 ${large ? "lg:px-4 lg:py-3 lg:text-base" : ""}`}
         />
@@ -127,6 +116,21 @@ export function LeadForm({
           .
         </span>
       </label>
+      {/* Honeypot -- off-screen and unreachable by Tab, so no real visitor
+          ever sees or fills it; a generically-named field like "company"
+          is exactly the kind an automated form-filler tends to fill in
+          regardless. See the matching check in lead-actions.ts. Placed
+          last (not first) so it can't be mistaken by a browser's autofill
+          heuristics for the form's primary subject, ahead of the actual
+          name/phone/email fields. */}
+      <input
+        type="text"
+        name="company"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute w-px h-px opacity-0 -left-[9999px]"
+      />
       <SubmitButton
         pendingText="Submitting…"
         className={`w-full rounded-md bg-amber-600 text-white text-sm font-semibold py-3 shadow-sm hover:shadow-md hover:bg-amber-700 transition ${large ? "lg:text-base lg:py-3.5" : ""}`}
