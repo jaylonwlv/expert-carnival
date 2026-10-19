@@ -17,7 +17,8 @@ import { ChecklistAccordion, type ChecklistStageData } from "@/components/Checkl
 import { PCSBadge } from "@/components/PCSBadge";
 import { TimelineBadge } from "@/components/TimelineBadge";
 import { StageSwitcher } from "@/components/StageSwitcher";
-import { TIMELINE_LABELS, TIMELINE_ORDER, isTimeline } from "@/lib/timeline";
+import { isTimeline } from "@/lib/timeline";
+import { TimelineSelect } from "@/components/TimelineSelect";
 import {
   addSigner,
   createDocumentRecords,
@@ -156,21 +157,10 @@ export default async function ClientDetailPage({
                   {client.isPCS ? "Remove PCS tag" : "Mark as PCS relocation"}
                 </button>
               </form>
-              <ActionForm action={setTimelineForClient} toastMessage="Timeline updated.">
-                <select
-                  name="timeline"
-                  defaultValue={client.timeline ?? ""}
-                  onChange={(e) => e.currentTarget.form?.requestSubmit()}
-                  className="text-xs text-stone-500 border border-stone-200 rounded-md px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                >
-                  <option value="">Timeline: unknown</option>
-                  {TIMELINE_ORDER.map((t) => (
-                    <option key={t} value={t}>
-                      {TIMELINE_LABELS[t]}
-                    </option>
-                  ))}
-                </select>
-              </ActionForm>
+              <TimelineSelect
+                value={isTimeline(client.timeline) ? client.timeline : null}
+                action={setTimelineForClient}
+              />
             </div>
           </div>
           <span
