@@ -5,6 +5,7 @@ import { LandingSequenceBackground } from "@/components/LandingSequenceBackgroun
 import { MinimalSiteFooter } from "@/components/SiteFooter";
 import { StickyCtaBar } from "@/components/StickyCtaBar";
 import { RealtorBubble } from "@/components/RealtorBubble";
+import { extractTrackingParams, singleParam } from "@/lib/utm";
 import { submitLead } from "../lead-actions";
 
 // Same serif as the homepage's own headlines (page.tsx) -- this page and
@@ -28,10 +29,12 @@ export const metadata = {
 export default async function CaliforniaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ lead_submitted?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
   const action = submitLead.bind(null, "california", "/california");
+  const trackingFields = extractTrackingParams(params);
+  const metaEventId = singleParam(params.eid);
 
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 py-16">
@@ -78,7 +81,9 @@ export default async function CaliforniaPage({
           <LeadForm
             action={action}
             submitLabel="Get My Relocation Roadmap"
-            submitted={params.lead_submitted === "1"}
+            submitted={singleParam(params.lead_submitted) === "1"}
+            hiddenFields={trackingFields}
+            metaEventId={metaEventId}
             large
           />
         </div>

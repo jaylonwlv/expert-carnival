@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { TaxSavingsCalculator } from "@/components/TaxSavingsCalculator";
 import { BRollVideo } from "@/components/BRollVideo";
 import { Reveal } from "@/components/Reveal";
+import { extractTrackingParams, singleParam } from "@/lib/utm";
 import { submitLead } from "./lead-actions";
 
 // Scoped to this page only -- the display serif is part of the homepage's
@@ -83,10 +84,12 @@ function EditorialRow({
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ lead_submitted?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
   const action = submitLead.bind(null, "homepage", "/");
+  const trackingFields = extractTrackingParams(params);
+  const metaEventId = singleParam(params.eid);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -192,7 +195,9 @@ export default async function HomePage({
               <LeadForm
                 action={action}
                 submitLabel="Get My Free Guide"
-                submitted={params.lead_submitted === "1"}
+                submitted={singleParam(params.lead_submitted) === "1"}
+                hiddenFields={trackingFields}
+                metaEventId={metaEventId}
               />
             </div>
           </div>

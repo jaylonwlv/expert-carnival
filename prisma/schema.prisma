@@ -40,6 +40,20 @@ model Client {
   // realtor from the client detail page when a reply doesn't parse cleanly.
   timeline               String?
   timelineSetAt          DateTime?
+  // Campaign attribution, captured from the landing page's own query
+  // string at the moment of submission (see app/california/page.tsx,
+  // app/optin/page.tsx, app/lead-actions.ts) -- `source` above already says
+  // which of our pages a lead came from; these say which ad/campaign sent
+  // them to it.
+  utmSource              String?
+  utmMedium              String?
+  utmCampaign            String?
+  utmContent             String?
+  utmTerm                String?
+  // Meta's own click id (the `fbclid` URL param) -- kept separately from
+  // the utm* fields since it's used to build the `fbc` value for the
+  // Conversions API match (see lib/meta.ts), not just for display.
+  fbclid                 String?
   createdAt              DateTime        @default(now())
   updatedAt              DateTime        @updatedAt
   stageUpdatedAt         DateTime        @default(now())

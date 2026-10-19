@@ -1,7 +1,9 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
+import { cookies, headers } from "next/headers";
 import { nanoid } from "nanoid";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activity";
@@ -11,6 +13,8 @@ import { buildAbsoluteUrl } from "@/lib/trackerUrl";
 import { BUSINESS } from "@/lib/business";
 import { isDatabaseConnectivityError } from "@/lib/dbErrors";
 import { TIMELINE_SMS_BODY } from "@/lib/timeline";
+import { getClientIp } from "@/lib/clientIp";
+import { sendMetaLeadEvent } from "@/lib/meta";
 
 export type LeadSource = "homepage" | "california" | "optin";
 
@@ -95,6 +99,19 @@ export async function submitLead(
 
   const isPCS = source === "optin";
 
+  // Read straight off whatever hidden fields LeadForm rendered (see
+  // app/california/page.tsx, app/optin/page.tsx, app/page.tsx) -- already
+  // length-capped server-side by extractTrackingParams before they ever
+  // reached a hidden input, but formData is still attacker-controlled input
+  // from here, so each is treated as optional/untrusted the same way
+  // name/phone/email already are.
+  const utmSource = String(formData.get("utm_source") ?? "").trim() || null;
+  const utmMedium = String(formData.get("utm_medium") ?? "").trim() || null;
+  const utmCampaign = String(formData.get("utm_campaign") ?? "").trim() || null;
+  const utmContent = String(formData.get("utm_content") ?? "").trim() || null;
+  const utmTerm = String(formData.get("utm_term") ?? "").trim() || null;
+  const fbclid = String(formData.get("fbclid") ?? "").trim() || null;
+
   // Unlike the validation checks above, a database hiccup here isn't the
   // visitor's fault and shouldn't cost them what they typed: without this,
   // the exception reaches the root error boundary, which unmounts the
@@ -114,6 +131,12 @@ export async function submitLead(
         source,
         smsConsent,
         smsConsentAt: smsConsent ? new Date() : null,
+        utmSource,
+        utmMedium,
+        utmCampaign,
+        utmContent,
+        utmTerm,
+        fbclid,
       },
     });
   } catch (error) {
@@ -130,18 +153,46 @@ export async function submitLead(
 
   const notifyTo = process.env.LEAD_NOTIFICATION_EMAIL ?? BUSINESS.email;
 
-  // The lead is already safely committed above -- none of these three sends
-  // can change that (sendEmail/sendSms both swallow their own errors), and
-  // the visitor's "you're all set" confirmation doesn't need any of them to
-  // have actually gone out yet. Running them via `after()` instead of
-  // awaiting lets the redirect fire as soon as the DB write lands, rather
-  // than holding the visitor's spinner hostage to however long Resend/Twilio
-  // take to respond. `after()` (not a bare fire-and-forget) is what keeps
-  // this work alive past the response on a serverless deployment, where an
-  // un-awaited promise can otherwise get cut off the instant the response
-  // is sent.
+  // Shared between the server-side Conversions API call below and the
+  // browser Pixel's own "Lead" event (components/MetaLeadPixelFire.tsx,
+  // fired once the visitor actually reaches the success state) -- carried
+  // to the client via the redirect's own `eid` query param so both halves
+  // report the exact same event_id and Meta deduplicates them instead of
+  // counting one real conversion twice.
+  const metaEventId = randomUUID();
+  const eventSourceUrl = await buildAbsoluteUrl(path);
+  const clientIp = await getClientIp();
+  const userAgent = (await headers()).get("user-agent");
+  const cookieStore = await cookies();
+  const fbp = cookieStore.get("_fbp")?.value ?? null;
+  // Meta's own fallback construction for when the click landed before the
+  // Pixel had a chance to set _fbc itself -- using the URL's own fbclid
+  // (captured into the Client record above) still gives Meta something to
+  // match against instead of nothing.
+  const fbc = cookieStore.get("_fbc")?.value ?? (fbclid ? `fb.1.${Date.now()}.${fbclid}` : null);
+
+  // The lead is already safely committed above -- none of these sends can
+  // change that (sendEmail/sendSms/sendMetaLeadEvent all swallow their own
+  // errors), and the visitor's "you're all set" confirmation doesn't need
+  // any of them to have actually gone out yet. Running them via `after()`
+  // instead of awaiting lets the redirect fire as soon as the DB write
+  // lands, rather than holding the visitor's spinner hostage to however
+  // long Resend/Twilio/Meta take to respond. `after()` (not a bare fire-
+  // and-forget) is what keeps this work alive past the response on a
+  // serverless deployment, where an un-awaited promise can otherwise get
+  // cut off the instant the response is sent.
   after(() =>
     Promise.all([
+      sendMetaLeadEvent({
+        email,
+        phone,
+        eventId: metaEventId,
+        eventSourceUrl,
+        clientIp,
+        userAgent,
+        fbp,
+        fbc,
+      }),
       sendEmail({
         to: email,
         subject: guide.subject,
@@ -181,5 +232,5 @@ export async function submitLead(
     ])
   );
 
-  redirect(`${path}?lead_submitted=1`);
+  redirect(`${path}?lead_submitted=1&eid=${metaEventId}`);
 }

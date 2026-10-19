@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { MetaPixel } from "@/components/MetaPixel";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <noscript>
           <style>{".reveal { opacity: 1 !important; transform: none !important; }"}</style>
         </noscript>
+        <MetaPixel />
         {children}
       </body>
     </html>

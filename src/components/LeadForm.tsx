@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { SubmitButton } from "@/components/SubmitButton";
 import { TrackerPreview } from "@/components/TrackerPreview";
+import { MetaLeadPixelFire } from "@/components/MetaLeadPixelFire";
 import type { LeadFormState } from "@/app/lead-actions";
 
 export function LeadForm({
@@ -11,11 +12,21 @@ export function LeadForm({
   submitLabel,
   submitted,
   large,
+  hiddenFields,
+  metaEventId,
 }: {
   action: (prevState: LeadFormState, formData: FormData) => Promise<LeadFormState>;
   submitLabel: string;
   submitted?: boolean;
   large?: boolean;
+  // UTM params + fbclid, read server-side from the landing page's own
+  // query string and passed straight through as hidden fields -- simpler
+  // than a cookie for a single self-contained page with no navigation
+  // before the form, and avoids any cookie-consent question entirely.
+  hiddenFields?: Record<string, string>;
+  // Set only once the visitor has actually converted (the redirect target
+  // carries it) -- see app/lead-actions.ts.
+  metaEventId?: string;
 }) {
   // A validation error now comes back as state on this same render, not a
   // redirect to a fresh page load -- so a visitor who scrolled down, filled
@@ -34,6 +45,7 @@ export function LeadForm({
           </p>
         </div>
         <TrackerPreview />
+        {metaEventId && <MetaLeadPixelFire eventId={metaEventId} />}
       </div>
     );
   }
@@ -44,6 +56,10 @@ export function LeadForm({
       action={formAction}
       className={`space-y-4 ${large ? "lg:space-y-5" : ""}`}
     >
+      {hiddenFields &&
+        Object.entries(hiddenFields).map(([name, value]) => (
+          <input key={name} type="hidden" name={name} value={value} />
+        ))}
       {state.error && (
         <p className={`text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2 ${large ? "lg:text-base" : ""}`}>
           {state.error === "invalid_email"
