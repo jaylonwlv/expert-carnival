@@ -6,6 +6,7 @@ import { MinimalSiteFooter } from "@/components/SiteFooter";
 import { StickyCtaBar } from "@/components/StickyCtaBar";
 import { RealtorBubble } from "@/components/RealtorBubble";
 import { extractTrackingParams, singleParam } from "@/lib/utm";
+import { getMetaLeadEventId } from "@/lib/meta";
 import { submitLead } from "../lead-actions";
 
 // Same serif as the homepage's own headlines (page.tsx) -- this page and
@@ -34,7 +35,7 @@ export default async function CaliforniaPage({
   const params = await searchParams;
   const action = submitLead.bind(null, "california", "/california");
   const trackingFields = extractTrackingParams(params);
-  const metaEventId = singleParam(params.eid);
+  const metaEventId = await getMetaLeadEventId();
 
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 py-16">

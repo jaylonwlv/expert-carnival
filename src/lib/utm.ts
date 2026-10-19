@@ -12,6 +12,11 @@ export function extractTrackingParams(searchParams: Record<string, string | stri
     const value = Array.isArray(raw) ? raw[0] : raw;
     if (value) result[key] = value.slice(0, 200);
   }
+  // Captured now (page render, close to the actual ad click) rather than
+  // whenever the form eventually gets submitted -- see lead-actions.ts's
+  // use of this for the `fbc` fallback, where the gap between the two
+  // matters.
+  if (result.fbclid) result.fbclid_captured_at = String(Date.now());
   return result;
 }
 

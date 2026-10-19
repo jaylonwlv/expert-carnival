@@ -1,9 +1,19 @@
 import crypto from "node:crypto";
+import { cookies } from "next/headers";
 
 // Graph API version pins to a specific release; Meta deprecates old ones on
 // a rolling schedule, so this needs bumping occasionally (check
 // developers.facebook.com/docs/graph-api/changelog before it's dropped).
 const GRAPH_API_VERSION = "v21.0";
+
+// Set only by submitLead actually running (see app/lead-actions.ts) --
+// reading it back here, instead of trusting a `?eid=` query param a page
+// might otherwise accept, is what stops anyone from crafting a success URL
+// that fires a fake "Lead" event without a real submission ever happening.
+export async function getMetaLeadEventId(): Promise<string | undefined> {
+  const cookieStore = await cookies();
+  return cookieStore.get("meta_lead_eid")?.value;
+}
 
 // Meta requires user_data identifiers to arrive pre-hashed (SHA-256,
 // lowercased, trimmed) -- it never sees the raw email/phone, only the hash,

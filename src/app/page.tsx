@@ -7,6 +7,7 @@ import { TaxSavingsCalculator } from "@/components/TaxSavingsCalculator";
 import { BRollVideo } from "@/components/BRollVideo";
 import { Reveal } from "@/components/Reveal";
 import { extractTrackingParams, singleParam } from "@/lib/utm";
+import { getMetaLeadEventId } from "@/lib/meta";
 import { submitLead } from "./lead-actions";
 
 // Scoped to this page only -- the display serif is part of the homepage's
@@ -89,7 +90,7 @@ export default async function HomePage({
   const params = await searchParams;
   const action = submitLead.bind(null, "homepage", "/");
   const trackingFields = extractTrackingParams(params);
-  const metaEventId = singleParam(params.eid);
+  const metaEventId = await getMetaLeadEventId();
 
   return (
     <div className="min-h-screen flex flex-col">

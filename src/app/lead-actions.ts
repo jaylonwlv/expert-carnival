@@ -111,6 +111,12 @@ export async function submitLead(
   const utmContent = String(formData.get("utm_content") ?? "").trim() || null;
   const utmTerm = String(formData.get("utm_term") ?? "").trim() || null;
   const fbclid = String(formData.get("fbclid") ?? "").trim() || null;
+  // Captured server-side when the landing page itself rendered (close to
+  // the actual ad click), not at submission time -- a visitor who browses
+  // for a few minutes before submitting would otherwise get a fabricated
+  // "click time" in the fbc fallback below that's really the submit time.
+  const fbclidCapturedAtRaw = Number(formData.get("fbclid_captured_at"));
+  const fbclidCapturedAt = Number.isFinite(fbclidCapturedAtRaw) && fbclidCapturedAtRaw > 0 ? fbclidCapturedAtRaw : null;
 
   // Unlike the validation checks above, a database hiccup here isn't the
   // visitor's fault and shouldn't cost them what they typed: without this,
@@ -155,10 +161,19 @@ export async function submitLead(
 
   // Shared between the server-side Conversions API call below and the
   // browser Pixel's own "Lead" event (components/MetaLeadPixelFire.tsx,
-  // fired once the visitor actually reaches the success state) -- carried
-  // to the client via the redirect's own `eid` query param so both halves
-  // report the exact same event_id and Meta deduplicates them instead of
-  // counting one real conversion twice.
+  // fired once the visitor actually reaches the success state) so both
+  // halves report the exact same event_id and Meta deduplicates them
+  // instead of counting one real conversion twice.
+  //
+  // Carried to the client via a short-lived, httpOnly cookie rather than
+  // the redirect's own query string -- a query param is visible to and
+  // craftable by anyone, and LeadForm's success branch (gated only on
+  // `?lead_submitted=1`) doesn't verify a real submission happened. Without
+  // this, visiting `/california?lead_submitted=1&eid=<anything>` directly
+  // -- no form filled in, no Client row ever created -- would still fire a
+  // real "Lead" conversion event against the live ad account. An httpOnly
+  // cookie can only be set by this server action actually running, so
+  // there's no way to manufacture one without a genuine submission.
   const metaEventId = randomUUID();
   const eventSourceUrl = await buildAbsoluteUrl(path);
   const clientIp = await getClientIp();
@@ -168,8 +183,22 @@ export async function submitLead(
   // Meta's own fallback construction for when the click landed before the
   // Pixel had a chance to set _fbc itself -- using the URL's own fbclid
   // (captured into the Client record above) still gives Meta something to
-  // match against instead of nothing.
-  const fbc = cookieStore.get("_fbc")?.value ?? (fbclid ? `fb.1.${Date.now()}.${fbclid}` : null);
+  // match against instead of nothing. Uses the page-load-time timestamp
+  // captured above, not "now", since this fallback's whole point is
+  // approximating when the click actually happened.
+  const fbc =
+    cookieStore.get("_fbc")?.value ?? (fbclid ? `fb.1.${fbclidCapturedAt ?? Date.now()}.${fbclid}` : null);
+
+  cookieStore.set("meta_lead_eid", metaEventId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    // Just long enough to survive the redirect and the success page's own
+    // render -- not a general-purpose session, so it isn't left around as
+    // a replayable credential beyond the one request that needs it.
+    maxAge: 300,
+  });
 
   // The lead is already safely committed above -- none of these sends can
   // change that (sendEmail/sendSms/sendMetaLeadEvent all swallow their own
@@ -232,5 +261,5 @@ export async function submitLead(
     ])
   );
 
-  redirect(`${path}?lead_submitted=1&eid=${metaEventId}`);
+  redirect(`${path}?lead_submitted=1`);
 }

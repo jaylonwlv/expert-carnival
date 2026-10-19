@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Script from "next/script";
 import { usePathname } from "next/navigation";
 
@@ -20,6 +21,27 @@ function isTrackedPath(pathname: string): boolean {
 // isn't set, matching the sendEmail/sendSms no-op pattern.
 export function MetaPixel() {
   const pathname = usePathname();
+  const isFirstRender = useRef(true);
+
+  // Next.js only ever runs the inline script below once per full page
+  // load (it's deduped by this Script's own `id`), so that script's own
+  // 'track', 'PageView' call already covers the first page a visitor
+  // lands on. Without this effect, every subsequent client-side
+  // navigation to another tracked page (clicking a <Link>, no full
+  // reload) would never fire a PageView of its own -- undercounting
+  // traffic on exactly the pages this feature exists to measure. Called
+  // unconditionally, before the early return below, since hooks can't be
+  // called conditionally; the ref skips firing a duplicate PageView for
+  // the render that already got one from the inline script.
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (!PIXEL_ID || !isTrackedPath(pathname)) return;
+    (window as Window & { fbq?: (...args: unknown[]) => void }).fbq?.("track", "PageView");
+  }, [pathname]);
+
   if (!PIXEL_ID || !isTrackedPath(pathname)) return null;
 
   return (
