@@ -20,19 +20,22 @@ const TEAM = [
     name: "Jay",
     title: "Marketing Director",
     photo: "/team/jay.jpg",
-    blurb: "Runs the campaigns, lead-magnet guides, and digital presence that bring new clients in the door.",
+    blurb:
+      "Jay runs marketing and is usually the one behind the camera on location, filming the homes, neighborhoods, and behind-the-scenes moments you see across our guides and social channels.",
   },
   {
     name: "Noah",
-    title: "Operations Director",
+    title: "Director of Photography",
     photo: "/team/noah.jpg",
-    blurb: "Keeps the moving pieces (financing, scheduling, document flow) coordinated from lead to closing.",
+    blurb:
+      "Noah handles camera and lighting on every shoot, making sure every home and neighborhood looks as good on screen as it does in person.",
   },
   {
     name: "Daniel",
     title: "Production Editor",
     photo: "/team/daniel.jpg",
-    blurb: "Produces the relocation guides and client-facing materials that make the move easier to plan.",
+    blurb:
+      "Daniel edits everything you see on our social media, turning a day of filming into the videos and guides that help you picture the move before you've made it.",
   },
 ];
 
@@ -161,7 +164,7 @@ export default function AboutPage() {
           photo="/team/paulin.jpg"
           name={BUSINESS.licensee}
           title="Founder & Lead Realtor"
-          blurb={`Paulin is the realtor on the team: the one who gets on the phone with you, walks neighborhoods, negotiates your offer, and sees your file through to closing. Every client working with ${BUSINESS.legalName} is working with her directly.`}
+          blurb={`Paulin is the realtor on the team: the one who gets on the phone with you, tours neighborhoods with you, negotiates your offer, and sees your file through to closing. Every client working with ${BUSINESS.legalName} is working with her directly.`}
           extra={
             <>
               <p className="text-xs text-stone-400 mt-4">
@@ -207,7 +210,8 @@ export default function AboutPage() {
               Prefer to talk it through?
             </h2>
             <p className="text-base text-white/85 mt-5 max-w-xl mx-auto leading-relaxed">
-              Call or text {BUSINESS.licensee} directly. No call center, no hand-off.
+              Call or text {BUSINESS.licensee} directly. You'll always reach her, never a call
+              center, never someone new starting from scratch.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <a
