@@ -110,23 +110,37 @@ export default async function AdminPage({
   return (
     <div className="min-h-screen bg-[#faf8f4]">
       <header className="bg-white border-b border-stone-200">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Image src="/logo.png" alt="Relocation Engine LLC" width={680} height={546} className="h-20 w-auto" priority />
-          <div className="flex items-center gap-4">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+          <Image
+            src="/logo.png"
+            alt="Relocation Engine LLC"
+            width={680}
+            height={546}
+            className="h-14 sm:h-20 w-auto"
+            priority
+          />
+          {/* flex-wrap (not nowrap) so a narrow screen drops these to a
+              second line instead of squeezing all three into one row with
+              the logo -- each item keeps whitespace-nowrap so its own text
+              never breaks mid-word while that happens. */}
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <Link
               href="/admin/analytics"
-              className="text-sm font-medium text-stone-500 hover:text-stone-800 transition"
+              className="text-sm font-medium text-sky-700 bg-sky-50 border border-sky-200 rounded-lg px-4 py-2.5 hover:bg-sky-100 transition whitespace-nowrap"
             >
               Analytics Center
             </Link>
             <Link
               href="/admin/clients/new"
-              className="text-sm font-medium bg-amber-600 text-white rounded-lg px-4 py-2.5 hover:bg-amber-700 transition shadow-sm hover:shadow-md"
+              className="text-sm font-medium bg-amber-600 text-white rounded-lg px-4 py-2.5 hover:bg-amber-700 transition shadow-sm hover:shadow-md whitespace-nowrap"
             >
               + Add client
             </Link>
             <form action={logout}>
-              <button type="submit" className="text-sm font-medium text-stone-500 hover:text-stone-800 transition">
+              <button
+                type="submit"
+                className="text-sm font-medium text-stone-500 hover:text-stone-800 transition whitespace-nowrap"
+              >
                 Sign out
               </button>
             </form>
