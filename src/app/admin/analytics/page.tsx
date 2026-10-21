@@ -7,13 +7,14 @@ import { KNOWN_PLATFORMS, DIRECT_COLOR, OTHER_COLOR, classifyPlatform } from "@/
 
 export const dynamic = "force-dynamic";
 
-// Friendlier label for the one utm_medium value this app sets itself --
-// "in_app_browser" from the proxy's passive User-Agent/Referer fallback
-// (lib/inAppBrowser.ts) -- so the breakdown reads as "how this lead got
-// tagged" rather than a raw query-param value. Anything else (e.g. a
-// hand-built ad link's own utm_medium) is shown as typed.
+// Friendlier labels for utm_medium values -- "in_app_browser" is the one
+// this app sets itself (the proxy's passive User-Agent/Referer fallback in
+// lib/inAppBrowser.ts); "cpc" is Paulin's own hand-built tag on her Meta ad
+// links, not a generic paid-search tag, so it reads as "Meta Ads" rather
+// than the raw param. Anything else is shown as typed.
 const MEDIUM_LABELS: Record<string, string> = {
   in_app_browser: "Detected in-app browser",
+  cpc: "Meta Ads",
 };
 
 type Row = { label: string; count: number };
