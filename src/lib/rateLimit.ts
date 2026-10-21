@@ -5,7 +5,7 @@
 // like Vercel that can mean an attacker effectively gets a fresh set of
 // attempts per instance. It still meaningfully raises the cost of a casual
 // automated brute-force/credential-stuffing run against a single warm
-// instance, which is what it's for -- it is not a substitute for a durable,
+// instance, which is what it's for — it is not a substitute for a durable,
 // shared limiter (e.g. Redis-backed) if that threat model matters more than
 // "free and simple."
 const WINDOW_MS = 15 * 60 * 1000;
@@ -13,7 +13,7 @@ const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60 * 1000;
 
 // Crude safeguard against unbounded memory growth if something hammers this
-// from a flood of distinct keys (e.g. spoofed/rotating IPs) -- not a real
+// from a flood of distinct keys (e.g. spoofed/rotating IPs) — not a real
 // defense against that, just a ceiling so this map can't grow forever.
 const MAX_TRACKED_KEYS = 10_000;
 

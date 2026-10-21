@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE, isValidSessionToken } from "@/lib/auth";
 import { detectInAppPlatform } from "@/lib/inAppBrowser";
 
-// The three lead-capture pages (see lead-actions.ts's GUIDE_BY_SOURCE) --
+// The three lead-capture pages (see lead-actions.ts's GUIDE_BY_SOURCE) —
 // the only ones extractTrackingParams's utm_source actually feeds into a
 // Client record, so there's no point tagging anywhere else.
 const LEAD_CAPTURE_PATHS = new Set(["/", "/california", "/optin"]);
@@ -24,10 +24,10 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Only a fallback for a visit that arrived with no tag of its own -- a
+  // Only a fallback for a visit that arrived with no tag of its own — a
   // real utm_source (e.g. from a paid ad link) always wins over a guess
   // made here. GET-only: the lead form on these same paths submits via POST
-  // (a Server Action), and that request has no tracking page-load to tag --
+  // (a Server Action), and that request has no tracking page-load to tag —
   // rewriting it could only risk interfering with the submission itself for
   // no benefit.
   if (request.method === "GET" && LEAD_CAPTURE_PATHS.has(pathname) && !searchParams.get("utm_source")) {

@@ -20,16 +20,16 @@ export function LeadForm({
   submitted?: boolean;
   large?: boolean;
   // UTM params + fbclid, read server-side from the landing page's own
-  // query string and passed straight through as hidden fields -- simpler
+  // query string and passed straight through as hidden fields — simpler
   // than a cookie for a single self-contained page with no navigation
   // before the form, and avoids any cookie-consent question entirely.
   hiddenFields?: Record<string, string>;
   // Set only once the visitor has actually converted (the redirect target
-  // carries it) -- see app/lead-actions.ts.
+  // carries it) — see app/lead-actions.ts.
   metaEventId?: string;
 }) {
   // A validation error now comes back as state on this same render, not a
-  // redirect to a fresh page load -- so a visitor who scrolled down, filled
+  // redirect to a fresh page load — so a visitor who scrolled down, filled
   // the form in, and mistyped their email doesn't lose that scroll position
   // or get an empty form back. Success still redirects via `submitted`
   // (the one path where there's nothing left to preserve).
@@ -38,13 +38,13 @@ export function LeadForm({
   // The homepage's form sits ~5700px down the page; the redirect this
   // page just took after a real submission resets scroll to the very top,
   // so without this, a visitor who just submitted sees the hero again with
-  // zero sign anything happened -- confirmed directly (not assumed) to
+  // zero sign anything happened — confirmed directly (not assumed) to
   // read as a silent failure, risking a duplicate submission or an
   // abandoned visitor who thinks the form is broken.
   const successRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (submitted) successRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    // Only on mount -- this page load IS the one that just submitted, so
+    // Only on mount — this page load IS the one that just submitted, so
     // there's no later change in `submitted` to react to.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -146,7 +146,7 @@ export function LeadForm({
           .
         </span>
       </label>
-      {/* Honeypot -- off-screen and unreachable by Tab, so no real visitor
+      {/* Honeypot — off-screen and unreachable by Tab, so no real visitor
           ever sees or fills it; a generically-named field like "company"
           is exactly the kind an automated form-filler tends to fill in
           regardless. See the matching check in lead-actions.ts. Placed

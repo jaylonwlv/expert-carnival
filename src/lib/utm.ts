@@ -1,7 +1,7 @@
 const TRACKING_PARAM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "fbclid"] as const;
 
 // Pulled straight from the landing page's own query string and passed
-// through as hidden form fields (see components/LeadForm.tsx) -- these
+// through as hidden form fields (see components/LeadForm.tsx) — these
 // values are attacker-controlled (anyone can craft a link with arbitrary
 // query params), so each is capped defensively before it ever reaches a
 // hidden input or the database, rather than trusted as-is.
@@ -13,7 +13,7 @@ export function extractTrackingParams(searchParams: Record<string, string | stri
     if (value) result[key] = value.slice(0, 200);
   }
   // Captured now (page render, close to the actual ad click) rather than
-  // whenever the form eventually gets submitted -- see lead-actions.ts's
+  // whenever the form eventually gets submitted — see lead-actions.ts's
   // use of this for the `fbc` fallback, where the gap between the two
   // matters.
   if (result.fbclid) result.fbclid_captured_at = String(Date.now());

@@ -6,7 +6,7 @@ import { BUSINESS } from "@/lib/business";
 
 // Catches anything that throws while rendering a route (the lead-creation
 // DB write, say) that isn't already caught closer to the source. Without
-// this, that failure shows Next's raw default error screen -- unbranded,
+// this, that failure shows Next's raw default error screen — unbranded,
 // and on the two pages whose logo deliberately isn't a link anywhere else
 // on the page, offering no way back into the funnel at all.
 export default function Error({

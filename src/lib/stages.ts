@@ -6,7 +6,7 @@ export type Stage = {
 
 export const STAGES: Stage[] = [
   {
-    // Internal only -- never shown on the client's own tracker page. A
+    // Internal only — never shown on the client's own tracker page. A
     // client at this stage hasn't been sent a tracker link yet; that stays
     // a manual step the realtor takes after an actual phone call.
     title: "Lead",

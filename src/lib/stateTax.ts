@@ -3,7 +3,7 @@
 // not just assume California. California keeps its own precise bracket
 // calculation (estimateCaliforniaTax in caTax.ts); every other state uses
 // its single published top marginal income-tax rate as a simplified,
-// explicitly-labeled estimate -- not full bracket math. Building verified
+// explicitly-labeled estimate — not full bracket math. Building verified
 // bracket tables for all 50 states isn't something to fake: rates below are
 // 2025 figures (Tax Foundation / state revenue department reporting) and,
 // same as caTax.ts's own note, need re-checking against
@@ -34,14 +34,14 @@ export const STATE_LABELS: Record<StateCode, string> = {
   WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming",
 };
 
-// Ordered for the <select> -- alphabetical by label, same order STATE_LABELS
+// Ordered for the <select> — alphabetical by label, same order STATE_LABELS
 // would sort to, just precomputed so the component doesn't re-sort on
 // every render.
 export const STATE_ORDER: StateCode[] = (Object.keys(STATE_LABELS) as StateCode[]).sort((a, b) =>
   STATE_LABELS[a].localeCompare(STATE_LABELS[b])
 );
 
-// No individual income tax at all -- not an approximation, an actual $0.
+// No individual income tax at all — not an approximation, an actual $0.
 // (New Hampshire's old interest/dividends-only tax was fully repealed
 // effective Jan 1, 2025, which is why it's in this list now and wasn't a
 // few years ago.)
@@ -51,7 +51,7 @@ const NO_TAX_STATES = new Set<StateCode>(["AK", "FL", "NV", "NH", "SD", "TN", "T
 // every state except California (which gets the real bracket treatment in
 // caTax.ts). For an actually-flat-rate state this rate is exact; for a
 // progressive state it deliberately overstates tax for any household below
-// the top bracket -- conservative in the "don't overstate the NV savings"
+// the top bracket — conservative in the "don't overstate the NV savings"
 // direction, and clearly labeled as such in the calculator's own copy
 // rather than presented as bracket-accurate.
 const TOP_RATE: Partial<Record<StateCode, number>> = {
@@ -65,7 +65,7 @@ const TOP_RATE: Partial<Record<StateCode, number>> = {
 };
 
 // Rough stand-in for a standard deduction on the simplified (non-California)
-// path -- without subtracting *something*, every flat-rate state would tax
+// path — without subtracting *something*, every flat-rate state would tax
 // the first dollar of income same as the millionth, which overstates low
 // and middle incomes far more than it overstates high ones. Not any real
 // state's actual deduction figure; just enough to keep the curve realistic

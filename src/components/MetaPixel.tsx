@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 
 const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
-// Only the public marketing pages -- not /admin (realtor-only, behind
+// Only the public marketing pages — not /admin (realtor-only, behind
 // auth, no ad-conversion value) and not /track (an existing client's
 // private portal, already converted, and showing relocation-specific
 // personal details a third-party tracker has no reason to see).
@@ -14,7 +14,7 @@ function isTrackedPath(pathname: string): boolean {
   return !pathname.startsWith("/admin") && !pathname.startsWith("/track");
 }
 
-// Loaded via next/script's afterInteractive strategy -- same reasoning as
+// Loaded via next/script's afterInteractive strategy — same reasoning as
 // everywhere else video/third-party work has been deferred this session:
 // it shouldn't compete with the page's own content for bandwidth on first
 // paint. No-ops entirely (renders nothing) when NEXT_PUBLIC_META_PIXEL_ID
@@ -28,7 +28,7 @@ export function MetaPixel() {
   // 'track', 'PageView' call already covers the first page a visitor
   // lands on. Without this effect, every subsequent client-side
   // navigation to another tracked page (clicking a <Link>, no full
-  // reload) would never fire a PageView of its own -- undercounting
+  // reload) would never fire a PageView of its own — undercounting
   // traffic on exactly the pages this feature exists to measure. Called
   // unconditionally, before the early return below, since hooks can't be
   // called conditionally; the ref skips firing a duplicate PageView for
@@ -61,7 +61,7 @@ export function MetaPixel() {
         `}
       </Script>
       <noscript>
-        {/* eslint-disable-next-line @next/next/no-img-element -- Meta's own
+        {/* eslint-disable-next-line @next/next/no-img-element — Meta's own
             standard base code is a plain <img>, not a next/image candidate */}
         <img
           height="1"

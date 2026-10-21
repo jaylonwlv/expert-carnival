@@ -1,7 +1,7 @@
 // California 2025 married-filing-jointly state income tax brackets, standard
 // deduction, and personal exemption credit (FTB 2025 schedules). Nevada has
 // no state income tax, so the "Nevada tax" side of this comparison is always
-// $0 -- there's nothing to model there.
+// $0 — there's nothing to model there.
 const STANDARD_DEDUCTION_MFJ = 11_412;
 const PERSONAL_EXEMPTION_CREDIT_MFJ = 306;
 const MENTAL_HEALTH_SERVICES_TAX_THRESHOLD = 1_000_000;
@@ -19,7 +19,7 @@ const BRACKETS_MFJ: { upTo: number; rate: number }[] = [
   { upTo: Infinity, rate: 0.123 },
 ];
 
-// Estimated only -- illustrative, not tax advice. Matches the methodology
+// Estimated only — illustrative, not tax advice. Matches the methodology
 // footnoted in the California relocation guide PDF: married filing jointly,
 // standard deduction only, no credits beyond the personal exemption.
 export function estimateCaliforniaTax(householdIncome: number): number {

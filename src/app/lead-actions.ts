@@ -19,23 +19,23 @@ import { sendMetaLeadEvent } from "@/lib/meta";
 export type LeadSource = "homepage" | "california" | "optin";
 
 // Returned to useActionState rather than carried via a redirect's query
-// string -- a validation failure stays on the same render, so the visitor's
+// string — a validation failure stays on the same render, so the visitor's
 // scroll position and everything else they've typed survive it. Only a
 // validation error returns state; success still redirects (nothing to
 // preserve once the lead's in).
 export type LeadFormState = {
   error?: "missing" | "invalid_email" | "db_unavailable";
   // React resets uncontrolled form fields after every action dispatch,
-  // success or failure alike -- echoing back what was typed (and keying
+  // success or failure alike — echoing back what was typed (and keying
   // the form on it in LeadForm) is what actually keeps it on screen.
   values?: { name: string; phone: string; email: string; smsConsent: boolean };
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// The homepage and /california share one lead magnet -- confirmed by
+// The homepage and /california share one lead magnet — confirmed by
 // Paulin. Both PDFs live in public/guides, so the link is just this app's
-// own domain -- no external hosting/env var to configure.
+// own domain — no external hosting/env var to configure.
 const GUIDE_BY_SOURCE: Record<LeadSource, { pdfPath: string; subject: string; title: string }> = {
   homepage: {
     pdfPath: "/guides/California-to-Las-Vegas-Relocation-Guide-2026.pdf",
@@ -54,12 +54,12 @@ const GUIDE_BY_SOURCE: Record<LeadSource, { pdfPath: string; subject: string; ti
   },
 };
 
-// Previously just "thanks for requesting X, here's the download" -- the
+// Previously just "thanks for requesting X, here's the download" — the
 // one touchpoint that should carry the landing page's own warmth (Paulin's
 // photo, a personal signature, a concrete next step) into the recipient's
 // inbox was carrying none of it, reading more like an automated receipt
 // than a handoff from a real person. logoUrl/photoUrl have to be absolute
-// (not root-relative) -- most email clients render straight from the raw
+// (not root-relative) — most email clients render straight from the raw
 // HTML with no site origin to resolve a relative path against.
 function leadMagnetEmailHtml(
   firstName: string,
@@ -76,7 +76,7 @@ function leadMagnetEmailHtml(
       <p>Hi ${escapeHtml(firstName)},</p>
       <p>Thanks for requesting the <strong>${escapeHtml(title)}</strong>. Here it is:</p>
       ${downloadBlock}
-      <p>I'll personally reach out by call or text soon to see how I can help with your move --
+      <p>I'll personally reach out by call or text soon to see how I can help with your move —
       no pressure, just a conversation about your timeline and what you're looking for.</p>
       <table cellpadding="0" cellspacing="0" style="margin-top:20px;">
         <tr>
@@ -102,7 +102,7 @@ export async function submitLead(
   formData: FormData
 ): Promise<LeadFormState> {
   // Honeypot: a field real visitors never see or tab to (LeadForm positions
-  // it off-screen and marks it aria-hidden/tabIndex=-1), named "company" --
+  // it off-screen and marks it aria-hidden/tabIndex=-1), named "company" —
   // generic enough that a bot filling every field it finds on a lead form
   // tends to fill it anyway. A filled value means this wasn't a person;
   // pretend success without writing anything or sending any email/SMS, so
@@ -127,7 +127,7 @@ export async function submitLead(
   const isPCS = source === "optin";
 
   // Read straight off whatever hidden fields LeadForm rendered (see
-  // app/california/page.tsx, app/optin/page.tsx, app/page.tsx) -- already
+  // app/california/page.tsx, app/optin/page.tsx, app/page.tsx) — already
   // length-capped server-side by extractTrackingParams before they ever
   // reached a hidden input, but formData is still attacker-controlled input
   // from here, so each is treated as optional/untrusted the same way
@@ -139,7 +139,7 @@ export async function submitLead(
   const utmTerm = String(formData.get("utm_term") ?? "").trim() || null;
   const fbclid = String(formData.get("fbclid") ?? "").trim() || null;
   // Captured server-side when the landing page itself rendered (close to
-  // the actual ad click), not at submission time -- a visitor who browses
+  // the actual ad click), not at submission time — a visitor who browses
   // for a few minutes before submitting would otherwise get a fabricated
   // "click time" in the fbc fallback below that's really the submit time.
   const fbclidCapturedAtRaw = Number(formData.get("fbclid_captured_at"));
@@ -148,7 +148,7 @@ export async function submitLead(
   // Unlike the validation checks above, a database hiccup here isn't the
   // visitor's fault and shouldn't cost them what they typed: without this,
   // the exception reaches the root error boundary, which unmounts the
-  // whole form -- name/phone/email, gone, with only a generic "Something
+  // whole form — name/phone/email, gone, with only a generic "Something
   // went wrong." Catching it here and returning state (same pattern as the
   // validation errors above) keeps `values` echoed back so they can just
   // retry immediately.
@@ -197,11 +197,11 @@ export async function submitLead(
   // instead of counting one real conversion twice.
   //
   // Carried to the client via a short-lived, httpOnly cookie rather than
-  // the redirect's own query string -- a query param is visible to and
+  // the redirect's own query string — a query param is visible to and
   // craftable by anyone, and LeadForm's success branch (gated only on
   // `?lead_submitted=1`) doesn't verify a real submission happened. Without
   // this, visiting `/california?lead_submitted=1&eid=<anything>` directly
-  // -- no form filled in, no Client row ever created -- would still fire a
+  // — no form filled in, no Client row ever created — would still fire a
   // real "Lead" conversion event against the live ad account. An httpOnly
   // cookie can only be set by this server action actually running, so
   // there's no way to manufacture one without a genuine submission.
@@ -212,7 +212,7 @@ export async function submitLead(
   const cookieStore = await cookies();
   const fbp = cookieStore.get("_fbp")?.value ?? null;
   // Meta's own fallback construction for when the click landed before the
-  // Pixel had a chance to set _fbc itself -- using the URL's own fbclid
+  // Pixel had a chance to set _fbc itself — using the URL's own fbclid
   // (captured into the Client record above) still gives Meta something to
   // match against instead of nothing. Uses the page-load-time timestamp
   // captured above, not "now", since this fallback's whole point is
@@ -226,12 +226,12 @@ export async function submitLead(
     sameSite: "lax",
     path: "/",
     // Just long enough to survive the redirect and the success page's own
-    // render -- not a general-purpose session, so it isn't left around as
+    // render — not a general-purpose session, so it isn't left around as
     // a replayable credential beyond the one request that needs it.
     maxAge: 300,
   });
 
-  // The lead is already safely committed above -- none of these sends can
+  // The lead is already safely committed above — none of these sends can
   // change that (sendEmail/sendSms/sendMetaLeadEvent all swallow their own
   // errors), and the visitor's "you're all set" confirmation doesn't need
   // any of them to have actually gone out yet. Running them via `after()`
@@ -257,7 +257,7 @@ export async function submitLead(
         to: email,
         subject: guide.subject,
         html: leadMagnetEmailHtml(firstName, guide.title, pdfUrl, logoUrl, photoUrl),
-        // Attached directly, not just linked -- a spam filter or an
+        // Attached directly, not just linked — a spam filter or an
         // email client set to block remote content can keep the link
         // from ever loading, but an attachment arrives with the email
         // itself either way. The download button in the body stays too,
@@ -283,9 +283,9 @@ export async function submitLead(
         ? [
             sendSms({
               to: phone,
-              body: `Hi ${firstName}, this is Relocation Engine -- thanks for reaching out! We'll be in touch soon. Reply STOP to opt out.`,
+              body: `Hi ${firstName}, this is Relocation Engine — thanks for reaching out! We'll be in touch soon. Reply STOP to opt out.`,
             }),
-            // Separate text, not folded into the one above -- a reply to
+            // Separate text, not folded into the one above — a reply to
             // this one is meant to come back as a bare "A"/"B"/"C" (see
             // lib/timeline.ts), which only works cleanly if the question is
             // the only thing in the thread asking for a reply.

@@ -26,7 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         {/* .reveal (components/Reveal.tsx) starts offset/transparent and
-            relies on JS (IntersectionObserver) to reveal it -- without
+            relies on JS (IntersectionObserver) to reveal it — without
             this, a visitor with JS disabled would never see that content
             at all. The animation is a progressive enhancement, not a
             requirement for reading the page. */}

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
-// Full-bleed background video for an editorial section -- the homepage uses
+// Full-bleed background video for an editorial section — the homepage uses
 // one of these per section (hero + each service), so this is a single
 // shared, parameterized component rather than one bespoke component per
 // clip.
@@ -11,7 +11,7 @@ import Image from "next/image";
 // The poster is rendered as a next/image `fill` underneath the <video>,
 // NOT as the video's own `poster` attribute: a <video poster> is fetched
 // eagerly by the browser the instant the element is parsed, regardless of
-// any `preload`/JS deferral on the clip itself -- on a page with five of
+// any `preload`/JS deferral on the clip itself — on a page with five of
 // these, that alone was pulling in ~900KB of posters for sections nobody
 // had scrolled to yet. next/image's own lazy loading (on by default,
 // `priority` only for the hero) fixes that for free, with a smaller,
@@ -25,12 +25,12 @@ import Image from "next/image";
 //   scrolled close to it.
 // Skipped entirely under prefers-reduced-motion (the poster covers it).
 //
-// These clips are raw b-roll, not footage shot to loop seamlessly -- the
+// These clips are raw b-roll, not footage shot to loop seamlessly — the
 // native `loop` attribute would jump-cut from the last frame straight back
 // to the first the instant playback reaches the end. Looping is handled
 // manually instead (handleTimeUpdate/handleEnded below), fading through
 // that cut. The initial poster-to-video handoff, on the other hand, isn't
-// faded -- it just appears once playback starts (see transitionEnabled
+// faded — it just appears once playback starts (see transitionEnabled
 // below).
 const LOOP_FADE_MS = 500;
 
@@ -48,7 +48,7 @@ export function BRollVideo({
   const videoRef = useRef<HTMLVideoElement>(null);
   // isPlaying controls opacity; transitionEnabled controls whether that
   // change animates. The very first reveal (poster -> live video) should
-  // just appear, not fade -- only the loop's fade-out/fade-in (masking the
+  // just appear, not fade — only the loop's fade-out/fade-in (masking the
   // jump-cut between the clip's last frame and its first) should animate.
   // Both start false so the first onPlaying flips isPlaying without
   // transitionEnabled having caught up yet (same render), landing on
@@ -96,7 +96,7 @@ export function BRollVideo({
     observer.observe(video);
 
     // Start fading out once the remaining playback time is less than the
-    // fade's own duration, so the fade finishes right as the clip ends --
+    // fade's own duration, so the fade finishes right as the clip ends —
     // by the time `ended` fires and resets/restarts it, the video is
     // already (or very nearly) invisible, and the poster underneath is
     // what actually shows through during the cut.

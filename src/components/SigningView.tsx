@@ -45,7 +45,7 @@ export function SigningView({
     return initial;
   });
   // Date/time fields start pre-filled with the moment this view mounted, as
-  // a convenience default -- but a client can take minutes (or, with Date,
+  // a convenience default — but a client can take minutes (or, with Date,
   // even cross into the next day) between opening the page and actually
   // submitting. Tracking which of those two fields the client has
   // deliberately edited lets handleSubmit refresh any still-untouched one to

@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 // developers.facebook.com/docs/graph-api/changelog before it's dropped).
 const GRAPH_API_VERSION = "v21.0";
 
-// Set only by submitLead actually running (see app/lead-actions.ts) --
+// Set only by submitLead actually running (see app/lead-actions.ts) —
 // reading it back here, instead of trusting a `?eid=` query param a page
 // might otherwise accept, is what stops anyone from crafting a success URL
 // that fires a fake "Lead" event without a real submission ever happening.
@@ -16,13 +16,13 @@ export async function getMetaLeadEventId(): Promise<string | undefined> {
 }
 
 // Meta requires user_data identifiers to arrive pre-hashed (SHA-256,
-// lowercased, trimmed) -- it never sees the raw email/phone, only the hash,
+// lowercased, trimmed) — it never sees the raw email/phone, only the hash,
 // which it compares against its own hash of the same value for matching.
 function hashForMeta(value: string): string {
   return crypto.createHash("sha256").update(value.trim().toLowerCase()).digest("hex");
 }
 
-// Meta wants digits only, country code included, no "+" -- same
+// Meta wants digits only, country code included, no "+" — same
 // normalization sendSms's toE164 applies for Twilio, minus the leading "+"
 // (lib/sms.ts keeps its own copy since the two have different output
 // formats, not because the logic actually differs).
@@ -37,7 +37,7 @@ function normalizePhoneForMeta(phone: string): string {
 // (see components/MetaLeadPixelFire.tsx) so Meta deduplicates instead of
 // double-counting. The server-side half is what makes this reliable: it
 // still fires through an ad blocker, Safari's tracking prevention, or the
-// site's own no-JS path (this form works without JavaScript) -- the browser
+// site's own no-JS path (this form works without JavaScript) — the browser
 // pixel alone would miss all three. No-ops with a console log when
 // NEXT_PUBLIC_META_PIXEL_ID/META_CONVERSIONS_API_TOKEN aren't set, matching
 // the sendEmail/sendSms pattern elsewhere in this app.
@@ -64,7 +64,7 @@ export async function sendMetaLeadEvent({
   const accessToken = process.env.META_CONVERSIONS_API_TOKEN;
 
   if (!pixelId || !accessToken) {
-    console.log(`[meta] Conversions API not configured -- would send a "Lead" event for ${email}`);
+    console.log(`[meta] Conversions API not configured — would send a "Lead" event for ${email}`);
     return;
   }
 
@@ -94,7 +94,7 @@ export async function sendMetaLeadEvent({
   if (process.env.META_TEST_EVENT_CODE) body.test_event_code = process.env.META_TEST_EVENT_CODE;
 
   // A failed send should never take down the mutation it's a side effect of
-  // -- same error-handling posture as sendEmail/sendSms.
+  // — same error-handling posture as sendEmail/sendSms.
   try {
     const res = await fetch(
       `https://graph.facebook.com/${GRAPH_API_VERSION}/${pixelId}/events?access_token=${encodeURIComponent(accessToken)}`,

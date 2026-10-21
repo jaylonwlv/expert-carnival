@@ -21,7 +21,7 @@ function newStop(): Stop {
 }
 
 // A previously saved route is already in its final (optimized) order, with
-// real coordinates already known -- seeding straight into "done" status
+// real coordinates already known — seeding straight into "done" status
 // skips re-geocoding every address again just to show the realtor what's
 // already been shared.
 function stopsFromSaved(saved: TourStop[]): Stop[] {
@@ -44,7 +44,7 @@ function numberedIcon(n: number) {
 }
 
 // Geocoding runs against Nominatim's free public search endpoint directly
-// from the browser -- no API key, but one request at a time with a short
+// from the browser — no API key, but one request at a time with a short
 // delay between each, per Nominatim's usage policy for low-volume/occasional
 // use (which fits a single realtor planning a day of tours).
 async function geocode(address: string): Promise<GeoPoint> {
@@ -144,7 +144,7 @@ export function TourRoutePlanner({
   }
 
   // The stops that were successfully geocoded, in the order `planRoute` found
-  // them -- `order` holds indices into exactly this array.
+  // them — `order` holds indices into exactly this array.
   const geocodedStops = stops.filter((s): s is Stop & { point: GeoPoint } => s.point !== null);
   const orderedStops = (order ?? geocodedStops.map((_, i) => i))
     .map((i) => geocodedStops[i])
@@ -226,7 +226,7 @@ export function TourRoutePlanner({
           </ol>
 
           <p className="text-sm text-stone-500">
-            Stop order is picked by straight-line distance, not real roads or traffic -- it gets you a sensible
+            Stop order is picked by straight-line distance, not real roads or traffic — it gets you a sensible
             plan, but Google Maps below will handle the actual turn-by-turn driving directions.
           </p>
 

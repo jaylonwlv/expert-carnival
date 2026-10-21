@@ -7,7 +7,7 @@ import { logActivity } from "@/lib/activity";
 import { BUSINESS } from "@/lib/business";
 import { classifyTimelineReply, TIMELINE_LABELS } from "@/lib/timeline";
 
-// The standard CTIA/carrier-recognized opt-out and opt-in keywords -- every
+// The standard CTIA/carrier-recognized opt-out and opt-in keywords — every
 // SMS this app sends already promises "Reply STOP to opt out, HELP for
 // help" (lead-actions.ts, the review-request cron, the SMS Terms page), so
 // honoring them here isn't optional polish, it's making good on a promise
@@ -18,7 +18,7 @@ const HELP_KEYWORDS = new Set(["HELP", "INFO"]);
 
 // Configured as this Twilio number's "A Message Comes In" webhook. Unlike
 // every other inbound path in this app, a request here isn't something a
-// browser navigated to -- it's unauthenticated by default, so without the
+// browser navigated to — it's unauthenticated by default, so without the
 // signature check below, anyone who discovered this URL could POST a fake
 // reply and overwrite any client's timeline. Twilio's own validation
 // algorithm (https://www.twilio.com/docs/usage/webhooks/webhooks-security):
@@ -38,7 +38,7 @@ function isValidTwilioSignature(url: string, params: Record<string, string>, sig
 
 function emptyTwiml(): NextResponse {
   // Twilio expects a TwiML response (even an empty one) to treat this as a
-  // handled webhook rather than an error -- there's nothing to say back to
+  // handled webhook rather than an error — there's nothing to say back to
   // the lead here, so an empty <Response/> is the correct "got it."
   return new NextResponse('<?xml version="1.0" encoding="UTF-8"?><Response></Response>', {
     status: 200,
@@ -48,7 +48,7 @@ function emptyTwiml(): NextResponse {
 
 // Unlike the outbound sends elsewhere in this app (a separate API call to
 // Twilio's REST endpoint), a STOP/HELP reply's own confirmation goes back
-// as TwiML in this same response -- Twilio delivers it as the reply to the
+// as TwiML in this same response — Twilio delivers it as the reply to the
 // exact message that triggered it, with no second outbound send to pay for
 // or to race against.
 function twimlMessage(message: string): NextResponse {
@@ -71,11 +71,11 @@ async function notifyPaulinOfUnhandledReply(from: string, body: string, reason: 
   });
 }
 
-// Real-time nudge for an actual lead replying -- separate from (and faster
+// Real-time nudge for an actual lead replying — separate from (and faster
 // to notice than) the email path above, which is for replies that need a
 // manual look rather than ones that already resolved cleanly. Reuses the
 // same NEXT_PUBLIC_AGENT_PHONE the client tracker page already shows as
-// "reach Paulin" -- no second phone-number env var to keep in sync with
+// "reach Paulin" — no second phone-number env var to keep in sync with
 // it. No-ops (same pattern as AGENT_EMAIL) if it's unset.
 async function notifyPaulinBySms(message: string) {
   const agentPhone = process.env.NEXT_PUBLIC_AGENT_PHONE;
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
   if (!from) return emptyTwiml();
 
   // Client.phone is free-text (whatever a lead typed into the form), not
-  // stored normalized -- toE164 here is the same normalization sendSms
+  // stored normalized — toE164 here is the same normalization sendSms
   // already applies at send time, so a stored "(702) 555-1234" correctly
   // matches Twilio's own already-E.164 `From`.
   const candidates = await prisma.client.findMany({ where: { phone: { not: null } } });
@@ -114,20 +114,20 @@ export async function POST(req: NextRequest) {
       body,
       matches.length === 0
         ? "Received a timeline reply from a number that doesn't match any client."
-        : `Received a timeline reply from a number matching ${matches.length} clients -- can't tell which one.`
+        : `Received a timeline reply from a number matching ${matches.length} clients — can't tell which one.`
     );
     return emptyTwiml();
   }
 
   const client = matches[0];
-  // Checked before classifyTimelineReply below -- "STOP" would never match
+  // Checked before classifyTimelineReply below — "STOP" would never match
   // A/B/C anyway, but catching it here is what actually revokes consent
   // instead of just falling through to "unrecognized reply."
   const normalizedBody = body.trim().toUpperCase();
 
   if (STOP_KEYWORDS.has(normalizedBody)) {
     await prisma.client.update({ where: { id: client.id }, data: { smsConsent: false } });
-    await logActivity(client.id, "Replied STOP -- SMS consent revoked.");
+    await logActivity(client.id, "Replied STOP — SMS consent revoked.");
     return twimlMessage(
       `You have been unsubscribed from ${BUSINESS.legalName} text messages. No further messages will be sent. Reply START to opt back in.`
     );
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
 
   if (START_KEYWORDS.has(normalizedBody)) {
     await prisma.client.update({ where: { id: client.id }, data: { smsConsent: true, smsConsentAt: new Date() } });
-    await logActivity(client.id, "Replied START -- SMS consent restored.");
+    await logActivity(client.id, "Replied START — SMS consent restored.");
     return twimlMessage(`You're resubscribed to ${BUSINESS.legalName} text messages. Reply STOP to opt out again.`);
   }
 
@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
       `${client.name}'s timeline reply didn't parse as ${client.isPCS ? "A/B" : "A/B/C"}.`
     );
     await notifyPaulinBySms(
-      `${client.name} replied: "${body}" -- didn't parse as ${client.isPCS ? "A/B" : "A/B/C"}, check your email.`
+      `${client.name} replied: "${body}" — didn't parse as ${client.isPCS ? "A/B" : "A/B/C"}, check your email.`
     );
     return emptyTwiml();
   }

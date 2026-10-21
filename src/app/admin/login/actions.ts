@@ -15,7 +15,7 @@ async function clientIp(): Promise<string> {
   if (realIp) return realIp;
 
   // No identifying header at all (local/dev, or a proxy that doesn't
-  // forward one) -- a shared literal "unknown" bucket would mean five
+  // forward one) — a shared literal "unknown" bucket would mean five
   // failed attempts from ANY such visitor locks out every other one
   // sharing it for 15 minutes, including the real admin. A fresh,
   // non-shared key per call means this one unidentifiable request just

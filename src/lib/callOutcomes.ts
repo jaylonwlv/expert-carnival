@@ -1,5 +1,5 @@
 // Logged while a lead is still at the "Lead" stage (see lib/stages.ts,
-// currentStage 0) after Paulin actually calls them -- each pick adds one
+// currentStage 0) after Paulin actually calls them — each pick adds one
 // dated ActivityLog entry (lib/activity.ts stamps createdAt) rather than
 // setting a persistent field on Client, since the point is a history of
 // attempts (several calls, several dates), not a single current status.
@@ -20,7 +20,7 @@ export const CALL_OUTCOME_LABELS: Record<CallOutcome, string> = {
 };
 
 // Client.lastCallOutcome is a plain Prisma String? (not an enum), so
-// anything read off the model is `string | null` until narrowed -- same
+// anything read off the model is `string | null` until narrowed — same
 // pattern as lib/timeline.ts's isTimeline.
 export function isCallOutcome(value: string | null): value is CallOutcome {
   return value !== null && value in CALL_OUTCOME_LABELS;

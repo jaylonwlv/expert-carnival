@@ -40,7 +40,7 @@ export default async function AdminPage({
   const mediumFilter = (params.medium ?? "").trim().toLowerCase() || null;
 
   // Both of these come straight off the URL, which a bookmark, a shared
-  // link, or just hand-editing the address bar can put anything into -- an
+  // link, or just hand-editing the address bar can put anything into — an
   // unparseable or out-of-range value has to fall back to a sane default
   // rather than reach Prisma, which rejects a non-integer Int filter (NaN,
   // a float, an out-of-range stage) by throwing instead of matching nothing.
@@ -59,7 +59,7 @@ export default async function AdminPage({
   // Drill-down from the Analytics Center charts (lib/platforms.ts has the
   // same known-platform list and the same classification rule the chart
   // itself uses, so a bar's count and what clicking it turns up here can't
-  // drift apart). Both scope to source: { not: null } -- only an actual
+  // drift apart). Both scope to source: { not: null } — only an actual
   // lead-form submission carries utm data at all, same reasoning as the
   // dashboard's own "Leads by type" card and the analytics page.
   let platformWhere: Prisma.ClientWhereInput | undefined;
@@ -82,7 +82,7 @@ export default async function AdminPage({
     mediumWhere = { source: { not: null }, utmMedium: { equals: mediumFilter, mode: "insensitive" } };
   }
 
-  // Combined as an AND array, not spread into one object -- platformWhere's
+  // Combined as an AND array, not spread into one object — platformWhere's
   // "other" branch and a future filter could otherwise collide on a shared
   // key (e.g. both setting their own NOT) and silently overwrite each other.
   const andClauses: Prisma.ClientWhereInput[] = [];
@@ -103,7 +103,7 @@ export default async function AdminPage({
 
   // This is the first thing almost any admin session touches right after
   // login, so a database that's unreachable shows up here as "login is
-  // broken" -- catching it here and saying so directly is the only way to
+  // broken" — catching it here and saying so directly is the only way to
   // say that: a thrown error reaching the root error.tsx boundary instead
   // would just show a generic "Something went wrong", since Next.js (and
   // React, on top of it) redacts the real server-side error before it
@@ -117,7 +117,7 @@ export default async function AdminPage({
     // The stat cards always reflect every client, independent of the
     // search box/stage filter below them, so they're counted separately
     // from the (possibly filtered) list. Grouping by isPCS is scoped to
-    // source: { not: null } -- that's what tells an actual lead-form
+    // source: { not: null } — that's what tells an actual lead-form
     // submission apart from a client Paulin added by hand, who shouldn't
     // count here either way.
     let rawLeadsByType;
@@ -132,7 +132,7 @@ export default async function AdminPage({
       pcs: rawLeadsByType.find((r) => r.isPCS)?._count._all ?? 0,
     };
 
-    // Clamp instead of trusting the URL's ?page= as-is -- otherwise
+    // Clamp instead of trusting the URL's ?page= as-is — otherwise
     // narrowing a search/stage filter while on a later page would skip
     // past the end of the now-smaller result set and silently render
     // nothing.
@@ -161,7 +161,7 @@ export default async function AdminPage({
   const page = Math.min(requestedPage, totalPages);
 
   // Only claim an active filter once it actually narrowed the query (i.e.
-  // *Where was built) -- an unrecognized ?platform= value falls through to
+  // *Where was built) — an unrecognized ?platform= value falls through to
   // undefined above rather than silently matching everything, so this
   // banner and the where clause always agree on what's really filtered.
   const activeFilter = platformWhere
@@ -184,7 +184,7 @@ export default async function AdminPage({
           />
           {/* flex-wrap (not nowrap) so a narrow screen drops these to a
               second line instead of squeezing all three into one row with
-              the logo -- each item keeps whitespace-nowrap so its own text
+              the logo — each item keeps whitespace-nowrap so its own text
               never breaks mid-word while that happens. */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <Link
@@ -248,7 +248,7 @@ export default async function AdminPage({
   );
 }
 
-// At-a-glance split of lead-form submissions by relocation type -- isPCS
+// At-a-glance split of lead-form submissions by relocation type — isPCS
 // is what each landing page actually sets based on which one the visitor
 // came through (optin = PCS, homepage/california = standard), not a
 // separate field to keep in sync (see submitLead in app/lead-actions.ts).

@@ -53,7 +53,7 @@ export default async function ClientDetailPage({
     notFound();
   }
 
-  // buildTrackerUrl only reads request headers -- it has no dependency on
+  // buildTrackerUrl only reads request headers — it has no dependency on
   // the checklist chain below, so run both at once instead of paying for
   // them back-to-back on every admin client-detail page load.
   const [trackerUrl, checklistItems] = await Promise.all([
@@ -83,10 +83,10 @@ export default async function ClientDetailPage({
 
   const currentStageColor = stageColor(client.currentStage);
 
-  // Only the fields this specific lead actually has -- most clients Paulin
+  // Only the fields this specific lead actually has — most clients Paulin
   // adds by hand, or anyone who landed without a tagged link, will have
   // none of these, and the section above is skipped entirely rather than
-  // rendering a card full of "--".
+  // rendering a card full of "—".
   const attributionFields: [string, string][] = [
     ["Source", client.utmSource],
     ["Medium", client.utmMedium],
@@ -197,7 +197,7 @@ export default async function ClientDetailPage({
         <section className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 space-y-3">
           <h2 className="text-sm font-semibold text-stone-900">Signers</h2>
           <p className="text-sm text-stone-500">
-            Everyone whose own documents need to be told apart -- e.g. both spouses on a joint purchase. Tag
+            Everyone whose own documents need to be told apart — e.g. both spouses on a joint purchase. Tag
             uploads with a signer below, or leave a document as &ldquo;Shared&rdquo; when it&apos;s not specific
             to one person.
           </p>

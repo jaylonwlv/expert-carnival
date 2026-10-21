@@ -26,12 +26,12 @@ export async function sendSms({ to, body }: { to: string; body: string }): Promi
   const from = process.env.TWILIO_FROM_NUMBER;
 
   if (!accountSid || !authToken || !from) {
-    console.log(`[sms] Twilio credentials not set -- would text ${to}: "${body}"`);
+    console.log(`[sms] Twilio credentials not set — would text ${to}: "${body}"`);
     return;
   }
 
   // A failed send should never take down the mutation it's a side effect of
-  // -- swallow both network-level failures and non-OK responses here,
+  // — swallow both network-level failures and non-OK responses here,
   // matching sendEmail's error handling in lib/email.ts.
   try {
     const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
