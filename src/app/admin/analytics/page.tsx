@@ -115,7 +115,7 @@ export default async function AnalyticsPage() {
 
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
         <div>
-          <h1 className="text-xl font-semibold text-stone-900">Analytics</h1>
+          <h1 className="text-xl font-semibold text-stone-900">Analytics Center</h1>
           <p className="text-sm text-stone-500 mt-1">
             {totalLeads} lead-form submission{totalLeads === 1 ? "" : "s"} total.
           </p>

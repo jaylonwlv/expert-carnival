@@ -117,7 +117,7 @@ export default async function AdminPage({
               href="/admin/analytics"
               className="text-sm font-medium text-stone-500 hover:text-stone-800 transition"
             >
-              Analytics
+              Analytics Center
             </Link>
             <Link
               href="/admin/clients/new"
