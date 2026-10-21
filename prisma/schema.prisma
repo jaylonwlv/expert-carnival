@@ -40,6 +40,13 @@ model Client {
   // realtor from the client detail page when a reply doesn't parse cleanly.
   timeline               String?
   timelineSetAt          DateTime?
+  // Most recent pick from the dashboard's "Log a call result" dropdown
+  // (lib/callOutcomes.ts) -- the dropdown itself always resets to blank
+  // after logging (each pick is a new dated ActivityLog entry, not a
+  // single current status), so this is what lets the dashboard list show
+  // the last outcome at a glance instead of it disappearing entirely.
+  lastCallOutcome        String?
+  lastCallOutcomeAt      DateTime?
   // Campaign attribution, captured from the landing page's own query
   // string at the moment of submission (see app/california/page.tsx,
   // app/optin/page.tsx, app/lead-actions.ts) -- `source` above already says

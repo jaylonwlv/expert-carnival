@@ -12,7 +12,7 @@ import { PCSBadge } from "@/components/PCSBadge";
 import { TimelineBadge } from "@/components/TimelineBadge";
 import { CampaignBadge } from "@/components/CampaignBadge";
 import { isTimeline } from "@/lib/timeline";
-import { CALL_OUTCOME_LABELS, CALL_OUTCOME_ORDER } from "@/lib/callOutcomes";
+import { CALL_OUTCOME_LABELS, CALL_OUTCOME_ORDER, isCallOutcome } from "@/lib/callOutcomes";
 
 type ClientRow = {
   id: string;
@@ -26,6 +26,11 @@ type ClientRow = {
   // real Timeline before TimelineBadge ever sees it.
   timeline: string | null;
   utmSource: string | null;
+  // Prisma's column is a plain String? (not an enum), same isCallOutcome
+  // narrowing pattern as isTimeline above -- the dropdown below always
+  // resets to blank after logging, so this is what the row actually shows.
+  lastCallOutcome: string | null;
+  lastCallOutcomeAt: Date | null;
   updatedAt: Date;
 };
 
@@ -179,27 +184,33 @@ export function ClientList({
                   </p>
                 </Link>
                 {client.currentStage === 0 && (
-                  <ActionForm
-                    action={logCallOutcomeAction.bind(null, client.id)}
-                    toastMessage="Call result logged."
-                    className="w-44 shrink-0 hidden lg:block"
-                  >
-                    <select
-                      name="callOutcome"
-                      defaultValue=""
-                      onChange={(e) => e.currentTarget.form?.requestSubmit()}
-                      className="w-full text-xs text-stone-500 border border-stone-200 rounded-md px-1.5 py-1 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                    >
-                      <option value="" disabled>
-                        Log a call result…
-                      </option>
-                      {CALL_OUTCOME_ORDER.map((outcome) => (
-                        <option key={outcome} value={outcome}>
-                          {CALL_OUTCOME_LABELS[outcome]}
+                  <div className="w-44 shrink-0 hidden lg:block">
+                    {isCallOutcome(client.lastCallOutcome) && (
+                      <p className="text-xs text-stone-500 truncate mb-1" title={CALL_OUTCOME_LABELS[client.lastCallOutcome]}>
+                        Last call: {CALL_OUTCOME_LABELS[client.lastCallOutcome]}
+                        {client.lastCallOutcomeAt && (
+                          <span className="text-stone-400"> · {timeAgo(client.lastCallOutcomeAt)}</span>
+                        )}
+                      </p>
+                    )}
+                    <ActionForm action={logCallOutcomeAction.bind(null, client.id)} toastMessage="Call result logged.">
+                      <select
+                        name="callOutcome"
+                        defaultValue=""
+                        onChange={(e) => e.currentTarget.form?.requestSubmit()}
+                        className="w-full text-xs text-stone-500 border border-stone-200 rounded-md px-1.5 py-1 focus:outline-none focus:ring-2 focus:ring-amber-600"
+                      >
+                        <option value="" disabled>
+                          Log a call result…
                         </option>
-                      ))}
-                    </select>
-                  </ActionForm>
+                        {CALL_OUTCOME_ORDER.map((outcome) => (
+                          <option key={outcome} value={outcome}>
+                            {CALL_OUTCOME_LABELS[outcome]}
+                          </option>
+                        ))}
+                      </select>
+                    </ActionForm>
+                  </div>
                 )}
                 <Link href={`/admin/clients/${client.id}`} className="w-40 shrink-0 hidden sm:block">
                   <span

@@ -452,6 +452,15 @@ export async function logCallOutcome(clientId: string, outcome: CallOutcome) {
     throw new Error("Invalid call outcome");
   }
 
+  // The dashboard dropdown itself always resets to blank after this (each
+  // pick is a new dated log entry, not a current status) -- storing the
+  // most recent pick here separately is what lets the list show it at a
+  // glance instead of it disappearing the instant the toast fades.
+  await prisma.client.update({
+    where: { id: clientId },
+    data: { lastCallOutcome: outcome, lastCallOutcomeAt: new Date() },
+  });
+
   await logActivity(clientId, `Call result: ${CALL_OUTCOME_LABELS[outcome]}.`);
 
   revalidatePath("/admin");

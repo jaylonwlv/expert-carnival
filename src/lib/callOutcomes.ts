@@ -18,3 +18,10 @@ export const CALL_OUTCOME_LABELS: Record<CallOutcome, string> = {
   answered_tracker_sent: "Answered — tracker sent",
   no_response: "No response",
 };
+
+// Client.lastCallOutcome is a plain Prisma String? (not an enum), so
+// anything read off the model is `string | null` until narrowed -- same
+// pattern as lib/timeline.ts's isTimeline.
+export function isCallOutcome(value: string | null): value is CallOutcome {
+  return value !== null && value in CALL_OUTCOME_LABELS;
+}
