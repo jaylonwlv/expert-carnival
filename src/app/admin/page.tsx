@@ -114,6 +114,12 @@ export default async function AdminPage({
           <Image src="/logo.png" alt="Relocation Engine LLC" width={680} height={546} className="h-20 w-auto" priority />
           <div className="flex items-center gap-4">
             <Link
+              href="/admin/analytics"
+              className="text-sm font-medium text-stone-500 hover:text-stone-800 transition"
+            >
+              Analytics
+            </Link>
+            <Link
               href="/admin/clients/new"
               className="text-sm font-medium bg-amber-600 text-white rounded-lg px-4 py-2.5 hover:bg-amber-700 transition shadow-sm hover:shadow-md"
             >

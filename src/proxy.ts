@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE, isValidSessionToken } from "@/lib/auth";
+import { detectInAppPlatform } from "@/lib/inAppBrowser";
+
+// The three lead-capture pages (see lead-actions.ts's GUIDE_BY_SOURCE) --
+// the only ones extractTrackingParams's utm_source actually feeds into a
+// Client record, so there's no point tagging anywhere else.
+const LEAD_CAPTURE_PATHS = new Set(["/", "/california", "/optin"]);
 
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
 
   if (pathname === "/admin/login") {
     return NextResponse.next();
@@ -15,11 +21,26 @@ export function proxy(request: NextRequest) {
       loginUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(loginUrl);
     }
+    return NextResponse.next();
+  }
+
+  // Only a fallback for a visit that arrived with no tag of its own -- a
+  // real utm_source (whether from an ad or one of the /tt, /ig, /yt short
+  // links, which already redirect with their own utm_source/utm_medium
+  // attached) always wins over a guess made from the User-Agent here.
+  if (LEAD_CAPTURE_PATHS.has(pathname) && !searchParams.get("utm_source")) {
+    const detected = detectInAppPlatform(request.headers.get("user-agent"));
+    if (detected) {
+      const url = request.nextUrl.clone();
+      url.searchParams.set("utm_source", detected.source);
+      url.searchParams.set("utm_medium", detected.medium);
+      return NextResponse.rewrite(url);
+    }
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/", "/california", "/optin"],
 };
