@@ -210,8 +210,7 @@ export default function AboutPage() {
               Prefer to talk it through?
             </h2>
             <p className="text-base text-white/85 mt-5 max-w-xl mx-auto leading-relaxed">
-              Call or text {BUSINESS.licensee} directly. You'll always reach her, never a call
-              center, never someone new starting from scratch.
+              Call or text {BUSINESS.licensee} any time, it's always her who picks up.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <a
