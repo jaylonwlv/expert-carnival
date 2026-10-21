@@ -31,7 +31,11 @@ export function proxy(request: NextRequest) {
   // rewriting it could only risk interfering with the submission itself for
   // no benefit.
   if (request.method === "GET" && LEAD_CAPTURE_PATHS.has(pathname) && !searchParams.get("utm_source")) {
-    const detected = detectInAppPlatform(request.headers.get("user-agent"), request.headers.get("referer"));
+    const detected = detectInAppPlatform(
+      request.headers.get("user-agent"),
+      request.headers.get("referer"),
+      request.headers.get("x-requested-with")
+    );
     if (detected) {
       const url = request.nextUrl.clone();
       url.searchParams.set("utm_source", detected.source);

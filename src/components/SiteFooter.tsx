@@ -69,7 +69,8 @@ export function SiteFooter({ socialLinks = false }: { socialLinks?: boolean } = 
           <p className="text-xs text-stone-400">
             {BUSINESS.legalName} is an Equal Opportunity company and fully supports the principles of
             the Fair Housing Act. We do not discriminate on the basis of race, color, religion, sex,
-            handicap, familial status, national origin, sexual orientation, or gender identity.
+            disability, familial status, national origin, sexual orientation, or gender identity, per
+            the State of California and Nevada law &amp; jurisdictions.
           </p>
           <p className="text-xs text-stone-400 shrink-0">⌂ Equal Housing Opportunity</p>
         </div>

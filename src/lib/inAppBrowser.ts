@@ -19,10 +19,29 @@ const UA_SIGNATURES: [RegExp, string][] = [
   [/\byoutube\b/, "youtube"],
 ];
 
-// Fallback for an app whose in-app browser doesn't mark itself in the
-// User-Agent at all -- most notably YouTube's Android "Custom Tab", which
-// typically looks like plain Chrome there but still sends a Referer back to
-// the app that opened it. Checked only when no UA signature above matched.
+// Android WebView sends this header as the exact package name of the app
+// that opened the page -- a direct identifier, not a pattern match against
+// a free-text string the way the UA is. Chrome proposed stripping it in
+// 2023 over privacy concerns and required an opt-in allowlist API for
+// anyone who still needed it, then reversed that decision; current Android
+// WebView sends it by default again and the opt-in API is itself
+// deprecated. Checked ahead of the Referer fallback since a package name is
+// harder to end up looking like a platform by accident than a UA token is.
+// iOS has no equivalent header, so this only ever helps on Android.
+const PACKAGE_SIGNATURES: [string, string][] = [
+  ["com.zhiliaoapp.musically", "tiktok"],
+  ["com.ss.android.ugc.trill", "tiktok"],
+  ["com.instagram.android", "instagram"],
+  ["com.facebook.katana", "facebook"],
+  ["com.facebook.lite", "facebook"],
+  ["com.google.android.youtube", "youtube"],
+];
+
+// Last resort, for an app whose in-app browser doesn't mark itself in
+// either the User-Agent or X-Requested-With -- most notably YouTube's
+// Android "Custom Tab", which typically looks like plain Chrome with
+// neither header set, but still sends a Referer back to the app that
+// opened it.
 const REFERER_SIGNATURES: [RegExp, string][] = [
   [/tiktok\.com|android-app:\/\/com\.zhiliao/, "tiktok"],
   [/instagram\.com|android-app:\/\/com\.instagram/, "instagram"],
@@ -30,10 +49,19 @@ const REFERER_SIGNATURES: [RegExp, string][] = [
   [/youtube\.com|android-app:\/\/com\.google\.android\.youtube/, "youtube"],
 ];
 
-export function detectInAppPlatform(userAgent: string | null, referer: string | null): DetectedPlatform | null {
+export function detectInAppPlatform(
+  userAgent: string | null,
+  referer: string | null,
+  requestedWith: string | null
+): DetectedPlatform | null {
   const ua = (userAgent ?? "").toLowerCase();
   for (const [pattern, source] of UA_SIGNATURES) {
     if (pattern.test(ua)) return { source, medium: "in_app_browser" };
+  }
+
+  const packageName = (requestedWith ?? "").trim().toLowerCase();
+  for (const [pkg, source] of PACKAGE_SIGNATURES) {
+    if (packageName === pkg) return { source, medium: "in_app_browser" };
   }
 
   const ref = (referer ?? "").toLowerCase();
