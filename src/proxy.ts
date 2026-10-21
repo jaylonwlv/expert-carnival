@@ -26,9 +26,12 @@ export function proxy(request: NextRequest) {
 
   // Only a fallback for a visit that arrived with no tag of its own -- a
   // real utm_source (e.g. from a paid ad link) always wins over a guess
-  // made from the User-Agent here.
-  if (LEAD_CAPTURE_PATHS.has(pathname) && !searchParams.get("utm_source")) {
-    const detected = detectInAppPlatform(request.headers.get("user-agent"));
+  // made here. GET-only: the lead form on these same paths submits via POST
+  // (a Server Action), and that request has no tracking page-load to tag --
+  // rewriting it could only risk interfering with the submission itself for
+  // no benefit.
+  if (request.method === "GET" && LEAD_CAPTURE_PATHS.has(pathname) && !searchParams.get("utm_source")) {
+    const detected = detectInAppPlatform(request.headers.get("user-agent"), request.headers.get("referer"));
     if (detected) {
       const url = request.nextUrl.clone();
       url.searchParams.set("utm_source", detected.source);
