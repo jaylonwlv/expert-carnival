@@ -89,37 +89,19 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Hero: the team group photo, full-bleed, same treatment as the
-          homepage's own video hero. A plain object-cover here centers its
-          crop, and the photo's four people span nearly the full width
-          (Noah at the far left, Jay at the far right), so on anything
-          narrower than the photo's own 3:2 ratio (every phone, most
-          tablets), that center crop trimmed both edges and left only
-          Paulin and Daniel, the two people nearest the middle, in frame.
-          Fixed with the standard mismatched-ratio technique: a blurred,
-          scaled-up copy fills the section edge-to-edge with no empty
-          bars, and the sharp copy on top is object-contain (never
-          cropped), so all four people stay in frame at every viewport. */}
+          homepage's own video hero (fill + object-cover inside a relative,
+          min-h-[92vh] section with a dark gradient overlay for text
+          contrast), this is the "group picture," made as full-bleed as a
+          fixed-aspect JPEG reasonably can be. */}
       <section className="relative min-h-[92vh] flex flex-col overflow-hidden bg-stone-900">
         <Image
           src="/team/team-group.jpg"
-          alt=""
-          aria-hidden
+          alt="The Relocation Engine team"
           fill
           priority
           sizes="100vw"
-          className="object-cover scale-110 blur-2xl opacity-70"
+          className="object-cover"
         />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative w-full aspect-[2000/1333]">
-            <Image
-              src="/team/team-group.jpg"
-              alt="The Relocation Engine team"
-              fill
-              sizes="100vw"
-              className="object-contain"
-            />
-          </div>
-        </div>
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/10 to-black/70" />
 
         <header className="relative z-10">
