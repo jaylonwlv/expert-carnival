@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { prisma } from "@/lib/prisma";
-import { toE164 } from "@/lib/sms";
+import { toE164, sendSms } from "@/lib/sms";
 import { sendEmail, escapeHtml } from "@/lib/email";
 import { logActivity } from "@/lib/activity";
 import { BUSINESS } from "@/lib/business";
 import { classifyTimelineReply, TIMELINE_LABELS } from "@/lib/timeline";
+
+// The standard CTIA/carrier-recognized opt-out and opt-in keywords -- every
+// SMS this app sends already promises "Reply STOP to opt out, HELP for
+// help" (lead-actions.ts, the review-request cron, the SMS Terms page), so
+// honoring them here isn't optional polish, it's making good on a promise
+// already made in writing.
+const STOP_KEYWORDS = new Set(["STOP", "STOPALL", "UNSUBSCRIBE", "CANCEL", "END", "QUIT"]);
+const START_KEYWORDS = new Set(["START", "UNSTOP", "YES"]);
+const HELP_KEYWORDS = new Set(["HELP", "INFO"]);
 
 // Configured as this Twilio number's "A Message Comes In" webhook. Unlike
 // every other inbound path in this app, a request here isn't something a
@@ -37,6 +46,19 @@ function emptyTwiml(): NextResponse {
   });
 }
 
+// Unlike the outbound sends elsewhere in this app (a separate API call to
+// Twilio's REST endpoint), a STOP/HELP reply's own confirmation goes back
+// as TwiML in this same response -- Twilio delivers it as the reply to the
+// exact message that triggered it, with no second outbound send to pay for
+// or to race against.
+function twimlMessage(message: string): NextResponse {
+  const escaped = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return new NextResponse(
+    `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${escaped}</Message></Response>`,
+    { status: 200, headers: { "Content-Type": "text/xml" } }
+  );
+}
+
 async function notifyPaulinOfUnhandledReply(from: string, body: string, reason: string) {
   await sendEmail({
     to: BUSINESS.email,
@@ -47,6 +69,18 @@ async function notifyPaulinOfUnhandledReply(from: string, body: string, reason: 
       <p>Message: "${escapeHtml(body)}"</p>
     `,
   });
+}
+
+// Real-time nudge for an actual lead replying -- separate from (and faster
+// to notice than) the email path above, which is for replies that need a
+// manual look rather than ones that already resolved cleanly. Reuses the
+// same NEXT_PUBLIC_AGENT_PHONE the client tracker page already shows as
+// "reach Paulin" -- no second phone-number env var to keep in sync with
+// it. No-ops (same pattern as AGENT_EMAIL) if it's unset.
+async function notifyPaulinBySms(message: string) {
+  const agentPhone = process.env.NEXT_PUBLIC_AGENT_PHONE;
+  if (!agentPhone) return;
+  await sendSms({ to: agentPhone, body: message });
 }
 
 export async function POST(req: NextRequest) {
@@ -86,11 +120,37 @@ export async function POST(req: NextRequest) {
   }
 
   const client = matches[0];
+  // Checked before classifyTimelineReply below -- "STOP" would never match
+  // A/B/C anyway, but catching it here is what actually revokes consent
+  // instead of just falling through to "unrecognized reply."
+  const normalizedBody = body.trim().toUpperCase();
+
+  if (STOP_KEYWORDS.has(normalizedBody)) {
+    await prisma.client.update({ where: { id: client.id }, data: { smsConsent: false } });
+    await logActivity(client.id, "Replied STOP -- SMS consent revoked.");
+    return twimlMessage(
+      `You have been unsubscribed from ${BUSINESS.legalName} text messages. No further messages will be sent. Reply START to opt back in.`
+    );
+  }
+
+  if (START_KEYWORDS.has(normalizedBody)) {
+    await prisma.client.update({ where: { id: client.id }, data: { smsConsent: true, smsConsentAt: new Date() } });
+    await logActivity(client.id, "Replied START -- SMS consent restored.");
+    return twimlMessage(`You're resubscribed to ${BUSINESS.legalName} text messages. Reply STOP to opt out again.`);
+  }
+
+  if (HELP_KEYWORDS.has(normalizedBody)) {
+    return twimlMessage(
+      `${BUSINESS.legalName}: for help, contact ${BUSINESS.email} or ${BUSINESS.phone}. Msg & data rates may apply. Reply STOP to unsubscribe.`
+    );
+  }
+
   const timeline = classifyTimelineReply(body);
 
   if (!timeline) {
     await logActivity(client.id, `Received an unrecognized timeline reply: "${body}".`);
     await notifyPaulinOfUnhandledReply(from, body, `${client.name}'s timeline reply didn't parse as A/B/C.`);
+    await notifyPaulinBySms(`${client.name} replied: "${body}" -- didn't parse as A/B/C, check your email.`);
     return emptyTwiml();
   }
 
@@ -99,6 +159,7 @@ export async function POST(req: NextRequest) {
     data: { timeline, timelineSetAt: new Date() },
   });
   await logActivity(client.id, `Timeline reply: ${TIMELINE_LABELS[timeline]} (auto-classified from SMS).`);
+  await notifyPaulinBySms(`${client.name} replied to the timeline text: ${TIMELINE_LABELS[timeline]}.`);
 
   return emptyTwiml();
 }
