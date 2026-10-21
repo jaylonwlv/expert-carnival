@@ -37,7 +37,7 @@ export default async function SignPage({
   // The acknowledgment gate doesn't show the PDF at all, so there's no reason
   // to pay for a signed-URL round trip to Vercel Blob before the client even
   // gets past it. Once signed, the document to show is the stamped copy
-  // (their signature baked in, plus the audit page) — not the original,
+  // (their signature baked in, plus the audit page), not the original,
   // pre-signature source file that request.document still points at.
   let viewUrl: string | null = null;
   // Documents aren't protected from deletion once they're the target of a
@@ -45,7 +45,7 @@ export default async function SignPage({
   // admin cleaning up the gallery deletes what looks like a stray file but
   // is actually the signed copy). Falling back to the unsigned original in
   // that case would silently show the wrong document under a "you signed
-  // this" banner — surfacing it as missing instead is the honest result.
+  // this" banner, surfacing it as missing instead is the honest result.
   let signedCopyMissing = false;
   if (!needsIdAcknowledgment) {
     if (request.status === "signed") {

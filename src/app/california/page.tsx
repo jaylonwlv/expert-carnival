@@ -9,7 +9,7 @@ import { extractTrackingParams, singleParam } from "@/lib/utm";
 import { getMetaLeadEventId } from "@/lib/meta";
 import { submitLead } from "../lead-actions";
 
-// Same serif as the homepage's own headlines (page.tsx) — this page and
+// Same serif as the homepage's own headlines (page.tsx), this page and
 // /optin are the ones actually carrying paid traffic, so they're the first
 // impression most visitors get, and they shouldn't read as a plainer,
 // more generic page than the homepage they'll likely never see.
@@ -74,7 +74,7 @@ export default async function CaliforniaPage({
 
         <p className="text-center text-xs lg:text-sm font-medium text-amber-900 bg-amber-50/90 border border-amber-200 rounded-lg px-3 py-2 lg:px-4 lg:py-3 mb-5 lg:mb-8">
           Every month in California is another month of state income tax you won&apos;t pay in Nevada.
-          The sooner you start, the sooner that savings begins — and the earlier you lock in, the
+          The sooner you start, the sooner that savings begins, and the earlier you lock in, the
           more home and financing options you&apos;ll have.
         </p>
 

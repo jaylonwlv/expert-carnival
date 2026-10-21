@@ -8,7 +8,7 @@ import { STAGES } from "@/lib/stages";
 
 // Fires once per client, a few days after they reach the final "Moved In"
 // stage: a review-request (Google Business Profile) plus a referral ask.
-// Deliberately not fired the instant the stage changes — let them actually
+// Deliberately not fired the instant the stage changes, let them actually
 // settle in first. Triggered by Vercel Cron (see vercel.json); CRON_SECRET
 // gates it from being hit by anyone else, since this sends real
 // email/SMS to real clients.
@@ -48,8 +48,8 @@ export async function GET(req: NextRequest) {
           and we hope you're settling in well.</p>
           <p>If you have a minute, a quick review means a lot to a small team like ours:</p>
           <p><a href="${BUSINESS.reviewUrl}" style="display:inline-block;background:#d97706;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;">Leave us a review</a></p>
-          <p>And if you know anyone else relocating to the Las Vegas area — California sellers or
-          military families with PCS orders — we'd love the introduction. They can get started at
+          <p>And if you know anyone else relocating to the Las Vegas area, California sellers or
+          military families with PCS orders, we'd love the introduction. They can get started at
           <a href="${referralUrl}">${escapeHtml(BUSINESS.domain)}</a>.</p>
           <p>Thank you again for trusting us with your move.</p>
           <p>${escapeHtml(BUSINESS.licensee)}<br/>${escapeHtml(BUSINESS.legalName)}</p>
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
     if (client.smsConsent && client.phone) {
       await sendSms({
         to: client.phone,
-        body: `Hi ${firstName}, it's ${BUSINESS.licensee} with ${BUSINESS.legalName} — congrats again on your new home! If you have a minute, a review means a lot: ${BUSINESS.reviewUrl} And if you know anyone else moving to Vegas, send them to ${BUSINESS.domain}. Reply STOP to opt out.`,
+        body: `Hi ${firstName}, it's ${BUSINESS.licensee} with ${BUSINESS.legalName}, congrats again on your new home! If you have a minute, a review means a lot: ${BUSINESS.reviewUrl} And if you know anyone else moving to Vegas, send them to ${BUSINESS.domain}. Reply STOP to opt out.`,
       });
     }
 

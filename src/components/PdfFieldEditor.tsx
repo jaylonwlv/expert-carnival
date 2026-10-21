@@ -191,7 +191,7 @@ export function PdfFieldEditor({
                   {fieldTypeConfig(field.type).label}
                 </span>
                 {/* Always visible (not hover-gated) and sized for a thumb, not
-                    just a mouse pointer — a control only shown on :hover is
+                    just a mouse pointer, a control only shown on :hover is
                     simply never reachable on a touch device. */}
                 <button
                   type="button"

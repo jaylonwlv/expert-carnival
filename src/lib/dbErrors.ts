@@ -2,7 +2,7 @@ import { Prisma } from "@/generated/prisma/client";
 
 // With the @prisma/adapter-pg driver adapter this project uses, a database
 // that's unreachable doesn't come through as PrismaClientInitializationError
-// (what plain, non-adapter Prisma Client throws for the same failure) —
+// (what plain, non-adapter Prisma Client throws for the same failure),
 // it surfaces as a PrismaClientKnownRequestError whose code falls in the
 // P1xxx range, Prisma's own documented range for connection-level errors
 // (P1001 "Can't reach database server", P1002 "timed out", P1017 "server

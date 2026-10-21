@@ -108,8 +108,8 @@ export default function PrivacyPage() {
       <p>
         If you arrive at our site from a Meta (Facebook/Instagram) ad, we use the Meta Pixel and Meta
         Conversions API to measure how our advertising performs. When you submit a lead form, we send
-        Meta a cryptographically hashed (SHA-256) version of your email and phone number — never the
-        plain, readable value — along with your IP address, browser user agent, and Meta&apos;s own
+        Meta a cryptographically hashed (SHA-256) version of your email and phone number (never the
+        plain, readable value), along with your IP address, browser user agent, and Meta&apos;s own
         anonymous ad-click identifiers, so Meta can match your submission back to the ad that brought
         you here. This is used solely to measure and improve ad performance, not to build a profile of
         you beyond that matching.

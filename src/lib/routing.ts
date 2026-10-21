@@ -34,7 +34,7 @@ function permutations(indices: number[]): number[][] {
 }
 
 // Straight-line (haversine) distance stands in for drive time to pick a
-// visiting order — no routing API needed. Brute-forces every permutation
+// visiting order, no routing API needed. Brute-forces every permutation
 // after the fixed starting stop for <=8 total stops (7! = 5,040, instant),
 // which covers any realistic day of home tours; falls back to a greedy
 // nearest-neighbor heuristic beyond that so it never hangs on a huge list.

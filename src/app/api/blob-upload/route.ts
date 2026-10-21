@@ -26,7 +26,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
         // The admin session cookie and the client's own tracker token are
         // the two things this app treats as proof of identity elsewhere
-        // (src/proxy.ts and the track pages, respectively) — re-derive the
+        // (src/proxy.ts and the track pages, respectively), re-derive the
         // authorized clientId from one of those here rather than trusting
         // whatever clientId the browser sent, so a tampered payload can't
         // point this token at someone else's folder.

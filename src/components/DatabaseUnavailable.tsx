@@ -6,7 +6,7 @@ import { BUSINESS } from "@/lib/business";
 // boundary can't show this specific a message: Next.js (and React, on top
 // of it) redacts the real server-side error before it reaches the client
 // in production, leaving only a generic "Something went wrong" regardless
-// of what was actually thrown — confirmed directly, not assumed. Catching
+// of what was actually thrown, confirmed directly, not assumed. Catching
 // the error where it happens and returning this as an ordinary render is
 // the only way to say something more useful than that.
 export function DatabaseUnavailable({ retryHref }: { retryHref: string }) {

@@ -45,7 +45,7 @@ export default async function TrackPage({
   }
 
   // A client is never sent this link until the realtor has called them and
-  // moved them past "Lead" (index 0) — but if one does land here early
+  // moved them past "Lead" (index 0), but if one does land here early
   // (the link gets shared ahead of that call), clientStages[0] is "Signed
   // On": without this guard the page would tell them they're signed on
   // while the badge still renders in Lead's own color, a visibly
@@ -62,7 +62,7 @@ export default async function TrackPage({
           </div>
         </header>
         {/* This used to be two lines of plain text on an otherwise empty
-            page — the biggest tonal drop in the whole funnel, landing
+            page, the biggest tonal drop in the whole funnel, landing
             right after the photo- and video-driven warmth of the landing
             page itself. A face, a concrete (but not over-promised) set of
             next steps, and a direct way to reach out close that gap
@@ -91,7 +91,7 @@ export default async function TrackPage({
             </p>
             <ol className="space-y-4">
               {[
-                `${AGENT_NAME} reaches out personally — by call or text.`,
+                `${AGENT_NAME} reaches out personally, by call or text.`,
                 "We talk through your timeline, budget, and must-haves.",
                 "This page updates automatically at every step from there.",
               ].map((step, i) => (
@@ -132,7 +132,7 @@ export default async function TrackPage({
     );
   }
 
-  // "Lead" (index 0) is realtor-only — a client is never sent this link
+  // "Lead" (index 0) is realtor-only, a client is never sent this link
   // until the realtor has called them and moved them past it, but showing
   // it defensively anyway (rather than assuming that always holds) keeps
   // the term from ever reaching the client even if a link goes out early.

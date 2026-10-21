@@ -35,7 +35,7 @@ export async function acknowledgeIdentity(requestId: string, token: string) {
 }
 
 // Fired from a client-side effect (MarkViewedOnMount) once the signing page
-// has actually mounted in a real browser — not from the server component's
+// has actually mounted in a real browser, not from the server component's
 // render itself. A messaging app's link-preview/unfurl bot fetching the
 // signing URL for a thumbnail is an ordinary GET like any other; doing this
 // update at render time flipped the request to "viewed" before the client
@@ -73,7 +73,7 @@ export async function submitSignature(
   }
   // The ID-acknowledgment gate (sign/[requestId]/page.tsx deciding whether
   // to render IdentityAcknowledgment vs. the signing view) is only a UI
-  // decision — it doesn't stop this action from being called directly.
+  // decision, it doesn't stop this action from being called directly.
   // Enforcing it here too is what actually makes it a gate.
   if (request.requiresIdAcknowledgment && !request.idAcknowledgedAt) {
     throw new Error("Please confirm your identity before signing");
@@ -91,7 +91,7 @@ export async function submitSignature(
   // Atomically claim the request before doing any expensive work, so two
   // concurrent submissions (double-click, two open tabs) can't both pass the
   // "not yet signed" check and race to overwrite each other's audit data.
-  // Only pending/viewed requests can be claimed — "signing" is excluded so a
+  // Only pending/viewed requests can be claimed, "signing" is excluded so a
   // second concurrent call can't also claim it once the first flips it.
   const claim = await prisma.signatureRequest.updateMany({
     where: { id: requestId, status: { in: ["pending", "viewed"] } },

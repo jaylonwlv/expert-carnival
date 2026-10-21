@@ -22,12 +22,12 @@ type ClientRow = {
   currentStage: number;
   isPCS: boolean;
   // Prisma's column is a plain String? (not an enum), so this is whatever
-  // was last written to it — isTimeline is what actually narrows it to a
+  // was last written to it, isTimeline is what actually narrows it to a
   // real Timeline before TimelineBadge ever sees it.
   timeline: string | null;
   utmSource: string | null;
   // Prisma's column is a plain String? (not an enum), same isCallOutcome
-  // narrowing pattern as isTimeline above — the dropdown below always
+  // narrowing pattern as isTimeline above, the dropdown below always
   // resets to blank after logging, so this is what the row actually shows.
   lastCallOutcome: string | null;
   lastCallOutcomeAt: Date | null;
@@ -50,7 +50,7 @@ export function ClientList({
   deleteAction: (clientId: string) => void;
   logCallOutcomeAction: (clientId: string, formData: FormData) => Promise<void>;
   // The list below is already the server-filtered, server-paginated page
-  // for these three — search and stage filtering happen in the database
+  // for these three, search and stage filtering happen in the database
   // (see admin/page.tsx) so they cover every client, not just whatever
   // page happens to be loaded in the browser right now.
   query: string;
@@ -158,7 +158,7 @@ export function ClientList({
           {clients.map((client) => {
             const stage = STAGES[client.currentStage];
             const color = stageColor(client.currentStage);
-            // 0 at "Lead" (nothing's happened yet), 100 at "Moved In" —
+            // 0 at "Lead" (nothing's happened yet), 100 at "Moved In",
             // unlike the other STAGES.length usages, +1/STAGES.length would
             // show a lead who hasn't been contacted as already ~11% done.
             const progress = (client.currentStage / (STAGES.length - 1)) * 100;

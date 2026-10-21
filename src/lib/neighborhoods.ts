@@ -11,9 +11,9 @@ export type NeighborhoodGroup = {
 };
 
 // Zip codes gathered from Las Vegas-area real estate guides (not USPS
-// boundary files — treat as "which zip to expect," not a legal boundary).
+// boundary files, treat as "which zip to expect," not a legal boundary).
 // Coordinates are approximate community-center estimates, not geocoded
-// against a live API — the map pins are draggable so they can be nudged to
+// against a live API, the map pins are draggable so they can be nudged to
 // the right spot once viewed against real tiles.
 export const NEIGHBORHOOD_GROUPS: NeighborhoodGroup[] = [
   {

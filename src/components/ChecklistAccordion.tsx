@@ -11,7 +11,7 @@ import type { ChecklistStatus } from "@/lib/checklist";
 import type { NeighborhoodGroup } from "@/lib/neighborhoods";
 import type { UploadedBlobMeta } from "@/lib/documents";
 
-// Leaflet touches `window` at import time, which breaks SSR — load client-only.
+// Leaflet touches `window` at import time, which breaks SSR, load client-only.
 const NeighborhoodMapPicker = dynamic(
   () => import("@/components/NeighborhoodMapPicker").then((m) => m.NeighborhoodMapPicker),
   { ssr: false, loading: () => <div className="h-80 rounded-lg bg-stone-50 animate-pulse" /> }

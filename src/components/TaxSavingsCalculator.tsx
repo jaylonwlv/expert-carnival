@@ -8,7 +8,7 @@ import type { LeadSource } from "@/app/lead-actions";
 const DEFAULT_INCOME = 150_000;
 const MIN_INCOME = 40_000;
 const MAX_INCOME = 500_000;
-// Most of this site's traffic is explicitly "moving from California" —
+// Most of this site's traffic is explicitly "moving from California",
 // defaulting the picker to CA instead of an alphabetical first state (AL)
 // means the number a visitor sees on first paint, before touching anything,
 // is already the relevant one for most of them.
@@ -19,7 +19,7 @@ function formatUsd(value: number): string {
 }
 
 // Interactive stand-in for the static CA-vs-NV comparison table buried in
-// the PDF guide — same underlying math, but something a visitor can play
+// the PDF guide, same underlying math, but something a visitor can play
 // with before ever filling out the form. See lib/stateTax.ts (and, for
 // California specifically, lib/caTax.ts) for the figures.
 export function TaxSavingsCalculator({ page }: { page: LeadSource }) {
@@ -28,7 +28,7 @@ export function TaxSavingsCalculator({ page }: { page: LeadSource }) {
   const stateTax = estimateStateTax(state, income);
   const monthlyStateTax = stateTax / 12;
   // Dragging the slider or changing the state is the engagement signal we
-  // actually care about — not a second CTA on the calculator (that
+  // actually care about, not a second CTA on the calculator (that
   // competes with the one real ask, the lead form below). Logged once per
   // page load, on whichever happens first, so one visitor who plays with
   // either control for a while doesn't inflate the count.
@@ -114,7 +114,7 @@ export function TaxSavingsCalculator({ page }: { page: LeadSource }) {
         >
           taxfoundation.org
         </a>
-        . Simplified for illustration — not tax advice. Consult a licensed CPA or tax advisor for
+        . Simplified for illustration, not tax advice. Consult a licensed CPA or tax advisor for
         guidance specific to your household.
       </p>
     </div>

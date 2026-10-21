@@ -11,7 +11,7 @@ function wrap(firstName: string, message: string, trackerUrl: string): string {
     <p>Hi ${firstName},</p>
     <p>${message}</p>
     <p><a href="${trackerUrl}">View your progress</a></p>
-    <p>— ${AGENT_NAME}, ${COMPANY_NAME}</p>
+    <p>${AGENT_NAME}, ${COMPANY_NAME}</p>
   `;
 }
 
@@ -19,7 +19,7 @@ function wrap(firstName: string, message: string, trackerUrl: string): string {
 // them in this app's data model (see src/lib/checklist.ts and
 // src/lib/stages.ts). "Approved" is interpreted as loan approval
 // (loan_conditions_cleared), distinct from "clear to close" at the end of
-// the same stage — flagged since it's the one ambiguous name in the
+// the same stage, flagged since it's the one ambiguous name in the
 // original request; easy to remap if that's not the intent.
 export const CHECKLIST_EMAIL_TRIGGERS: Record<string, EmailTrigger> = {
   preapproval_letter: {
@@ -56,12 +56,12 @@ export const STAGE_EMAIL_TRIGGERS: Record<string, EmailTrigger> = {
   },
   // Every other stage below this one has a trigger; without one here, the
   // first message a client gets after the actual finish line was the
-  // post-move review request (api/cron/review-requests), a few days later —
+  // post-move review request (api/cron/review-requests), a few days later,
   // reviews-first, congratulations never, at the one moment that should
   // feel warmest.
   "Moved In": {
     subject: "Welcome home!",
     body: (firstName, trackerUrl) =>
-      wrap(firstName, "Congratulations — you're officially a Las Vegas resident! Welcome home.", trackerUrl),
+      wrap(firstName, "Congratulations! You're officially a Las Vegas resident. Welcome home.", trackerUrl),
   },
 };

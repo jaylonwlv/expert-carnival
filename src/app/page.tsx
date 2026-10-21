@@ -11,7 +11,7 @@ import { extractTrackingParams, singleParam } from "@/lib/utm";
 import { getMetaLeadEventId } from "@/lib/meta";
 import { submitLead } from "./lead-actions";
 
-// Scoped to this page only — the display serif is part of the homepage's
+// Scoped to this page only, the display serif is part of the homepage's
 // editorial redesign, not a site-wide type change.
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["500", "600"] });
 
@@ -21,7 +21,7 @@ export const metadata = {
     "Full-service relocation to Las Vegas, from financing and home selection through closing and move-in.",
 };
 
-// Paulin's own b-roll, not stock footage — one clip per service so each
+// Paulin's own b-roll, not stock footage, one clip per service so each
 // gets its own full-bleed moment instead of sharing a single hero loop.
 const SERVICES = [
   {
@@ -97,7 +97,7 @@ export default async function HomePage({
     <div className="min-h-screen flex flex-col">
       {/* This page is by far the longest, most scroll-heavy one on the
           site (hero -> quote -> 4 video sections -> calculator -> the one
-          form, dead last) — /california and /optin already get this
+          form, dead last), /california and /optin already get this
           floating shortcut, but it was never wired up here despite needing
           it the most. */}
       <StickyCtaBar heroId="hero" formId="lead-form" label="Get My Free Guide ↓" />
@@ -151,7 +151,7 @@ export default async function HomePage({
               </Link>
             </div>
             {/* Neither bucket? Without this, the only way down to the
-                generic form is scrolling the entire page — a plain anchor
+                generic form is scrolling the entire page, a plain anchor
                 jump (not a route change) straight to it. */}
             <a
               href="#lead-form"

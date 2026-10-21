@@ -32,7 +32,7 @@ export type StageChecklist = {
 // not fully confirmed from these searches).
 export const STAGE_CHECKLISTS: StageChecklist[] = [
   {
-    // Lead — no checklist items; nothing to track until they're signed on.
+    // Lead, no checklist items; nothing to track until they're signed on.
     documentHeavy: false,
     items: [],
   },
@@ -241,7 +241,7 @@ export async function ensureChecklistItems(clientId: string, isPCS: boolean) {
   // Cheap short-circuit: once a client's items exactly match their current
   // PCS/standard set (the common case on every page load after the first),
   // skip the write pass entirely instead of re-upserting unchanged rows on
-  // every render. A plain count match isn't enough here — toggling isPCS
+  // every render. A plain count match isn't enough here, toggling isPCS
   // swaps in a different set of items, which can coincidentally be the same
   // size as the old one, so the actual key sets have to match.
   if (existingKeys.size === expectedKeys.size && [...expectedKeys].every((key) => existingKeys.has(key))) {
@@ -249,13 +249,13 @@ export async function ensureChecklistItems(clientId: string, isPCS: boolean) {
   }
 
   // Items left over from before a PCS toggle (standard-only items on a now-
-  // PCS client, or vice versa) are no longer relevant — without this,
+  // PCS client, or vice versa) are no longer relevant, without this,
   // ensureChecklistItems only ever adds the newly-relevant set and the old
   // one lingers forever, since upsert never removes a row that isn't in
   // the set it's given. Excludes items already marked "done": deleting
   // those would silently erase a real completion (and the record it ever
   // happened, with no activity-log trace) just because the client's PCS
-  // flag got toggled — leaving them in place as history is the safer
+  // flag got toggled, leaving them in place as history is the safer
   // failure mode than losing them if the flag gets toggled back.
   const staleKeys = [...existingKeys].filter((key) => !expectedKeys.has(key));
   if (staleKeys.length > 0) {

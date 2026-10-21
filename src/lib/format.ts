@@ -36,7 +36,7 @@ export function fileKindLabel(contentType: string | null, filename: string): str
 }
 
 // Appointment date/times are stored and displayed as plain wall-clock values
-// (no timezone math) — whatever Paulin types is exactly what the client sees,
+// (no timezone math), whatever Paulin types is exactly what the client sees,
 // on the assumption everyone involved is in the same local time.
 
 export function parseAppointmentInput(value: string): Date {

@@ -9,10 +9,10 @@ const LEGAL_LINKS = [
   { href: "/accessibility", label: "Accessibility" },
 ];
 
-// Full site footer — nav to About/Contact, the legal pages required by the
+// Full site footer, nav to About/Contact, the legal pages required by the
 // SMS/real-estate compliance work, and the Equal Housing Opportunity
 // statement. Used on the homepage and every informational/legal page.
-// `socialLinks` is opt-in (default off) — only the homepage passes it;
+// `socialLinks` is opt-in (default off), only the homepage passes it;
 // the legal pages and the dedicated lead-capture pages intentionally don't,
 // same reasoning MinimalSiteFooter already documents for those.
 export function SiteFooter({ socialLinks = false }: { socialLinks?: boolean } = {}) {
@@ -89,10 +89,10 @@ export function SiteFooter({ socialLinks = false }: { socialLinks?: boolean } = 
 
 // Compact version for the dedicated lead-capture pages (/california,
 // /optin), where a full nav footer would compete with the single
-// conversion goal — just the links that compliance actually needs
+// conversion goal, just the links that compliance actually needs
 // reachable from a page that collects SMS consent, plus a tap-to-call
 // fallback. The form is the primary path, so the call link is deliberately
-// below everything else, not competing for attention above the fold — but
+// below everything else, not competing for attention above the fold, but
 // some visitors who are already sold just want to talk to Paulin directly
 // rather than type into a form, and until now that path didn't exist
 // anywhere on either page.

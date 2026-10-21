@@ -43,7 +43,7 @@ export async function createSignatureRequest(
       },
     });
   } catch (err) {
-    // documentId is @unique — opening the same document's sign-setup page
+    // documentId is @unique, opening the same document's sign-setup page
     // in two tabs, or double-clicking "Send" before the page revalidates,
     // both see "no request yet" and both submit. Without this, the second
     // call throws a raw Prisma constraint error straight at the admin.

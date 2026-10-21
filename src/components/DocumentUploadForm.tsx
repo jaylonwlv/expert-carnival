@@ -22,7 +22,7 @@ export function DocumentUploadForm({
 }: {
   context: UploadAuthContext;
   // Exactly one of these four is used, picked by which of stageOptions /
-  // signerOptions is provided — kept as separate props (rather than one
+  // signerOptions is provided, kept as separate props (rather than one
   // variable-arity callback) so each call site's bound server action can be
   // passed straight through without a wrapping arrow function, which would
   // break passing it down from a Server Component.
@@ -49,19 +49,19 @@ export function DocumentUploadForm({
   const signerSelectId = useId();
 
   // The stage/signer pickers below render whenever stageOptions/signerOptions
-  // are provided — if the matching callback that would actually carry the
+  // are provided, if the matching callback that would actually carry the
   // chosen value wasn't also provided, handleSubmit's priority dispatch
   // would silently fall through to a callback that drops it. Failing loudly
   // here, rather than quietly losing the picked value, catches that at the
   // call site instead of in production.
   if (stageOptions && !onUploadWithStage && !onUploadWithStageAndSigner) {
     throw new Error(
-      "DocumentUploadForm: stageOptions was provided, but neither onUploadWithStage nor onUploadWithStageAndSigner was — the chosen stage would be silently dropped."
+      "DocumentUploadForm: stageOptions was provided, but neither onUploadWithStage nor onUploadWithStageAndSigner was, the chosen stage would be silently dropped."
     );
   }
   if (signerOptions && signerOptions.length > 0 && !onUploadWithSigner && !onUploadWithStageAndSigner) {
     throw new Error(
-      "DocumentUploadForm: signerOptions was provided, but neither onUploadWithSigner nor onUploadWithStageAndSigner was — the chosen signer would be silently dropped."
+      "DocumentUploadForm: signerOptions was provided, but neither onUploadWithSigner nor onUploadWithStageAndSigner was, the chosen signer would be silently dropped."
     );
   }
 
@@ -101,7 +101,7 @@ export function DocumentUploadForm({
 
       // Which callback fires is decided by which ones the caller actually
       // passed in, not by whether signerOptions/stageOptions happens to be
-      // empty right now — a caller that supports signer tagging still
+      // empty right now, a caller that supports signer tagging still
       // wires up onUploadWithSigner even before any signers exist yet, so
       // that still has to be what runs once one gets added later.
       if (onUploadWithStageAndSigner) {

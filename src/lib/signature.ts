@@ -3,15 +3,15 @@ import path from "node:path";
 import { PDFDocument, rgb } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 
-// StandardFonts.Helvetica only supports WinAnsi (Windows-1252) encoding —
+// StandardFonts.Helvetica only supports WinAnsi (Windows-1252) encoding,
 // any signer name or typed field value outside that (Vietnamese diacritics,
 // Cyrillic, CJK, emoji) made drawText throw, so a real class of legitimate
 // names could never complete signing at all. A bundled Unicode font fixes
-// that. `subset: false` (the default — deliberately not overridden) is
+// that. `subset: false` (the default, deliberately not overridden) is
 // load-bearing, not just unused: pdf-lib's font-subsetting path was tested
 // directly against this exact font and silently dropped several glyphs
 // (Vietnamese tone marks, full Cyrillic words) without throwing, which is
-// worse than Helvetica's crash — it would have shipped a signed PDF
+// worse than Helvetica's crash, it would have shipped a signed PDF
 // quietly missing characters from the signer's own name. Unsubsetted, the
 // same glyphs render correctly (verified directly, not assumed), at the
 // cost of embedding the full ~2MB font in every signed PDF.
@@ -69,7 +69,7 @@ export async function stampSignedPdf(
     if (!page) {
       // A field's page index not matching the document's actual page count
       // is a data-integrity problem (the stored file doesn't match what the
-      // field layout assumed), not a normal "field left blank" case — it
+      // field layout assumed), not a normal "field left blank" case, it
       // was previously lumped in with the !field.value check below and
       // silently skipped, which let a signed PDF ship with a required mark
       // quietly missing and nothing in the audit trail saying so.
@@ -109,7 +109,7 @@ export async function stampSignedPdf(
     }
   }
 
-  // Audit/certificate page — the part of RabbitSign's "audit trail on every
+  // Audit/certificate page, the part of RabbitSign's "audit trail on every
   // signed document" feature that's independent of where fields were placed.
   const auditPage = pdfDoc.addPage();
   const { height: auditPageHeight } = auditPage.getSize();

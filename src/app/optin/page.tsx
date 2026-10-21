@@ -9,11 +9,11 @@ import { extractTrackingParams, singleParam } from "@/lib/utm";
 import { getMetaLeadEventId } from "@/lib/meta";
 import { submitLead } from "../lead-actions";
 
-// Same serif as the homepage's own headlines and /california — see that
+// Same serif as the homepage's own headlines and /california, see that
 // page's comment on why this (not the homepage) is where it matters most.
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["500", "600"] });
 
-// Placeholder copy — Paulin's providing the real PCS guide copy separately.
+// Placeholder copy, Paulin's providing the real PCS guide copy separately.
 // Structure/workflow mirrors /california exactly so swapping in the final
 // copy is a text-only change.
 export const metadata = {

@@ -1,6 +1,6 @@
 // A document's filename (or a client's name) can end up interpolated
 // straight into an HTML email body, and either one can originate from a
-// client-controlled upload or form field — escape before interpolating
+// client-controlled upload or form field, escape before interpolating
 // into any email HTML built from them.
 export function escapeHtml(value: string): string {
   return value
@@ -14,7 +14,7 @@ export function escapeHtml(value: string): string {
 // Sends via Resend's REST API directly (no SDK dependency, consistent with
 // how this project avoids extra service wrappers). No-ops with a console log
 // when RESEND_API_KEY isn't set, matching the FAKE_SIGNED_URLS pattern in
-// lib/documents.ts — local dev and testing don't need a real key, and
+// lib/documents.ts, local dev and testing don't need a real key, and
 // nothing breaks if it's missing.
 //
 // Required for production: a Resend account, a verified sending domain, and
@@ -37,12 +37,12 @@ export async function sendEmail({
   const from = process.env.EMAIL_FROM ?? "Relocation Engine <updates@example.com>";
 
   if (!apiKey) {
-    console.log(`[email] RESEND_API_KEY not set — would send "${subject}" to ${to}`);
+    console.log(`[email] RESEND_API_KEY not set, would send "${subject}" to ${to}`);
     return;
   }
 
   // A failed send should never take down the mutation it's a side effect of
-  // (the stage/checklist change already committed by the time this runs) —
+  // (the stage/checklist change already committed by the time this runs),
   // swallow both network-level failures and non-OK responses here.
   try {
     const res = await fetch("https://api.resend.com/emails", {

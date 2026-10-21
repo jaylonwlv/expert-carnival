@@ -22,7 +22,7 @@ function PdfPageCanvas({
   useEffect(() => {
     let cancelled = false;
     // Capture the in-flight render task (not just a boolean flag) so cleanup
-    // can actually cancel it — pdf.js throws "Cannot use the same canvas
+    // can actually cancel it, pdf.js throws "Cannot use the same canvas
     // during multiple render() operations" if a second render starts on the
     // same canvas before the first's task is cancelled, which otherwise
     // happens on every Strict Mode double-mount in dev.
@@ -43,7 +43,7 @@ function PdfPageCanvas({
         await renderTask.promise;
         if (!cancelled) onRendered(pageIndex, { width: viewport.width, height: viewport.height });
       } catch (err) {
-        // Cancelling a task deliberately rejects its promise — that's expected.
+        // Cancelling a task deliberately rejects its promise, that's expected.
         if (!cancelled) throw err;
       }
     })();

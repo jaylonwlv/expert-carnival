@@ -22,7 +22,7 @@ model Client {
   preferredNeighborhoods String[]        @default([])
   isPCS                  Boolean         @default(false)
   // Set when this client originated from a public lead-capture page rather
-  // than being added directly by the realtor — which page, for marketing
+  // than being added directly by the realtor, which page, for marketing
   // analytics (the homepage and /california share one PDF/workflow but are
   // still worth telling apart here).
   source                 String?
@@ -31,17 +31,17 @@ model Client {
   tourStops              Json?
   tourSavedAt            DateTime?
   // Set once the post-move review/referral request has actually been sent
-  // (see api/cron/review-requests) — guards against sending it twice if the
+  // (see api/cron/review-requests), guards against sending it twice if the
   // cron runs again before the client's stage changes.
   reviewRequestSentAt    DateTime?
   // The lead's own reply (A/B/C) to the post-submission timeline-check text
-  // — "immediate" | "60_90" | "90_120" (see lib/timeline.ts). Set either by
+  //, "immediate" | "60_90" | "90_120" (see lib/timeline.ts). Set either by
   // the inbound SMS webhook auto-classifying a reply, or manually by the
   // realtor from the client detail page when a reply doesn't parse cleanly.
   timeline               String?
   timelineSetAt          DateTime?
   // Most recent pick from the dashboard's "Log a call result" dropdown
-  // (lib/callOutcomes.ts) — the dropdown itself always resets to blank
+  // (lib/callOutcomes.ts), the dropdown itself always resets to blank
   // after logging (each pick is a new dated ActivityLog entry, not a
   // single current status), so this is what lets the dashboard list show
   // the last outcome at a glance instead of it disappearing entirely.
@@ -49,7 +49,7 @@ model Client {
   lastCallOutcomeAt      DateTime?
   // Campaign attribution, captured from the landing page's own query
   // string at the moment of submission (see app/california/page.tsx,
-  // app/optin/page.tsx, app/lead-actions.ts) — `source` above already says
+  // app/optin/page.tsx, app/lead-actions.ts), `source` above already says
   // which of our pages a lead came from; these say which ad/campaign sent
   // them to it.
   utmSource              String?
@@ -57,7 +57,7 @@ model Client {
   utmCampaign            String?
   utmContent             String?
   utmTerm                String?
-  // Meta's own click id (the `fbclid` URL param) — kept separately from
+  // Meta's own click id (the `fbclid` URL param), kept separately from
   // the utm* fields since it's used to build the `fbc` value for the
   // Conversions API match (see lib/meta.ts), not just for display.
   fbclid                 String?
@@ -72,7 +72,7 @@ model Client {
 }
 
 // A named person on the file whose own documents (ID, pay stubs, etc.) need
-// to be told apart from the rest of the household's — e.g. both spouses on
+// to be told apart from the rest of the household's, e.g. both spouses on
 // a joint purchase. Deliberately separate from Client, which stays the one
 // record per relocation case / tracker link, shared by the whole household.
 model Signer {
@@ -117,7 +117,7 @@ model SignatureRequest {
   status                   String           @default("pending") // pending | viewed | signed
   fields                   SignatureField[]
   viewedAt                 DateTime?
-  // Gates the signing view behind an ID-match confirmation step first —
+  // Gates the signing view behind an ID-match confirmation step first,
   // meant for whichever document a realtor sends first (e.g. Duties Owed),
   // set per-request rather than detected automatically, so later documents
   // for the same client don't re-ask once the client has already confirmed.
@@ -150,14 +150,14 @@ model SignatureField {
 }
 
 // How many visitors actually engage with the TaxSavingsCalculator, as a
-// proxy for whether it's pulling its weight — logged once per page load on
+// proxy for whether it's pulling its weight, logged once per page load on
 // the slider's first drag, deliberately not tied to a Client (most
 // visitors who touch the slider never submit the lead form at all).
 model CalculatorInteraction {
   id        String   @id @default(cuid())
   page      String
   income    Int
-  // Origin state the visitor picked — null for rows logged before the
+  // Origin state the visitor picked, null for rows logged before the
   // calculator supported anything but California, so this stays optional
   // rather than backfilled with a guess.
   state     String?

@@ -4,7 +4,7 @@ import { ActionForm } from "@/components/ActionForm";
 import { TIMELINE_LABELS, TIMELINE_ORDER, type Timeline } from "@/lib/timeline";
 
 // Pulled out of the client detail page (a Server Component) into its own
-// "use client" file — an onChange handler authored inside a Server
+// "use client" file, an onChange handler authored inside a Server
 // Component can't cross into a Client Component even as ActionForm's
 // children, since the closure itself isn't serializable. React Server
 // Components only allow that boundary crossing for Server Actions (like

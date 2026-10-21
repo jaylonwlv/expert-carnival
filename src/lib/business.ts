@@ -17,7 +17,7 @@ export const BUSINESS = {
   // (Business Profile > Ask for reviews > Share review form) before the
   // post-move review-request cron (api/cron/review-requests) goes live.
   reviewUrl: "https://g.page/r/REPLACE_ME/review",
-  // Shown only in the homepage footer (SiteFooter's socialLinks prop) — not
+  // Shown only in the homepage footer (SiteFooter's socialLinks prop), not
   // the legal pages or the dedicated lead-capture pages, which deliberately
   // keep nothing but the single conversion goal on screen.
   social: {

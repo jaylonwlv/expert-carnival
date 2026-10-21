@@ -8,7 +8,7 @@ import { capitalizeFirst } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-// Friendlier labels for utm_medium values — "in_app_browser" is the one
+// Friendlier labels for utm_medium values, "in_app_browser" is the one
 // this app sets itself (the proxy's passive User-Agent/Referer fallback in
 // lib/inAppBrowser.ts); "cpc" is Paulin's own hand-built tag on her Meta ad
 // links, not a generic paid-search tag, so it reads as "Meta Ads" rather
@@ -21,7 +21,7 @@ const MEDIUM_LABELS: Record<string, string> = {
 type Row = { label: string; count: number };
 type PlatformRow = Row & { color: string; detail?: string; href?: string };
 
-// Preset date ranges, newest-first — the same small, fixed set of presets
+// Preset date ranges, newest-first, the same small, fixed set of presets
 // the dataviz skill's own filter-control guidance calls for, rather than a
 // free-form date picker this page doesn't need. "all" (no lower bound) is
 // the default so a bookmarked /admin/analytics link keeps behaving exactly
@@ -44,7 +44,7 @@ export default async function AnalyticsPage({
     ? { gte: new Date(Date.now() - activeRange.days * 24 * 60 * 60 * 1000) }
     : undefined;
   // Scoped to source: { not: null } the same way the dashboard's own
-  // "Leads by type" card is — only actual lead-form submissions carry utm
+  // "Leads by type" card is, only actual lead-form submissions carry utm
   // data at all, so a client Paulin added by hand shouldn't dilute the
   // breakdown with another "Direct" row.
   const leadsWhere = { source: { not: null } as const, ...(createdAtFilter ? { createdAt: createdAtFilter } : {}) };
@@ -72,14 +72,14 @@ export default async function AnalyticsPage({
     return <DatabaseUnavailable retryHref={activeRange.key === "all" ? "/admin/analytics" : `/admin/analytics?range=${activeRange.key}`} />;
   }
 
-  // Every known platform always gets a bar — including one sitting at
-  // zero — so the chart reads the same way every time (nothing appears or
+  // Every known platform always gets a bar, including one sitting at
+  // zero, so the chart reads the same way every time (nothing appears or
   // disappears as leads come in) and a platform with no leads yet is still
   // visibly a tracked one, not indistinguishable from "we don't track
   // that." Anything tagged with a utm_source outside the known list (a
   // hand-built ad campaign, a referral partner, etc.) rolls up into one
   // "Other" bar rather than spawning an unbounded, increasingly unreadable
-  // number of bars — its exact breakdown is still one hover away.
+  // number of bars, its exact breakdown is still one hover away.
   const knownCounts = new Map<string, number>(KNOWN_PLATFORMS.map((p) => [p.key, 0]));
   let directCount = 0;
   const otherCounts = new Map<string, number>();
@@ -90,7 +90,7 @@ export default async function AnalyticsPage({
     if (bucket === "direct") {
       directCount += count;
     } else if (bucket === "other") {
-      // Not null here — classifyPlatform only returns "direct" for a null
+      // Not null here, classifyPlatform only returns "direct" for a null
       // utmSource, so reaching "other" means the row had a real value.
       const raw = row.utmSource as string;
       otherCounts.set(raw, (otherCounts.get(raw) ?? 0) + count);
@@ -105,15 +105,15 @@ export default async function AnalyticsPage({
     .map(([source, count]) => `${capitalizeFirst(source)} (${count})`)
     .join(", ");
 
-  // Fixed render order — the known platforms in their defined sequence,
-  // then Direct, then Other — rather than sorted by count. Sorting by
+  // Fixed render order, the known platforms in their defined sequence,
+  // then Direct, then Other, rather than sorted by count. Sorting by
   // count would shuffle which two colors ever sit next to each other as
   // the numbers change week to week; the color pairing was only validated
   // for *this* fixed adjacency.
   //
   // Each bar's href drills into the client list filtered to exactly the
   // same bucket (see admin/page.tsx's platformWhere), so a click always
-  // lands on precisely what the bar and its tooltip claim — both read off
+  // lands on precisely what the bar and its tooltip claim, both read off
   // the same lib/platforms.ts classification, so they can't drift apart.
   const platformRows: PlatformRow[] = [
     ...KNOWN_PLATFORMS.map((p) => ({
@@ -204,7 +204,7 @@ export default async function AnalyticsPage({
 }
 
 function PlatformChart({ rows, total }: { rows: PlatformRow[]; total: number }) {
-  // Height is relative to the largest bar here, not `total` — a chart
+  // Height is relative to the largest bar here, not `total`, a chart
   // where one platform is 90% of all leads would otherwise draw every bar
   // nearly full-height and erase the actual size difference between them.
   const max = Math.max(...rows.map((row) => row.count), 1);
@@ -220,7 +220,7 @@ function PlatformChart({ rows, total }: { rows: PlatformRow[]; total: number }) 
           row.count > 0
             ? { height: `${Math.max((row.count / max) * 100, 4)}%`, backgroundColor: row.color }
             : { height: "3px", backgroundColor: row.color, opacity: 0.35 };
-        const tooltip = `${row.label}: ${row.count} lead${row.count === 1 ? "" : "s"} (${pct}%)${row.detail ? ` — ${row.detail}` : ""}. Click to see these leads.`;
+        const tooltip = `${row.label}: ${row.count} lead${row.count === 1 ? "" : "s"} (${pct}%)${row.detail ? `, ${row.detail}` : ""}. Click to see these leads.`;
         return (
           <Link
             key={row.label}

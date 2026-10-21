@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { Reveal } from "@/components/Reveal";
 import { BUSINESS } from "@/lib/business";
 
-// Same serif as the homepage's own editorial redesign — this page now
+// Same serif as the homepage's own editorial redesign, this page now
 // shares that visual language rather than the plain legal-page layout it
 // used before.
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["500", "600"] });
@@ -42,7 +42,7 @@ export default function AboutPage() {
       {/* Hero: the team group photo, full-bleed, same treatment as the
           homepage's own video hero (fill + object-cover inside a relative,
           min-h-[92vh] section with a dark gradient overlay for text
-          contrast) — this is the "group picture," made as full-bleed as a
+          contrast), this is the "group picture," made as full-bleed as a
           fixed-aspect JPEG reasonably can be. */}
       <section className="relative min-h-[92vh] flex flex-col overflow-hidden bg-stone-900">
         <Image
@@ -81,7 +81,7 @@ export default function AboutPage() {
             <h1 className={`${playfair.className} text-4xl md:text-6xl text-white leading-tight`}>
               Full-service relocation,
               <br />
-              run by people — not a call center.
+              run by people, not a call center.
             </h1>
             <p className="text-base md:text-lg text-white/85 mt-5 max-w-2xl mx-auto leading-relaxed">
               {BUSINESS.legalName} helps California sellers and military families PCSing to Nevada move
@@ -108,7 +108,7 @@ export default function AboutPage() {
           </Reveal>
         </section>
 
-        {/* Paulin gets the featured, full-width editorial row — she's the
+        {/* Paulin gets the featured, full-width editorial row, she's the
             one clients actually talk to and who closes the transaction. */}
         <div className="grid md:grid-cols-2">
           <div className="relative h-[50vh] md:h-[70vh]">
@@ -175,7 +175,7 @@ export default function AboutPage() {
         </section>
 
         {/* Dark CTA section, same visual language (and the same pill-button
-            style) as the homepage's hero CTAs — not the plain white
+            style) as the homepage's hero CTAs, not the plain white
             info-card buttons the Contact page uses, which is the mismatch
             this replaces. */}
         <section className="bg-stone-900 py-20 md:py-24">
@@ -187,7 +187,7 @@ export default function AboutPage() {
               Prefer to talk it through?
             </h2>
             <p className="text-base text-white/85 mt-5 max-w-xl mx-auto leading-relaxed">
-              Call or text {BUSINESS.licensee} directly — no call center, no hand-off.
+              Call or text {BUSINESS.licensee} directly. No call center, no hand-off.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <a

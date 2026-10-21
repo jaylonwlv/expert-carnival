@@ -158,7 +158,7 @@ export async function saveTourRoute(clientId: string, stops: TourStop[]) {
 
 export async function deleteClient(clientId: string) {
   // The Document rows cascade-delete with the client (schema: onDelete:
-  // Cascade), but that only removes the DB rows — nothing deletes the
+  // Cascade), but that only removes the DB rows, nothing deletes the
   // underlying blobs, unlike deleteDocument below, which does. Without
   // this, every file ever uploaded to a deleted client (contracts, IDs,
   // signed documents) leaks in Blob storage forever with no way to find it.
@@ -204,12 +204,12 @@ export async function createDocumentRecords(
 
   await logActivity(clientId, `Uploaded ${filenames.map((f) => `"${f}"`).join(", ")}.`);
 
-  // A document the client can't see yet shouldn't prompt them to go look —
+  // A document the client can't see yet shouldn't prompt them to go look,
   // but one they can is the exact case the tracker's "you always know where
   // things stand" promise is actually about, and uploading it here was
   // previously the one path that promise didn't apply to: nothing told the
   // client it existed unless they happened to revisit the link on their own
-  // (the signature-request flow already notifies; this is everything else —
+  // (the signature-request flow already notifies; this is everything else,
   // a disclosure, an estimate, anything just shared to view or download).
   if (visibleToClient) {
     const client = await prisma.client.findUnique({ where: { id: clientId } });
@@ -416,7 +416,7 @@ export async function toggleClientPCS(clientId: string) {
 }
 
 // Manual override/fallback alongside the inbound SMS webhook (api/
-// webhooks/twilio-sms) — for a reply that didn't parse as a bare A/B/C, or
+// webhooks/twilio-sms), for a reply that didn't parse as a bare A/B/C, or
 // one Paulin got by phone instead of text, the timeline still needs a way
 // in that isn't "edit the database directly." `timeline` of `null` clears
 // it back to unknown.
@@ -436,7 +436,7 @@ export async function setClientTimeline(clientId: string, timeline: Timeline | n
 }
 
 // ActionForm (client detail page) can only pass a (formData) => Promise<void>
-// action — this is the adapter that extracts and validates the <select>'s
+// action, this is the adapter that extracts and validates the <select>'s
 // value before delegating to the real update above.
 export async function setClientTimelineFromForm(clientId: string, formData: FormData) {
   const raw = String(formData.get("timeline") ?? "");
@@ -444,7 +444,7 @@ export async function setClientTimelineFromForm(clientId: string, formData: Form
   await setClientTimeline(clientId, timeline);
 }
 
-// Each pick is its own dated log entry, not a field overwrite — see
+// Each pick is its own dated log entry, not a field overwrite, see
 // lib/callOutcomes.ts for why. revalidating /admin (not just the detail
 // page) is what lets the dropdown's own row re-render after the log lands.
 export async function logCallOutcome(clientId: string, outcome: CallOutcome) {
@@ -453,7 +453,7 @@ export async function logCallOutcome(clientId: string, outcome: CallOutcome) {
   }
 
   // The dashboard dropdown itself always resets to blank after this (each
-  // pick is a new dated log entry, not a current status) — storing the
+  // pick is a new dated log entry, not a current status), storing the
   // most recent pick here separately is what lets the list show it at a
   // glance instead of it disappearing the instant the toast fades.
   await prisma.client.update({

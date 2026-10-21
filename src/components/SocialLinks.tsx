@@ -1,6 +1,6 @@
 import { BUSINESS } from "@/lib/business";
 
-// Simplified, single-color glyphs (not the exact brand marks) — same
+// Simplified, single-color glyphs (not the exact brand marks), same
 // fair-use, link-identification role as any other footer social row, kept
 // visually consistent with this app's other inline-SVG icons (viewBox
 // 0 0 24 24, fill="currentColor").

@@ -24,7 +24,7 @@ export function MetaLeadPixelFire({ eventId }: { eventId: string }) {
       if (sessionStorage.getItem(storageKey)) return;
       sessionStorage.setItem(storageKey, "1");
     } catch {
-      // Private browsing / storage disabled — fall through and fire once
+      // Private browsing / storage disabled, fall through and fire once
       // for this page load anyway rather than silently dropping the event.
     }
 
