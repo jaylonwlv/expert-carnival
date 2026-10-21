@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { SubmitButton } from "@/components/SubmitButton";
 import { TrackerPreview } from "@/components/TrackerPreview";
@@ -35,9 +35,23 @@ export function LeadForm({
   // (the one path where there's nothing left to preserve).
   const [state, formAction] = useActionState(action, {});
 
+  // The homepage's form sits ~5700px down the page; the redirect this
+  // page just took after a real submission resets scroll to the very top,
+  // so without this, a visitor who just submitted sees the hero again with
+  // zero sign anything happened -- confirmed directly (not assumed) to
+  // read as a silent failure, risking a duplicate submission or an
+  // abandoned visitor who thinks the form is broken.
+  const successRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (submitted) successRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    // Only on mount -- this page load IS the one that just submitted, so
+    // there's no later change in `submitted` to react to.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (submitted) {
     return (
-      <div className="space-y-4">
+      <div ref={successRef} className="space-y-4 scroll-mt-20">
         <div className={`rounded-xl bg-green-50 border border-green-200 px-5 py-8 text-center ${large ? "lg:px-7 lg:py-10" : ""}`}>
           <p className={`text-sm font-semibold text-green-800 ${large ? "lg:text-base" : ""}`}>You&apos;re all set!</p>
           <p className={`text-sm text-green-700 mt-1 ${large ? "lg:text-base" : ""}`}>

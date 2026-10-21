@@ -53,6 +53,7 @@ export default async function TrackPage({
   // yet" message instead keeps the defensive intent the slice below
   // already states without substituting a more-advanced stage.
   if (client.currentStage === 0) {
+    const firstName = client.name.split(" ")[0];
     return (
       <div className="min-h-screen bg-[#faf8f4] flex flex-col">
         <header className="bg-white border-b border-stone-200">
@@ -60,14 +61,72 @@ export default async function TrackPage({
             <Image src="/logo.png" alt={COMPANY_NAME} width={680} height={546} className="h-16 w-auto" priority />
           </div>
         </header>
-        <main className="flex-1 max-w-2xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-xl font-semibold text-stone-900">
-            Hi {client.name.split(" ")[0]}, thanks for reaching out!
-          </h1>
-          <p className="text-sm text-stone-600 mt-2 leading-relaxed">
-            {AGENT_NAME} will be in touch personally soon to get your move started. Check back here
-            once that happens. This is where you&apos;ll track every step along the way.
-          </p>
+        {/* This used to be two lines of plain text on an otherwise empty
+            page -- the biggest tonal drop in the whole funnel, landing
+            right after the photo- and video-driven warmth of the landing
+            page itself. A face, a concrete (but not over-promised) set of
+            next steps, and a direct way to reach out close that gap
+            without inventing a timeline commitment this page can't back up. */}
+        <main className="flex-1 max-w-2xl mx-auto px-4 py-16">
+          <div className="text-center">
+            <Image
+              src="/team/paulin-bust.jpg"
+              alt={AGENT_NAME}
+              width={160}
+              height={160}
+              className="w-20 h-20 rounded-full object-cover mx-auto mb-5 shadow-sm"
+            />
+            <h1 className="text-xl font-semibold text-stone-900">
+              Hi {firstName}, thanks for reaching out!
+            </h1>
+            <p className="text-sm text-stone-600 mt-2 leading-relaxed">
+              {AGENT_NAME} will be in touch personally soon to get your move started. This is where
+              you&apos;ll track every step along the way, so feel free to bookmark it.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 mt-8">
+            <p className="text-xs font-semibold uppercase tracking-wide text-stone-400 mb-4">
+              What happens next
+            </p>
+            <ol className="space-y-4">
+              {[
+                `${AGENT_NAME} reaches out personally -- by call or text.`,
+                "We talk through your timeline, budget, and must-haves.",
+                "This page updates automatically at every step from there.",
+              ].map((step, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold flex items-center justify-center">
+                    {i + 1}
+                  </span>
+                  <span className="text-sm text-stone-700 leading-relaxed">{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          {AGENT_PHONE && (
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-5 mt-5 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-stone-900">Don&apos;t want to wait?</p>
+                <p className="text-xs text-stone-500">Reach {AGENT_NAME} directly, right now.</p>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <a
+                  href={`sms:${AGENT_PHONE}`}
+                  className="rounded-md bg-amber-600 text-white text-sm font-medium px-3 py-2 shadow-sm hover:shadow-md hover:bg-amber-700 transition"
+                >
+                  Text
+                </a>
+                <a
+                  href={`tel:${AGENT_PHONE}`}
+                  className="rounded-md border border-stone-300 bg-white text-stone-800 text-sm font-medium px-3 py-2 shadow-sm hover:shadow-md hover:bg-stone-50 transition"
+                >
+                  Call
+                </a>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     );

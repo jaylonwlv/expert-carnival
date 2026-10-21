@@ -105,7 +105,16 @@ export function TaxSavingsCalculator({ page }: { page: LeadSource }) {
         {isPreciseBracketState(state)
           ? "Estimates use 2025 California state income tax brackets for a married couple filing jointly, standard deduction only."
           : `Estimates use ${STATE_LABELS[state]}'s top state income-tax rate as a simplified, single-rate figure (not full bracket math).`}{" "}
-        Simplified for illustration -- not tax advice. Consult a licensed CPA or tax advisor for
+        Rates sourced from{" "}
+        <a
+          href="https://taxfoundation.org/data/all/state/state-income-tax-rates/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-stone-600"
+        >
+          taxfoundation.org
+        </a>
+        . Simplified for illustration -- not tax advice. Consult a licensed CPA or tax advisor for
         guidance specific to your household.
       </p>
     </div>

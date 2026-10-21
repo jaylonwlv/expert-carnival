@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { TaxSavingsCalculator } from "@/components/TaxSavingsCalculator";
 import { BRollVideo } from "@/components/BRollVideo";
 import { Reveal } from "@/components/Reveal";
+import { StickyCtaBar } from "@/components/StickyCtaBar";
 import { extractTrackingParams, singleParam } from "@/lib/utm";
 import { getMetaLeadEventId } from "@/lib/meta";
 import { submitLead } from "./lead-actions";
@@ -94,7 +95,14 @@ export default async function HomePage({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <section className="relative min-h-[92vh] flex flex-col overflow-hidden bg-stone-900">
+      {/* This page is by far the longest, most scroll-heavy one on the
+          site (hero -> quote -> 4 video sections -> calculator -> the one
+          form, dead last) -- /california and /optin already get this
+          floating shortcut, but it was never wired up here despite needing
+          it the most. */}
+      <StickyCtaBar heroId="hero" formId="lead-form" label="Get My Free Guide ↓" />
+
+      <section id="hero" className="relative min-h-[92vh] flex flex-col overflow-hidden bg-stone-900">
         <BRollVideo src="/broll/hero-glass.mp4" poster="/broll/hero-glass-poster.jpg" priority />
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/10 to-black/70" />
 
@@ -142,6 +150,15 @@ export default async function HomePage({
                 PCS orders to Las Vegas?
               </Link>
             </div>
+            {/* Neither bucket? Without this, the only way down to the
+                generic form is scrolling the entire page -- a plain anchor
+                jump (not a route change) straight to it. */}
+            <a
+              href="#lead-form"
+              className="inline-block mt-4 text-sm text-white/70 underline underline-offset-2 hover:text-white transition"
+            >
+              Not sure yet? Get the free guide anyway ↓
+            </a>
           </div>
         </div>
       </section>
@@ -186,7 +203,7 @@ export default async function HomePage({
           <div className="max-w-xl mx-auto px-4 space-y-5">
             <TaxSavingsCalculator page="homepage" />
 
-            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+            <div id="lead-form" className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 scroll-mt-20">
               <h3 className="text-lg font-semibold text-stone-900 text-center">
                 Get your free California to Las Vegas relocation guide
               </h3>

@@ -54,16 +54,43 @@ const GUIDE_BY_SOURCE: Record<LeadSource, { pdfPath: string; subject: string; ti
   },
 };
 
-function leadMagnetEmailHtml(firstName: string, title: string, pdfUrl: string): string {
+// Previously just "thanks for requesting X, here's the download" -- the
+// one touchpoint that should carry the landing page's own warmth (Paulin's
+// photo, a personal signature, a concrete next step) into the recipient's
+// inbox was carrying none of it, reading more like an automated receipt
+// than a handoff from a real person. logoUrl/photoUrl have to be absolute
+// (not root-relative) -- most email clients render straight from the raw
+// HTML with no site origin to resolve a relative path against.
+function leadMagnetEmailHtml(
+  firstName: string,
+  title: string,
+  pdfUrl: string,
+  logoUrl: string,
+  photoUrl: string
+): string {
   const downloadBlock = `<p><a href="${pdfUrl}" style="display:inline-block;background:#d97706;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;">Download your guide</a></p>`;
 
   return `
-    <div style="font-family:sans-serif;color:#1c1917;">
+    <div style="font-family:sans-serif;color:#1c1917;max-width:480px;">
+      <img src="${logoUrl}" alt="${escapeHtml(BUSINESS.legalName)}" height="40" style="margin-bottom:20px;">
       <p>Hi ${escapeHtml(firstName)},</p>
       <p>Thanks for requesting the <strong>${escapeHtml(title)}</strong>. Here it is:</p>
       ${downloadBlock}
-      <p>We'll be in touch soon to see how we can help with your move.</p>
-      <p>Relocation Engine</p>
+      <p>I'll personally reach out by call or text soon to see how I can help with your move --
+      no pressure, just a conversation about your timeline and what you're looking for.</p>
+      <table cellpadding="0" cellspacing="0" style="margin-top:20px;">
+        <tr>
+          <td style="padding-right:12px;">
+            <img src="${photoUrl}" alt="${escapeHtml(BUSINESS.licensee)}" width="56" height="56"
+              style="border-radius:50%;object-fit:cover;display:block;">
+          </td>
+          <td style="font-size:14px;line-height:1.4;">
+            <strong>${escapeHtml(BUSINESS.licensee)}</strong><br>
+            <span style="color:#78716c;">Licensed Nevada Realtor · License #${escapeHtml(BUSINESS.nvLicense)}</span><br>
+            <span style="color:#78716c;">Brokered by ${escapeHtml(BUSINESS.brokerage)} · CA DRE #${escapeHtml(BUSINESS.caDre)}</span>
+          </td>
+        </tr>
+      </table>
     </div>
   `;
 }
@@ -155,7 +182,11 @@ export async function submitLead(
 
   const firstName = name.split(" ")[0];
   const guide = GUIDE_BY_SOURCE[source];
-  const pdfUrl = await buildAbsoluteUrl(guide.pdfPath);
+  const [pdfUrl, logoUrl, photoUrl] = await Promise.all([
+    buildAbsoluteUrl(guide.pdfPath),
+    buildAbsoluteUrl("/logo.png"),
+    buildAbsoluteUrl("/team/paulin-bust.jpg"),
+  ]);
 
   const notifyTo = process.env.LEAD_NOTIFICATION_EMAIL ?? BUSINESS.email;
 
@@ -225,7 +256,7 @@ export async function submitLead(
       sendEmail({
         to: email,
         subject: guide.subject,
-        html: leadMagnetEmailHtml(firstName, guide.title, pdfUrl),
+        html: leadMagnetEmailHtml(firstName, guide.title, pdfUrl, logoUrl, photoUrl),
         // Attached directly, not just linked -- a spam filter or an
         // email client set to block remote content can keep the link
         // from ever loading, but an attachment arrives with the email
