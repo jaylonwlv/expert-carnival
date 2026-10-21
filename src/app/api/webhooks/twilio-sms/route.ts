@@ -145,12 +145,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const timeline = classifyTimelineReply(body);
+  const timeline = classifyTimelineReply(body, client.isPCS);
 
   if (!timeline) {
     await logActivity(client.id, `Received an unrecognized timeline reply: "${body}".`);
-    await notifyPaulinOfUnhandledReply(from, body, `${client.name}'s timeline reply didn't parse as A/B/C.`);
-    await notifyPaulinBySms(`${client.name} replied: "${body}" -- didn't parse as A/B/C, check your email.`);
+    await notifyPaulinOfUnhandledReply(
+      from,
+      body,
+      `${client.name}'s timeline reply didn't parse as ${client.isPCS ? "A/B" : "A/B/C"}.`
+    );
+    await notifyPaulinBySms(
+      `${client.name} replied: "${body}" -- didn't parse as ${client.isPCS ? "A/B" : "A/B/C"}, check your email.`
+    );
     return emptyTwiml();
   }
 
