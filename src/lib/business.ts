@@ -25,6 +25,6 @@ export const BUSINESS = {
     tiktok: "https://www.tiktok.com/@relocationengine",
     instagram: "https://www.instagram.com/relocationengine",
     linkedin: "https://www.linkedin.com/in/relocationengine",
-    googleBusiness: "https://share.google/VyQaGIyalwHIuw9Ff",
+    googleBusiness: "https://maps.app.goo.gl/zhSPj4S5E7N3HdxN6",
   },
 } as const;
