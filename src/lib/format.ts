@@ -23,6 +23,10 @@ export function isImageFile(contentType: string | null, filename: string): boole
   return /\.(png|jpe?g|gif|webp|svg|avif)$/i.test(filename);
 }
 
+export function capitalizeFirst(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 const SHORT_EXT: Record<string, string> = { DOCX: "DOC", XLSX: "XLS", PPTX: "PPT" };
 
 export function fileKindLabel(contentType: string | null, filename: string): string {

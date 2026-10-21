@@ -6,19 +6,38 @@ import { STAGES } from "@/lib/stages";
 import { ClientList } from "@/components/ClientList";
 import { DatabaseUnavailable } from "@/components/DatabaseUnavailable";
 import { isDatabaseConnectivityError } from "@/lib/dbErrors";
+import { KNOWN_PLATFORMS } from "@/lib/platforms";
+import { capitalizeFirst } from "@/lib/format";
 import { deleteClient, logCallOutcomeFromForm, logout } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 20;
 
+// Labels for the two chart-drill-down filters below, so the "Filtered by"
+// banner reads the same way the analytics charts do rather than echoing a
+// raw query-param value back at the realtor.
+const PLATFORM_FILTER_LABELS: Record<string, string> = {
+  ...Object.fromEntries(KNOWN_PLATFORMS.map((p) => [p.key, p.label])),
+  direct: "Direct / no link tag",
+  other: "Other",
+};
+
+const MEDIUM_FILTER_LABELS: Record<string, string> = {
+  in_app_browser: "Detected in-app browser",
+  cpc: "Meta Ads",
+  direct: "Direct / no link tag",
+};
+
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; q?: string; stage?: string }>;
+  searchParams: Promise<{ page?: string; q?: string; stage?: string; platform?: string; medium?: string }>;
 }) {
   const params = await searchParams;
   const query = (params.q ?? "").trim();
+  const platformFilter = (params.platform ?? "").trim().toLowerCase() || null;
+  const mediumFilter = (params.medium ?? "").trim().toLowerCase() || null;
 
   // Both of these come straight off the URL, which a bookmark, a shared
   // link, or just hand-editing the address bar can put anything into -- an
@@ -37,18 +56,50 @@ export default async function AdminPage({
   const parsedPage = Number(params.page);
   const requestedPage = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 
-  const where: Prisma.ClientWhereInput = {
-    ...(query
-      ? {
-          OR: [
-            { name: { contains: query, mode: "insensitive" } },
-            { email: { contains: query, mode: "insensitive" } },
-            { phone: { contains: query, mode: "insensitive" } },
-          ],
-        }
-      : {}),
-    ...(stageFilter !== "all" ? { currentStage: Number(stageFilter) } : {}),
-  };
+  // Drill-down from the Analytics Center charts (lib/platforms.ts has the
+  // same known-platform list and the same classification rule the chart
+  // itself uses, so a bar's count and what clicking it turns up here can't
+  // drift apart). Both scope to source: { not: null } -- only an actual
+  // lead-form submission carries utm data at all, same reasoning as the
+  // dashboard's own "Leads by type" card and the analytics page.
+  let platformWhere: Prisma.ClientWhereInput | undefined;
+  if (platformFilter === "direct") {
+    platformWhere = { source: { not: null }, utmSource: null };
+  } else if (platformFilter === "other") {
+    platformWhere = {
+      source: { not: null },
+      utmSource: { not: null },
+      NOT: { OR: KNOWN_PLATFORMS.map((p) => ({ utmSource: { equals: p.key, mode: "insensitive" } })) },
+    };
+  } else if (platformFilter && KNOWN_PLATFORMS.some((p) => p.key === platformFilter)) {
+    platformWhere = { source: { not: null }, utmSource: { equals: platformFilter, mode: "insensitive" } };
+  }
+
+  let mediumWhere: Prisma.ClientWhereInput | undefined;
+  if (mediumFilter === "direct") {
+    mediumWhere = { source: { not: null }, utmMedium: null };
+  } else if (mediumFilter) {
+    mediumWhere = { source: { not: null }, utmMedium: { equals: mediumFilter, mode: "insensitive" } };
+  }
+
+  // Combined as an AND array, not spread into one object -- platformWhere's
+  // "other" branch and a future filter could otherwise collide on a shared
+  // key (e.g. both setting their own NOT) and silently overwrite each other.
+  const andClauses: Prisma.ClientWhereInput[] = [];
+  if (query) {
+    andClauses.push({
+      OR: [
+        { name: { contains: query, mode: "insensitive" } },
+        { email: { contains: query, mode: "insensitive" } },
+        { phone: { contains: query, mode: "insensitive" } },
+      ],
+    });
+  }
+  if (stageFilter !== "all") andClauses.push({ currentStage: Number(stageFilter) });
+  if (platformWhere) andClauses.push(platformWhere);
+  if (mediumWhere) andClauses.push(mediumWhere);
+
+  const where: Prisma.ClientWhereInput = andClauses.length > 0 ? { AND: andClauses } : {};
 
   // This is the first thing almost any admin session touches right after
   // login, so a database that's unreachable shows up here as "login is
@@ -100,12 +151,24 @@ export default async function AdminPage({
     if (params.q) retryParams.set("q", params.q);
     if (params.stage) retryParams.set("stage", params.stage);
     if (params.page) retryParams.set("page", params.page);
+    if (params.platform) retryParams.set("platform", params.platform);
+    if (params.medium) retryParams.set("medium", params.medium);
     const qs = retryParams.toString();
     return <DatabaseUnavailable retryHref={qs ? `/admin?${qs}` : "/admin"} />;
   }
   const active = totalClients - movedIn;
   const totalPages = Math.max(1, Math.ceil(filteredCount / PAGE_SIZE));
   const page = Math.min(requestedPage, totalPages);
+
+  // Only claim an active filter once it actually narrowed the query (i.e.
+  // *Where was built) -- an unrecognized ?platform= value falls through to
+  // undefined above rather than silently matching everything, so this
+  // banner and the where clause always agree on what's really filtered.
+  const activeFilter = platformWhere
+    ? { kind: "platform" as const, label: PLATFORM_FILTER_LABELS[platformFilter!] ?? platformFilter }
+    : mediumWhere
+      ? { kind: "medium" as const, label: MEDIUM_FILTER_LABELS[mediumFilter!] ?? capitalizeFirst(mediumFilter!) }
+      : null;
 
   return (
     <div className="min-h-screen bg-[#faf8f4]">
@@ -156,6 +219,19 @@ export default async function AdminPage({
         </div>
 
         <LeadsByType leads={leadsByType} />
+
+        {activeFilter && (
+          <div className="flex items-center justify-between gap-3 bg-sky-50 border border-sky-200 rounded-xl px-4 py-3">
+            <p className="text-sm text-sky-800">
+              Filtered by {activeFilter.kind}: <span className="font-semibold">{activeFilter.label}</span>
+              {" "}
+              <span className="text-sky-600">({filteredCount} lead{filteredCount === 1 ? "" : "s"})</span>
+            </p>
+            <Link href="/admin" className="text-sm font-medium text-sky-700 hover:text-sky-900 whitespace-nowrap">
+              Clear filter
+            </Link>
+          </div>
+        )}
 
         <ClientList
           clients={clients}

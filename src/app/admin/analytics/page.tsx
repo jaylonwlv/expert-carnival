@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { DatabaseUnavailable } from "@/components/DatabaseUnavailable";
 import { isDatabaseConnectivityError } from "@/lib/dbErrors";
 import { KNOWN_PLATFORMS, DIRECT_COLOR, OTHER_COLOR, classifyPlatform } from "@/lib/platforms";
+import { capitalizeFirst } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -18,11 +19,7 @@ const MEDIUM_LABELS: Record<string, string> = {
 };
 
 type Row = { label: string; count: number };
-type PlatformRow = Row & { color: string; detail?: string };
-
-function capitalizeFirst(value: string): string {
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
+type PlatformRow = Row & { color: string; detail?: string; href?: string };
 
 export default async function AnalyticsPage() {
   let totalLeads: number;
@@ -90,16 +87,29 @@ export default async function AnalyticsPage() {
   // count would shuffle which two colors ever sit next to each other as
   // the numbers change week to week; the color pairing was only validated
   // for *this* fixed adjacency.
+  //
+  // Each bar's href drills into the client list filtered to exactly the
+  // same bucket (see admin/page.tsx's platformWhere), so a click always
+  // lands on precisely what the bar and its tooltip claim -- both read off
+  // the same lib/platforms.ts classification, so they can't drift apart.
   const platformRows: PlatformRow[] = [
-    ...KNOWN_PLATFORMS.map((p) => ({ label: p.label, count: knownCounts.get(p.key) ?? 0, color: p.color })),
-    { label: "Direct / no link tag", count: directCount, color: DIRECT_COLOR },
-    ...(otherTotal > 0 ? [{ label: "Other", count: otherTotal, color: OTHER_COLOR, detail: otherDetail }] : []),
+    ...KNOWN_PLATFORMS.map((p) => ({
+      label: p.label,
+      count: knownCounts.get(p.key) ?? 0,
+      color: p.color,
+      href: `/admin?platform=${p.key}`,
+    })),
+    { label: "Direct / no link tag", count: directCount, color: DIRECT_COLOR, href: "/admin?platform=direct" },
+    ...(otherTotal > 0
+      ? [{ label: "Other", count: otherTotal, color: OTHER_COLOR, detail: otherDetail, href: "/admin?platform=other" }]
+      : []),
   ];
 
-  const byMedium: Row[] = mediumRows
+  const byMedium: (Row & { href: string })[] = mediumRows
     .map((row) => ({
       label: row.utmMedium ? (MEDIUM_LABELS[row.utmMedium] ?? capitalizeFirst(row.utmMedium)) : "Direct / no link tag",
       count: row._count._all,
+      href: `/admin?medium=${encodeURIComponent(row.utmMedium ?? "direct")}`,
     }))
     .sort((a, b) => b.count - a.count);
 
@@ -132,14 +142,14 @@ export default async function AnalyticsPage() {
               <p className="text-sm font-semibold text-stone-900">Leads by platform</p>
               <p className="text-xs text-stone-500 mt-0.5 mb-6">
                 Where each lead&apos;s link was tagged from (utm_source), plus a passively detected
-                in-app browser when a lead arrived with no tag at all. Hover a bar for the exact count.
+                in-app browser when a lead arrived with no tag at all. Click a bar to see those leads.
               </p>
               <PlatformChart rows={platformRows} total={totalLeads} />
             </div>
 
             <BreakdownCard
               title="How leads were tagged"
-              subtitle="An explicit ad tag vs. a detected in-app browser vs. untagged."
+              subtitle="An explicit ad tag vs. a detected in-app browser vs. untagged. Click a bar to see those leads."
               rows={byMedium}
               total={totalLeads}
             />
@@ -156,74 +166,81 @@ function PlatformChart({ rows, total }: { rows: PlatformRow[]; total: number }) 
   // nearly full-height and erase the actual size difference between them.
   const max = Math.max(...rows.map((row) => row.count), 1);
   return (
-    <div>
-      <div className="flex items-end gap-4 h-40 border-b border-stone-200">
-        {rows.map((row) => {
-          const pct = total > 0 ? Math.round((row.count / total) * 100) : 0;
-          // A real zero stays visually a sliver at the baseline (present,
-          // in its own color, unmistakably small) rather than either a
-          // full 4%-minimum bar (which would read as "a little data") or
-          // nothing at all (which would read as "not tracked"/a bug).
-          const style =
-            row.count > 0
-              ? { height: `${Math.max((row.count / max) * 100, 4)}%`, backgroundColor: row.color }
-              : { height: "3px", backgroundColor: row.color, opacity: 0.35 };
-          const tooltip = `${row.label}: ${row.count} lead${row.count === 1 ? "" : "s"} (${pct}%)${row.detail ? ` -- ${row.detail}` : ""}`;
-          return (
-            <div key={row.label} className="flex-1 flex flex-col items-center justify-end h-full">
+    <div className="flex items-start gap-4">
+      {rows.map((row) => {
+        const pct = total > 0 ? Math.round((row.count / total) * 100) : 0;
+        // A real zero stays visually a sliver at the baseline (present, in
+        // its own color, unmistakably small) rather than either a full
+        // 4%-minimum bar (which would read as "a little data") or nothing
+        // at all (which would read as "not tracked"/a bug).
+        const style =
+          row.count > 0
+            ? { height: `${Math.max((row.count / max) * 100, 4)}%`, backgroundColor: row.color }
+            : { height: "3px", backgroundColor: row.color, opacity: 0.35 };
+        const tooltip = `${row.label}: ${row.count} lead${row.count === 1 ? "" : "s"} (${pct}%)${row.detail ? ` -- ${row.detail}` : ""}. Click to see these leads.`;
+        return (
+          <Link
+            key={row.label}
+            href={row.href ?? "/admin"}
+            title={tooltip}
+            className="flex-1 flex flex-col items-center rounded-lg px-1.5 py-1.5 -mx-1.5 hover:bg-stone-50 transition-colors"
+          >
+            <div className="flex flex-col items-center justify-end h-40 w-full border-b border-stone-200">
               <span className="text-xs font-semibold text-stone-700 tabular-nums mb-1">{row.count}</span>
-              <div
-                className="w-full max-w-14 rounded-t-[4px] transition-opacity hover:opacity-75 cursor-default"
-                style={style}
-                title={tooltip}
-              />
+              <div className="w-full max-w-14 rounded-t-[4px]" style={style} />
             </div>
-          );
-        })}
-      </div>
-      <div className="flex gap-4 mt-2">
-        {rows.map((row) => (
-          <div key={row.label} className="flex-1 text-center" title={row.detail}>
-            <span
-              className="inline-block w-2 h-2 rounded-full mr-1 align-middle"
-              style={{ backgroundColor: row.color }}
-            />
-            <span className="text-xs text-stone-500 leading-tight align-middle">{row.label}</span>
-          </div>
-        ))}
-      </div>
+            <div className="mt-2 text-center">
+              <span
+                className="inline-block w-2 h-2 rounded-full mr-1 align-middle"
+                style={{ backgroundColor: row.color }}
+              />
+              <span className="text-xs text-stone-500 leading-tight align-middle">{row.label}</span>
+            </div>
+          </Link>
+        );
+      })}
     </div>
   );
 }
 
-function BreakdownCard({ title, subtitle, rows, total }: { title: string; subtitle: string; rows: Row[]; total: number }) {
+function BreakdownCard({
+  title,
+  subtitle,
+  rows,
+  total,
+}: {
+  title: string;
+  subtitle: string;
+  rows: (Row & { href: string })[];
+  total: number;
+}) {
   const max = Math.max(...rows.map((row) => row.count), 1);
   return (
     <div className="bg-white rounded-2xl border border-stone-200 p-5 shadow-sm">
       <p className="text-sm font-semibold text-stone-900">{title}</p>
       <p className="text-xs text-stone-500 mt-0.5 mb-6">{subtitle}</p>
-      <div className="flex items-end gap-4 h-40 border-b border-stone-200">
+      <div className="flex items-start gap-4">
         {rows.map((row) => {
           const pct = total > 0 ? Math.round((row.count / total) * 100) : 0;
           const heightPct = Math.max((row.count / max) * 100, 4);
           return (
-            <div key={row.label} className="flex-1 flex flex-col items-center justify-end h-full">
-              <span className="text-xs font-semibold text-stone-700 tabular-nums mb-1">{row.count}</span>
-              <div
-                className="w-full max-w-14 rounded-t-[4px] bg-amber-500 hover:bg-amber-600 transition-colors cursor-default"
-                style={{ height: `${heightPct}%` }}
-                title={`${row.label}: ${row.count} lead${row.count === 1 ? "" : "s"} (${pct}%)`}
-              />
-            </div>
+            <Link
+              key={row.label}
+              href={row.href}
+              title={`${row.label}: ${row.count} lead${row.count === 1 ? "" : "s"} (${pct}%). Click to see these leads.`}
+              className="flex-1 flex flex-col items-center rounded-lg px-1.5 py-1.5 -mx-1.5 hover:bg-stone-50 transition-colors"
+            >
+              <div className="flex flex-col items-center justify-end h-40 w-full border-b border-stone-200">
+                <span className="text-xs font-semibold text-stone-700 tabular-nums mb-1">{row.count}</span>
+                <div
+                  className="w-full max-w-14 rounded-t-[4px] bg-amber-500 hover:bg-amber-600 transition-colors"
+                  style={{ height: `${heightPct}%` }}
+                />
+              </div>
+              <p className="text-xs text-stone-500 leading-tight mt-2 text-center">{row.label}</p>
+            </Link>
           );
         })}
-      </div>
-      <div className="flex gap-4 mt-2">
-        {rows.map((row) => (
-          <div key={row.label} className="flex-1 text-center">
-            <p className="text-xs text-stone-500 leading-tight">{row.label}</p>
-          </div>
-        ))}
       </div>
     </div>
   );
