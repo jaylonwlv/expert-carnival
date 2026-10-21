@@ -21,32 +21,55 @@ const MEDIUM_LABELS: Record<string, string> = {
 type Row = { label: string; count: number };
 type PlatformRow = Row & { color: string; detail?: string; href?: string };
 
-export default async function AnalyticsPage() {
+// Preset date ranges, newest-first -- the same small, fixed set of presets
+// the dataviz skill's own filter-control guidance calls for, rather than a
+// free-form date picker this page doesn't need. "all" (no lower bound) is
+// the default so a bookmarked /admin/analytics link keeps behaving exactly
+// as it always has.
+const RANGE_OPTIONS = [
+  { key: "7d", label: "Last 7 days", days: 7 },
+  { key: "30d", label: "Last 30 days", days: 30 },
+  { key: "90d", label: "Last 90 days", days: 90 },
+  { key: "all", label: "All time", days: null },
+] as const;
+
+export default async function AnalyticsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
+  const params = await searchParams;
+  const activeRange = RANGE_OPTIONS.find((r) => r.key === params.range) ?? RANGE_OPTIONS[3];
+  const createdAtFilter = activeRange.days
+    ? { gte: new Date(Date.now() - activeRange.days * 24 * 60 * 60 * 1000) }
+    : undefined;
+  // Scoped to source: { not: null } the same way the dashboard's own
+  // "Leads by type" card is -- only actual lead-form submissions carry utm
+  // data at all, so a client Paulin added by hand shouldn't dilute the
+  // breakdown with another "Direct" row.
+  const leadsWhere = { source: { not: null } as const, ...(createdAtFilter ? { createdAt: createdAtFilter } : {}) };
+
   let totalLeads: number;
   let sourceRows: { utmSource: string | null; _count: { _all: number } }[];
   let mediumRows: { utmMedium: string | null; _count: { _all: number } }[];
 
   try {
-    // Scoped to source: { not: null } the same way the dashboard's own
-    // "Leads by type" card is -- only actual lead-form submissions carry
-    // utm data at all, so a client Paulin added by hand shouldn't dilute
-    // the breakdown with another "Direct" row.
     [totalLeads, sourceRows, mediumRows] = await Promise.all([
-      prisma.client.count({ where: { source: { not: null } } }),
+      prisma.client.count({ where: leadsWhere }),
       prisma.client.groupBy({
         by: ["utmSource"],
-        where: { source: { not: null } },
+        where: leadsWhere,
         _count: { _all: true },
       }),
       prisma.client.groupBy({
         by: ["utmMedium"],
-        where: { source: { not: null } },
+        where: leadsWhere,
         _count: { _all: true },
       }),
     ]);
   } catch (error) {
     if (!isDatabaseConnectivityError(error)) throw error;
-    return <DatabaseUnavailable retryHref="/admin/analytics" />;
+    return <DatabaseUnavailable retryHref={activeRange.key === "all" ? "/admin/analytics" : `/admin/analytics?range=${activeRange.key}`} />;
   }
 
   // Every known platform always gets a bar -- including one sitting at
@@ -125,16 +148,36 @@ export default async function AnalyticsPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
-        <div>
-          <h1 className="text-xl font-semibold text-stone-900">Analytics Center</h1>
-          <p className="text-sm text-stone-500 mt-1">
-            {totalLeads} lead-form submission{totalLeads === 1 ? "" : "s"} total.
-          </p>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-semibold text-stone-900">Analytics Center</h1>
+            <p className="text-sm text-stone-500 mt-1">
+              {totalLeads} lead-form submission{totalLeads === 1 ? "" : "s"}
+              {activeRange.days ? ` in the last ${activeRange.days} days.` : " total."}
+            </p>
+          </div>
+          <div className="flex gap-1.5 bg-white border border-stone-200 rounded-lg p-1">
+            {RANGE_OPTIONS.map((range) => (
+              <Link
+                key={range.key}
+                href={range.key === "all" ? "/admin/analytics" : `/admin/analytics?range=${range.key}`}
+                className={`text-xs font-medium rounded-md px-3 py-1.5 transition whitespace-nowrap ${
+                  range.key === activeRange.key
+                    ? "bg-amber-600 text-white"
+                    : "text-stone-500 hover:text-stone-800 hover:bg-stone-50"
+                }`}
+              >
+                {range.label}
+              </Link>
+            ))}
+          </div>
         </div>
 
         {totalLeads === 0 ? (
           <div className="bg-white rounded-2xl border border-stone-200 py-16 text-center">
-            <p className="text-sm text-stone-500">No lead-form submissions yet.</p>
+            <p className="text-sm text-stone-500">
+              No lead-form submissions {activeRange.days ? `in the last ${activeRange.days} days` : "yet"}.
+            </p>
           </div>
         ) : (
           <>
