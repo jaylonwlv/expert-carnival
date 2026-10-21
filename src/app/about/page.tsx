@@ -117,7 +117,7 @@ export default function AboutPage() {
               alt={BUSINESS.licensee}
               fill
               sizes="(min-width: 768px) 50vw, 100vw"
-              className="object-cover"
+              className="object-cover object-top"
             />
           </div>
           <div className="flex items-center bg-white">
