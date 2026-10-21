@@ -36,6 +36,52 @@ const TEAM = [
   },
 ];
 
+// Shared full-width editorial row for every team member, Paulin included,
+// not just her. All four headshots share the same 1333x2000 portrait crop,
+// and this md:grid-cols-2 row is wider than it is tall on any normal
+// screen, so object-cover alone centers the crop and cuts off the top of
+// whoever's head is in the taller source image, object-top anchors the
+// crop to the top instead, the same fix Paulin's row already needed.
+function TeamRow({
+  photo,
+  name,
+  title,
+  blurb,
+  reverse,
+  extra,
+}: {
+  photo: string;
+  name: string;
+  title: string;
+  blurb: string;
+  reverse?: boolean;
+  extra?: React.ReactNode;
+}) {
+  return (
+    <div className="grid md:grid-cols-2">
+      <div className={`relative h-[50vh] md:h-[70vh] ${reverse ? "md:order-2" : ""}`}>
+        <Image
+          src={photo}
+          alt={name}
+          fill
+          sizes="(min-width: 768px) 50vw, 100vw"
+          className="object-cover object-top"
+        />
+      </div>
+      <div className="flex items-center bg-white">
+        <Reveal className="max-w-md mx-auto px-8 py-16 md:py-0">
+          <p className="text-xs font-semibold text-amber-700 mb-3">{title}</p>
+          <h2 className={`${playfair.className} text-2xl md:text-3xl text-stone-900 leading-snug`}>
+            {name}
+          </h2>
+          <p className="text-sm md:text-base text-stone-600 mt-4 leading-relaxed">{blurb}</p>
+          {extra}
+        </Reveal>
+      </div>
+    </div>
+  );
+}
+
 export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -108,39 +154,26 @@ export default function AboutPage() {
           </Reveal>
         </section>
 
-        {/* Paulin gets the featured, full-width editorial row, she's the
-            one clients actually talk to and who closes the transaction. */}
-        <div className="grid md:grid-cols-2">
-          <div className="relative h-[50vh] md:h-[70vh]">
-            <Image
-              src="/team/paulin.jpg"
-              alt={BUSINESS.licensee}
-              fill
-              sizes="(min-width: 768px) 50vw, 100vw"
-              className="object-cover object-top"
-            />
-          </div>
-          <div className="flex items-center bg-white">
-            <Reveal className="max-w-md mx-auto px-8 py-16 md:py-0">
-              <p className="text-xs font-semibold text-amber-700 mb-3">Founder &amp; Lead Realtor</p>
-              <h2 className={`${playfair.className} text-2xl md:text-3xl text-stone-900 leading-snug`}>
-                {BUSINESS.licensee}
-              </h2>
-              <p className="text-sm md:text-base text-stone-600 mt-4 leading-relaxed">
-                Paulin is the realtor on the team: the one who gets on the phone with you, walks
-                neighborhoods, negotiates your offer, and sees your file through to closing. Every
-                client working with {BUSINESS.legalName} is working with her directly.
-              </p>
+        {/* Every team member gets the same full-width editorial row, not
+            just Paulin, alternating sides (reverse on odd index) for the
+            same visual rhythm the homepage's own EditorialRow uses. */}
+        <TeamRow
+          photo="/team/paulin.jpg"
+          name={BUSINESS.licensee}
+          title="Founder & Lead Realtor"
+          blurb={`Paulin is the realtor on the team: the one who gets on the phone with you, walks neighborhoods, negotiates your offer, and sees your file through to closing. Every client working with ${BUSINESS.legalName} is working with her directly.`}
+          extra={
+            <>
               <p className="text-xs text-stone-400 mt-4">
                 NV Real Estate License #{BUSINESS.nvLicense} · CA DRE #{BUSINESS.caDre}
               </p>
               <p className="text-xs text-stone-400">Brokered by {BUSINESS.brokerage}</p>
-            </Reveal>
-          </div>
-        </div>
+            </>
+          }
+        />
 
         <section className="bg-stone-50 py-20 md:py-24">
-          <Reveal className="max-w-xl mx-auto px-4 text-center mb-10">
+          <Reveal className="max-w-xl mx-auto px-4 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">
               Behind the scenes
             </p>
@@ -148,31 +181,18 @@ export default function AboutPage() {
               The rest of the team.
             </h2>
           </Reveal>
-          <div className="max-w-3xl mx-auto px-4">
-            <div className="grid sm:grid-cols-3 gap-5">
-              {TEAM.map((member) => (
-                <Reveal key={member.name}>
-                  <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden h-full">
-                    <div className="relative h-56">
-                      <Image
-                        src={member.photo}
-                        alt={member.name}
-                        fill
-                        sizes="(min-width: 640px) 33vw, 100vw"
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <p className="text-sm font-semibold text-stone-900">{member.name}</p>
-                      <p className="text-xs font-medium text-amber-700 mt-0.5">{member.title}</p>
-                      <p className="text-xs text-stone-500 mt-2 leading-relaxed">{member.blurb}</p>
-                    </div>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
-          </div>
         </section>
+
+        {TEAM.map((member, i) => (
+          <TeamRow
+            key={member.name}
+            photo={member.photo}
+            name={member.name}
+            title={member.title}
+            blurb={member.blurb}
+            reverse={(i + 1) % 2 === 1}
+          />
+        ))}
 
         {/* Dark CTA section, same visual language (and the same pill-button
             style) as the homepage's hero CTAs, not the plain white
