@@ -68,7 +68,7 @@ function TeamRow({
           alt={name}
           fill
           sizes="(min-width: 768px) 50vw, 100vw"
-          className="object-cover object-top"
+          className="object-cover object-[50%_25%]"
         />
       </div>
       <div className="flex items-center bg-white">
