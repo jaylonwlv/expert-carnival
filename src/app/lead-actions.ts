@@ -226,6 +226,12 @@ export async function submitLead(
         to: email,
         subject: guide.subject,
         html: leadMagnetEmailHtml(firstName, guide.title, pdfUrl),
+        // Attached directly, not just linked -- a spam filter or an
+        // email client set to block remote content can keep the link
+        // from ever loading, but an attachment arrives with the email
+        // itself either way. The download button in the body stays too,
+        // as a second path to the same file.
+        attachments: [{ filename: guide.pdfPath.split("/").pop()!, path: pdfUrl }],
       }),
       sendEmail({
         to: notifyTo,

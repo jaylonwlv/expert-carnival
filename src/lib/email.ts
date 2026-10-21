@@ -23,10 +23,15 @@ export async function sendEmail({
   to,
   subject,
   html,
+  attachments,
 }: {
   to: string;
   subject: string;
   html: string;
+  // `path` (not raw `content`) lets Resend fetch the file itself from a URL
+  // this app already serves (e.g. a guide PDF under public/), rather than
+  // reading and base64-encoding it here on every send.
+  attachments?: { filename: string; path: string }[];
 }): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM ?? "Relocation Engine <updates@example.com>";
@@ -46,7 +51,7 @@ export async function sendEmail({
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ from, to, subject, html }),
+      body: JSON.stringify({ from, to, subject, html, ...(attachments ? { attachments } : {}) }),
     });
 
     if (!res.ok) {
