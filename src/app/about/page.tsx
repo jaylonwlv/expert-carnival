@@ -130,7 +130,7 @@ export default function AboutPage() {
             <h1 className={`${playfair.className} text-4xl md:text-6xl text-white leading-tight`}>
               Full-service relocation,
               <br />
-              run by people, not a call center.
+              run by people who put you first.
             </h1>
             <p className="text-base md:text-lg text-white/85 mt-5 max-w-2xl mx-auto leading-relaxed">
               {BUSINESS.legalName} helps California sellers and military families PCSing to Nevada move
@@ -210,7 +210,7 @@ export default function AboutPage() {
               Prefer to talk it through?
             </h2>
             <p className="text-base text-white/85 mt-5 max-w-xl mx-auto leading-relaxed">
-              Call or text {BUSINESS.licensee} any time, it's always her who picks up.
+              Call or text {BUSINESS.licensee} directly, she's the one who answers.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <a
