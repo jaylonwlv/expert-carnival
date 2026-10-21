@@ -6,14 +6,12 @@ import { isDatabaseConnectivityError } from "@/lib/dbErrors";
 
 export const dynamic = "force-dynamic";
 
-// Friendlier labels for the utm_medium values this app actually sets --
-// "short_form" from the /tt, /ig, /yt redirects (lib/shortLinks.ts),
+// Friendlier label for the one utm_medium value this app sets itself --
 // "in_app_browser" from the proxy's passive User-Agent fallback
 // (lib/inAppBrowser.ts) -- so the breakdown reads as "how this lead got
 // tagged" rather than a raw query-param value. Anything else (e.g. a
 // hand-built ad link's own utm_medium) is shown as typed.
 const MEDIUM_LABELS: Record<string, string> = {
-  short_form: "Short link (/tt, /ig, /yt)",
   in_app_browser: "Detected in-app browser",
 };
 
@@ -98,7 +96,7 @@ export default async function AnalyticsPage() {
             />
             <BreakdownCard
               title="How leads were tagged"
-              subtitle="Explicit ad/short-link tags vs. a detected in-app browser vs. untagged."
+              subtitle="An explicit ad tag vs. a detected in-app browser vs. untagged."
               rows={byMedium}
               total={totalLeads}
             />
@@ -110,27 +108,36 @@ export default async function AnalyticsPage() {
 }
 
 function BreakdownCard({ title, subtitle, rows, total }: { title: string; subtitle: string; rows: Row[]; total: number }) {
+  // Bar height is relative to the largest row here, not `total` -- a 2-bar
+  // chart where one row is 90% of all leads would otherwise draw both bars
+  // nearly full-height and erase the actual size difference between them.
+  const max = Math.max(...rows.map((row) => row.count), 1);
   return (
     <div className="bg-white rounded-2xl border border-stone-200 p-5 shadow-sm">
       <p className="text-sm font-semibold text-stone-900">{title}</p>
-      <p className="text-xs text-stone-500 mt-0.5 mb-4">{subtitle}</p>
-      <div className="space-y-3">
+      <p className="text-xs text-stone-500 mt-0.5 mb-6">{subtitle}</p>
+      <div className="flex items-end gap-4 h-40 border-b border-stone-200">
         {rows.map((row) => {
           const pct = total > 0 ? Math.round((row.count / total) * 100) : 0;
+          const heightPct = Math.max((row.count / max) * 100, 4);
           return (
-            <div key={row.label}>
-              <div className="flex items-baseline justify-between text-sm mb-1">
-                <span className="font-medium text-stone-800">{row.label}</span>
-                <span className="text-stone-500 tabular-nums">
-                  {row.count} <span className="text-stone-400">({pct}%)</span>
-                </span>
-              </div>
-              <div className="h-1.5 rounded-full bg-stone-100 overflow-hidden">
-                <div className="h-full rounded-full bg-amber-500" style={{ width: `${pct}%` }} />
-              </div>
+            <div key={row.label} className="flex-1 flex flex-col items-center justify-end h-full">
+              <span className="text-xs font-semibold text-stone-700 tabular-nums mb-1">{row.count}</span>
+              <div
+                className="w-full max-w-14 rounded-t-[4px] bg-amber-500 hover:bg-amber-600 transition-colors cursor-default"
+                style={{ height: `${heightPct}%` }}
+                title={`${row.label}: ${row.count} lead${row.count === 1 ? "" : "s"} (${pct}%)`}
+              />
             </div>
           );
         })}
+      </div>
+      <div className="flex gap-4 mt-2">
+        {rows.map((row) => (
+          <div key={row.label} className="flex-1 text-center">
+            <p className="text-xs text-stone-500 leading-tight">{row.label}</p>
+          </div>
+        ))}
       </div>
     </div>
   );

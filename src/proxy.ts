@@ -25,9 +25,8 @@ export function proxy(request: NextRequest) {
   }
 
   // Only a fallback for a visit that arrived with no tag of its own -- a
-  // real utm_source (whether from an ad or one of the /tt, /ig, /yt short
-  // links, which already redirect with their own utm_source/utm_medium
-  // attached) always wins over a guess made from the User-Agent here.
+  // real utm_source (e.g. from a paid ad link) always wins over a guess
+  // made from the User-Agent here.
   if (LEAD_CAPTURE_PATHS.has(pathname) && !searchParams.get("utm_source")) {
     const detected = detectInAppPlatform(request.headers.get("user-agent"));
     if (detected) {
