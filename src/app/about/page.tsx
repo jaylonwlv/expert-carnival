@@ -21,14 +21,14 @@ const TEAM = [
     title: "Marketing Director",
     photo: "/team/jay.jpg",
     blurb:
-      "Jay runs marketing and is usually the one behind the camera on location, filming the homes, neighborhoods, and behind-the-scenes moments you see across our guides and social channels.",
+      "Jay leads marketing and directs the content you see across our guides and social channels, planning what gets filmed on location and shaping it into the campaigns that bring new clients in the door.",
   },
   {
     name: "Noah",
     title: "Director of Photography",
     photo: "/team/noah.jpg",
     blurb:
-      "Noah handles camera and lighting on every shoot, making sure every home and neighborhood looks as good on screen as it does in person.",
+      "Noah is behind the camera on every shoot, handling the filming and lighting so every home and neighborhood looks as good on screen as it does in person.",
   },
   {
     name: "Daniel",
