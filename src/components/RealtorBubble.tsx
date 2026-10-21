@@ -31,6 +31,9 @@ export function RealtorBubble() {
         <p className="text-xs lg:text-sm font-medium text-amber-700">
           Licensed Nevada Realtor · License #{BUSINESS.nvLicense}
         </p>
+        <p className="text-xs text-stone-400">
+          Brokered by {BUSINESS.brokerage} · CA DRE #{BUSINESS.caDre}
+        </p>
         <p className="text-xs lg:text-sm text-stone-500 mt-1 leading-relaxed">
           You&apos;ll work with me personally, start to finish.
         </p>

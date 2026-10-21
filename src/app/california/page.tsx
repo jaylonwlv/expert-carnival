@@ -52,7 +52,7 @@ export default async function CaliforniaPage({
             className="h-12 lg:h-16 w-auto mx-auto mb-6 lg:mb-8"
             priority
           />
-          <p className="text-xs lg:text-sm font-semibold uppercase tracking-wide text-amber-400 mb-3 lg:mb-4 drop-shadow-sm">
+          <p className="text-sm md:text-base lg:text-xl font-semibold uppercase tracking-wide text-amber-400 mb-3 lg:mb-4 drop-shadow-sm">
             Free relocation guide · 2026 Edition
           </p>
           <h1 className={`${playfair.className} text-3xl md:text-4xl lg:text-6xl text-white leading-tight drop-shadow-sm`}>

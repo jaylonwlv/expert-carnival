@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BUSINESS } from "@/lib/business";
+import { SocialLinks } from "@/components/SocialLinks";
 
 const LEGAL_LINKS = [
   { href: "/privacy", label: "Privacy Policy" },
@@ -11,7 +12,10 @@ const LEGAL_LINKS = [
 // Full site footer -- nav to About/Contact, the legal pages required by the
 // SMS/real-estate compliance work, and the Equal Housing Opportunity
 // statement. Used on the homepage and every informational/legal page.
-export function SiteFooter() {
+// `socialLinks` is opt-in (default off) -- only the homepage passes it;
+// the legal pages and the dedicated lead-capture pages intentionally don't,
+// same reasoning MinimalSiteFooter already documents for those.
+export function SiteFooter({ socialLinks = false }: { socialLinks?: boolean } = {}) {
   return (
     <footer className="border-t border-stone-200 bg-[#faf8f4]">
       <div className="max-w-5xl mx-auto px-4 py-10">
@@ -30,6 +34,14 @@ export function SiteFooter() {
             <p className="text-xs text-stone-400 mt-2">
               {BUSINESS.licensee} · NV Real Estate License #{BUSINESS.nvLicense}
             </p>
+            <p className="text-xs text-stone-400">
+              Brokered by {BUSINESS.brokerage} · CA DRE #{BUSINESS.caDre}
+            </p>
+            {socialLinks && (
+              <div className="mt-4">
+                <SocialLinks />
+              </div>
+            )}
           </div>
 
           <nav className="flex flex-wrap gap-x-8 gap-y-3 text-sm">

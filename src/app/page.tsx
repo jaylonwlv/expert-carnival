@@ -205,7 +205,7 @@ export default async function HomePage({
         </section>
       </main>
 
-      <SiteFooter />
+      <SiteFooter socialLinks />
     </div>
   );
 }

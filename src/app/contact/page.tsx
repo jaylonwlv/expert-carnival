@@ -59,6 +59,9 @@ export default function ContactPage() {
           <p className="text-xs text-stone-400 mt-5 text-center">
             {BUSINESS.licensee} · NV Real Estate License #{BUSINESS.nvLicense}
           </p>
+          <p className="text-xs text-stone-400 text-center">
+            Brokered by {BUSINESS.brokerage} · CA DRE #{BUSINESS.caDre}
+          </p>
         </section>
 
         <section className="max-w-3xl mx-auto px-4 pb-16 text-center">

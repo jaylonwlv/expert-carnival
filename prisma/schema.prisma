@@ -150,6 +150,10 @@ model CalculatorInteraction {
   id        String   @id @default(cuid())
   page      String
   income    Int
+  // Origin state the visitor picked -- null for rows logged before the
+  // calculator supported anything but California, so this stays optional
+  // rather than backfilled with a guess.
+  state     String?
   createdAt DateTime @default(now())
 
   @@index([page])

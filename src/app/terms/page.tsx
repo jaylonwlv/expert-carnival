@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function TermsPage() {
   return (
-    <LegalPageLayout title="Terms of Service" lastUpdated="June 3, 2026">
+    <LegalPageLayout title="Terms of Service" lastUpdated="October 20, 2026">
       <h2>Acceptance of Terms</h2>
       <p>
         By accessing {BUSINESS.domain}, you agree to be bound by these Terms of Service and all
@@ -44,8 +44,9 @@ export default function TermsPage() {
       <h2>Real Estate Licensing &amp; Equal Housing Opportunity</h2>
       <p>
         Real estate services referenced on this site are provided by {BUSINESS.licensee}, a licensed
-        Nevada real estate professional (NV License #{BUSINESS.nvLicense}), operating under{" "}
-        {BUSINESS.legalName}. {BUSINESS.legalName} is an Equal Opportunity company and fully supports
+        Nevada real estate professional (NV License #{BUSINESS.nvLicense}) and a licensed California
+        real estate professional (CA DRE #{BUSINESS.caDre}), operating under {BUSINESS.legalName} and
+        brokered by {BUSINESS.brokerage} {BUSINESS.legalName} is an Equal Opportunity company and fully supports
         the principles of the Fair Housing Act. We do not discriminate on the basis of race, color,
         religion, sex, handicap, familial status, national origin, sexual orientation, or gender
         identity in the provision of services. This site does not provide direct access to Multiple
