@@ -93,8 +93,8 @@ export async function sendMetaLeadEvent({
   // during setup/verification without affecting real ad optimization.
   if (process.env.META_TEST_EVENT_CODE) body.test_event_code = process.env.META_TEST_EVENT_CODE;
 
-  // A failed send should never take down the mutation it's a side effect of
-  //, same error-handling posture as sendEmail/sendSms.
+  // A failed send should never take down the mutation it's a side effect of,
+  // same error-handling posture as sendEmail/sendSms.
   try {
     const res = await fetch(
       `https://graph.facebook.com/${GRAPH_API_VERSION}/${pixelId}/events?access_token=${encodeURIComponent(accessToken)}`,

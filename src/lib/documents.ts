@@ -122,8 +122,8 @@ export async function createDocumentRecordsForClient({
     // requested public access: the client (not this server) is the one
     // that tells Vercel whether a blob is public or private at upload time
     // (access isn't part of the signed upload token this app issues), so
-    // the real url, which embeds ".public." or ".private." in its host
-    //, is the only authoritative signal available after the fact.
+    // the real url, which embeds ".public." or ".private." in its host,
+    // is the only authoritative signal available after the fact.
     let realBlob;
     try {
       realBlob = await head(blob.pathname);

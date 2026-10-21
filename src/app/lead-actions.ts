@@ -200,8 +200,8 @@ export async function submitLead(
   // the redirect's own query string, a query param is visible to and
   // craftable by anyone, and LeadForm's success branch (gated only on
   // `?lead_submitted=1`) doesn't verify a real submission happened. Without
-  // this, visiting `/california?lead_submitted=1&eid=<anything>` directly
-  //, no form filled in, no Client row ever created, would still fire a
+  // this, visiting `/california?lead_submitted=1&eid=<anything>` directly,
+  // no form filled in, no Client row ever created, would still fire a
   // real "Lead" conversion event against the live ad account. An httpOnly
   // cookie can only be set by this server action actually running, so
   // there's no way to manufacture one without a genuine submission.

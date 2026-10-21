@@ -30,8 +30,8 @@ export async function sendSms({ to, body }: { to: string; body: string }): Promi
     return;
   }
 
-  // A failed send should never take down the mutation it's a side effect of
-  //, swallow both network-level failures and non-OK responses here,
+  // A failed send should never take down the mutation it's a side effect of,
+  // swallow both network-level failures and non-OK responses here,
   // matching sendEmail's error handling in lib/email.ts.
   try {
     const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
